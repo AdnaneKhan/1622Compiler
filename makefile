@@ -2,8 +2,10 @@ JAVAC=javac
 OUTDIR=out
 CLASSPATH=java-cup-11a.jar
 sources = $(wildcard src/*.java) \
-          $(wildcard AST/*.java) \
-	  $(wildcard Visitors/*.java)
+          $(wildcard syntaxtree/*.java) \
+	  $(wildcard visitor/*.java) \
+	  ${wildcard SymmTable/*.java) \
+	  $(wildcard IR/*.java)
 
 classes = $(sources:.java=.class)
 
