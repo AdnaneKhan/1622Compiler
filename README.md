@@ -15,7 +15,7 @@ To build this compiler simply run
 
 ~~~~
 make
-~~~
+~~~~
 
 In the base directory. This will compile all java files
 
