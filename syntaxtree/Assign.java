@@ -2,11 +2,12 @@ package syntaxtree;
 import visitor.Visitor;
 import visitor.TypeVisitor;
 
-public class ArrayLength extends Exp {
+public class Assign extends Statement{
+  public Identifier i;
   public Exp e;
-  
-  public ArrayLength(Exp ae) {
-    e=ae; 
+
+  public Assign(Identifier ai, Exp ae) {
+    i=ai; e=ae; 
   }
 
   public void accept(Visitor v) {
@@ -17,3 +18,4 @@ public class ArrayLength extends Exp {
     return v.visit(this);
   }
 }
+

@@ -2,7 +2,7 @@ package syntaxtree;
 import visitor.Visitor;
 import visitor.TypeVisitor;
 
-public class BooleanType extends Type {
+public class False extends Exp  extends ASTNode{
   public void accept(Visitor v) {
     v.visit(this);
   }

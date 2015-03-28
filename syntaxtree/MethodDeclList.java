@@ -2,7 +2,7 @@ package syntaxtree;
 
 import java.util.Vector;
 
-public class MethodDeclList {
+public class MethodDeclList extends ASTNode{
    private Vector list;
 
    public MethodDeclList() {

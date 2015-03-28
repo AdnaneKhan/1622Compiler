@@ -1,6 +1,6 @@
 package IR;
 
 
-public class Assignment3AC extends ThreeAddressStatement {
+public class Call3AC extends ThreeAddressStatement {
 
 }

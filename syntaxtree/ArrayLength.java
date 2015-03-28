@@ -2,11 +2,11 @@ package syntaxtree;
 import visitor.Visitor;
 import visitor.TypeVisitor;
 
-public class ArrayLookup extends Exp {
-  public Exp e1,e2;
+public class ArrayLength extends Exp{
+  public Exp e;
   
-  public ArrayLookup(Exp ae1, Exp ae2) { 
-    e1=ae1; e2=ae2;
+  public ArrayLength(Exp ae) {
+    e=ae; 
   }
 
   public void accept(Visitor v) {

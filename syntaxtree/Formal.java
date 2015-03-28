@@ -2,11 +2,13 @@ package syntaxtree;
 import visitor.Visitor;
 import visitor.TypeVisitor;
 
-public class Block extends Statement {
-  public StatementList sl;
 
-  public Block(StatementList asl) {
-    sl=asl;
+public class Formal extends ASTNode {
+  public Type t;
+  public Identifier i;
+ 
+  public Formal(Type at, Identifier ai) {
+    t=at; i=ai;
   }
 
   public void accept(Visitor v) {
@@ -17,4 +19,3 @@ public class Block extends Statement {
     return v.visit(this);
   }
 }
-

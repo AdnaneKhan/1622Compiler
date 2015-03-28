@@ -2,19 +2,19 @@ package syntaxtree;
 
 import java.util.Vector;
 
-public class ClassDeclList {
+public class ExpList extends ASTNode {
    private Vector list;
 
-   public ClassDeclList() {
+   public ExpList() {
       list = new Vector();
    }
 
-   public void addElement(ClassDecl n) {
+   public void addElement(Exp n) {
       list.addElement(n);
    }
 
-   public ClassDecl elementAt(int i)  { 
-      return (ClassDecl)list.elementAt(i); 
+   public Exp elementAt(int i)  { 
+      return (Exp)list.elementAt(i); 
    }
 
    public int size() { 

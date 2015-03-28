@@ -2,19 +2,19 @@ package syntaxtree;
 
 import java.util.Vector;
 
-public class VarDeclList {
+public class FormalList extends ASTNode {
    private Vector list;
 
-   public VarDeclList() {
+   public FormalList() {
       list = new Vector();
    }
 
-   public void addElement(VarDecl n) {
+   public void addElement(Formal n) {
       list.addElement(n);
    }
 
-   public VarDecl elementAt(int i)  { 
-      return (VarDecl)list.elementAt(i); 
+   public Formal elementAt(int i)  { 
+      return (Formal)list.elementAt(i); 
    }
 
    public int size() { 

@@ -2,14 +2,7 @@ package syntaxtree;
 import visitor.Visitor;
 import visitor.TypeVisitor;
 
-public class VarDecl {
-  public Type t;
-  public Identifier i;
-  
-  public VarDecl(Type at, Identifier ai) {
-    t=at; i=ai;
-  }
-
+public class BooleanType extends Type{
   public void accept(Visitor v) {
     v.visit(this);
   }
