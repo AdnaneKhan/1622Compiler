@@ -5,10 +5,8 @@ import java.util.Vector;
 public class ExpList extends ASTNode {
    private Vector list;
 
-   public ExpList(int col,int line) {
+   public ExpList() {
       list = new Vector();
-
-        setValues(col,line);
     }
 
    public void addElement(Exp n) {

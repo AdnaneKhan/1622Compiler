@@ -5,9 +5,8 @@ import java.util.Vector;
 public class FormalList extends ASTNode {
    private Vector list;
 
-   public FormalList(int col,int line) {
+   public FormalList() {
       list = new Vector();
-       setValues(col,line);
    }
 
    public void addElement(Formal n) {

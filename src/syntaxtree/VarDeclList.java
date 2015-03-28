@@ -5,9 +5,9 @@ import java.util.Vector;
 public class VarDeclList extends ASTNode{
    private Vector list;
 
-   public VarDeclList(int col,int line) {
+   public VarDeclList() {
       list = new Vector();
-       setValues(col,line);
+
    }
 
    public void addElement(VarDecl n) {

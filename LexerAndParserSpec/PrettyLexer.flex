@@ -93,7 +93,7 @@ IntegerLiteral = 0 | [1-9][0-9]*
       "="                        { return symbol( sym.ASSIGN, yytext());}
       "&&"                       { return symbol( sym.AND, yytext()); }
       {SemiColon}                { return symbol( sym.SEMI, ";");}
-      {Identifier}               { return symbol( sym.ID, new Identifier(yytext()));}
+      {Identifier}               { return symbol( sym.ID, new Identifier(yytext(),yyline,yycolumn));}
       /* comments */
       {Comment}                  { /* Ignore */ }
       {BlockComment}             { /* Ignore */ }

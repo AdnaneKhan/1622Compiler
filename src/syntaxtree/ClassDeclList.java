@@ -2,12 +2,12 @@ package syntaxtree;
 
 import java.util.Vector;
 
-public class ClassDeclList  implements ASTNode{
+public class ClassDeclList  extends ASTNode {
    private Vector list;
 
-   public ClassDeclList(int col,int line) {
+   public ClassDeclList() {
       list = new Vector();
-       setValues(col,line);
+
    }
 
    public void addElement(ClassDecl n) {

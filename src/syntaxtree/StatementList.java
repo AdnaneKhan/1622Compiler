@@ -5,9 +5,9 @@ import java.util.Vector;
 public class StatementList extends ASTNode{
    private Vector list;
 
-   public StatementList(int col,int line) {
+   public StatementList() {
       list = new Vector();
-       setValues(col,line);
+
    }
 
    public void addElement(Statement n) {

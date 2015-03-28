@@ -12,6 +12,9 @@ public parser(MiniJavaLexer lex) {
     super(lex);
     lexer = lex;
 }
+
+
+
 :}
 
 /* Terminals (no values) */
@@ -91,17 +94,17 @@ precedence right NOT;
 
 start with MiniJavaProgram;
 
-MiniJavaProgram ::= mainclass:m ClassDeclList:d {: RESULT = new Program(m, d); :};
+MiniJavaProgram ::= mainclass:m ClassDeclList:d {: RESULT = new Program(m, d,mleft,mright); :};
 
-mainclass ::= CLASS ID:name LEFT_CURLY PUBLIC STATIC VOID_MAIN LEFT_PAREN STRING LEFT_B RIGHT_B ID:args RIGHT_PAREN LEFT_CURLY Statement:s RIGHT_CURLY RIGHT_CURLY {: RESULT = new MainClass(name,args,s); :};
+mainclass ::= CLASS ID:name LEFT_CURLY PUBLIC STATIC VOID_MAIN LEFT_PAREN STRING LEFT_B RIGHT_B ID:args RIGHT_PAREN LEFT_CURLY Statement:s RIGHT_CURLY RIGHT_CURLY {: RESULT = new MainClass(name,args,s,nameleft,nameright); :};
 
 ClassDeclList ::=  ClassDeclList:cdl ClassDecl:cd {: cdl.addElement(cd); RESULT = cdl; :}
         | {: RESULT = new ClassDeclList(); :}
         ;
 
 
-ClassDecl ::= CLASS ID:name LEFT_CURLY VarDeclList:v MethodDeclList:mdl RIGHT_CURLY {: RESULT = new ClassDeclSimple(name,v,mdl); :}
-        | CLASS ID:name EXTENDS ID:parent LEFT_CURLY VarDeclList:v MethodDeclList:mdl RIGHT_CURLY {: RESULT = new ClassDeclExtends(name,parent,v,mdl); :}
+ClassDecl ::= CLASS ID:name LEFT_CURLY VarDeclList:v MethodDeclList:mdl RIGHT_CURLY {: RESULT = new ClassDeclSimple(name,v,mdl,nameleft,nameright); :}
+        | CLASS ID:name EXTENDS ID:parent LEFT_CURLY VarDeclList:v MethodDeclList:mdl RIGHT_CURLY {: RESULT = new ClassDeclExtends(name,parent,v,mdl,nameleft,nameright); :}
         | error:e RIGHT_CURLY {: :}
         ;
 
@@ -109,7 +112,7 @@ VarDeclList ::= VarDeclList:vdl VarDecl:vd  {: vdl.addElement(vd); RESULT = vdl;
        | {: RESULT = new VarDeclList(); :}
        ;
 
-VarDecl ::= Type:t ID:i SEMI {: RESULT = new VarDecl(t,i); :}
+VarDecl ::= Type:t ID:i SEMI {: RESULT = new VarDecl(t,i,tleft,tright); :}
         | error:e SEMI {: :}
         ;
 
@@ -117,7 +120,7 @@ MethodDeclList ::= MethodDeclList:mdl MethodDecl:md  {: mdl.addElement(md); RESU
        | {: RESULT = new MethodDeclList(); :}
        ;
 
-MethodDecl ::= PUBLIC Type:t ID:i LEFT_PAREN FormalList:fl RIGHT_PAREN LEFT_CURLY VarDeclList:v StatementList:sl RETURN Exp:e SEMI RIGHT_CURLY {: RESULT = new MethodDecl(t,i,fl,v,sl,e); :}
+MethodDecl ::= PUBLIC Type:t ID:i LEFT_PAREN FormalList:fl RIGHT_PAREN LEFT_CURLY VarDeclList:v StatementList:sl RETURN Exp:e SEMI RIGHT_CURLY {: RESULT = new MethodDecl(t,i,fl,v,sl,e,ileft,iright); :}
         | error:e RIGHT_CURLY {: :}
         ;
 
@@ -129,44 +132,44 @@ FormalRest ::= FormalRest:fr Formal:f COMMA {: fr.addElement(f); RESULT = fr; :}
         | {: RESULT = new FormalList(); :}
         ;
 
-Formal ::= Type:t ID:i {: RESULT = new Formal(t,i); :}
-    ;
+Formal ::= Type:t ID:i {: RESULT = new Formal(t,i,tleft,tright); :}
+        ;
 
 Type ::= INT LEFT_B RIGHT_B {: RESULT = new IntArrayType(); :}
         | BOOLEAN {: RESULT = new BooleanType(); :}
         | INT {: RESULT = new IntegerType(); :}
-        | ID:i {: RESULT = new IdentifierType(i.toString()); :}
+        | ID:i {: RESULT = new IdentifierType(i.toString(),ileft,iright); :}
         ;
 
 StatementList ::= Statement:s  StatementList:sl {: sl.addElement(s); RESULT = sl; :}
         | {: RESULT = new StatementList(); :}
         ;
 
-Statement ::= LEFT_CURLY StatementList:sl RIGHT_CURLY {: RESULT = new Block(sl); :}
-       | IF LEFT_PAREN Exp:e RIGHT_PAREN Statement:s1 ELSE Statement:s2 {: RESULT = new If(e,s1,s2); :}
-       | WHILE LEFT_PAREN Exp:e RIGHT_PAREN Statement:s1 {: RESULT = new While(e,s1); :}
-       | PRINT LEFT_PAREN Exp:e RIGHT_PAREN SEMI {: RESULT = new Print(e); :}
-       | ID:i ASSIGN Exp:e SEMI {: RESULT = new Assign(i,e); :}
-       | ID:i LEFT_B Exp:e RIGHT_B ASSIGN Exp:e1 SEMI {: RESULT = new ArrayAssign(i,e,e1); :}
-       | error:e SEMI {: System.out.println("Parse error at line"); :}
+Statement ::= LEFT_CURLY StatementList:sl RIGHT_CURLY {: RESULT = new Block(sl,slleft,slright); :}
+       | IF LEFT_PAREN Exp:e RIGHT_PAREN Statement:s1 ELSE Statement:s2 {: RESULT = new If(e,s1,s2,eleft,eright); :}
+       | WHILE LEFT_PAREN Exp:e RIGHT_PAREN Statement:s1 {: RESULT = new While(e,s1,eleft,eright); :}
+       | PRINT LEFT_PAREN Exp:e RIGHT_PAREN SEMI {: RESULT = new Print(e,eleft,eright); :}
+       | ID:i ASSIGN Exp:e SEMI {: RESULT = new Assign(i,e,ileft,iright); :}
+       | ID:i LEFT_B Exp:e RIGHT_B ASSIGN Exp:e1 SEMI {: RESULT = new ArrayAssign(i,e,e1,ileft,iright); :}
+       | error:e SEMI {: System.out.println("Parse error at line " + eleft + " character " + eright); :}
        ;
 
-Exp ::=  Exp:e PLUS Exp:e1 {: RESULT = new Plus(e,e1); :}
-       | Exp:e TIMES Exp:e1 {: RESULT = new Times(e,e1); :}
-       | Exp:e MINUS Exp:e1 {: RESULT = new Minus(e,e1); :}
-       | Exp:e LESS Exp:e1 {: RESULT = new LessThan(e,e1); :}
-       | Exp:e AND Exp:e1 {: RESULT = new And(e,e1); :}
-       | Exp:e LEFT_B Exp:e1 RIGHT_B {: RESULT = new ArrayLookup(e,e1); :}
-       | Exp:e DOT LENGTH {: RESULT = new ArrayLength(e); :}
-       | Exp:e DOT ID:i LEFT_PAREN ExpList:el RIGHT_PAREN {: RESULT = new Call(e,i,el); :}
-       | INTEGER_LITERAL:i {: RESULT = new IntegerLiteral(i);  :}
+Exp ::=  Exp:e PLUS Exp:e1 {: RESULT = new Plus(e,e1,eleft,eright); :}
+       | Exp:e TIMES Exp:e1 {: RESULT = new Times(e,e1,eleft,eright); :}
+       | Exp:e MINUS Exp:e1 {: RESULT = new Minus(e,e1,eleft,eright); :}
+       | Exp:e LESS Exp:e1 {: RESULT = new LessThan(e,e1,eleft,eright); :}
+       | Exp:e AND Exp:e1 {: RESULT = new And(e,e1,eleft,eright); :}
+       | Exp:e LEFT_B Exp:e1 RIGHT_B {: RESULT = new ArrayLookup(e,e1,eleft,eright); :}
+       | Exp:e DOT LENGTH {: RESULT = new ArrayLength(e,eleft,eright); :}
+       | Exp:e DOT ID:i LEFT_PAREN ExpList:el RIGHT_PAREN {: RESULT = new Call(e,i,el,eleft,eright); :}
+       | INTEGER_LITERAL:i {: RESULT = new IntegerLiteral(i,ileft,iright);  :}
        | TRUE {: RESULT = new True(); :}
        | FALSE {: RESULT = new False(); :}
-       | ID:i {: RESULT = new IdentifierExp(i.toString()); :}
+       | ID:i {: RESULT = new IdentifierExp(i.toString(),ileft,iright); :}
        | THIS {: RESULT = new This(); :}
-       | NEW INT LEFT_B Exp:e RIGHT_B {: RESULT = new NewArray(e); :}
-       | NEW ID:i LEFT_PAREN RIGHT_PAREN {: RESULT = new NewObject(i); :}
-       | NOT Exp:e {: RESULT = new Not(e); :}
+       | NEW INT LEFT_B Exp:e RIGHT_B {: RESULT = new NewArray(e,eleft,eright); :}
+       | NEW ID:i LEFT_PAREN RIGHT_PAREN {: RESULT = new NewObject(i,ileft,iright); :}
+       | NOT Exp:e {: RESULT = new Not(e,eleft,eright); :}
        | LEFT_PAREN Exp:e RIGHT_PAREN {: RESULT = e; :}
        ;
 
