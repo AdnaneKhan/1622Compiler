@@ -1,5 +1,7 @@
 package SymTable;
 
+import syntaxtree.ASTNode;
+
 import java.util.HashMap;
 
 /**
@@ -9,6 +11,10 @@ public class MethodTable extends TableEntry {
     // Reference to the parent scope which this symbol entry resides in, the parent scope can be
     // accessed to check for duplicates, etc.
     private TableEntry parent;
+
+    public MethodTable(ASTNode makeFrom) {
+        super(makeFrom);
+    }
 
     protected HashMap<SymbolEntry, TableEntry> hash;
 }
