@@ -6,9 +6,12 @@ import syntaxtree.ASTNode;
  * Created by adnankhan on 3/29/15.
  */
 public abstract  class TableEntry {
+    public final static int METHOD_ENTRY = 1;
+    public final static int CLASS_ENTRY = 2;
+    public final static int LEAF_ENTRY = 3;
+    public final static int ROOT_ENTRY = 4;
 
     private ASTNode actualNode;
-
 
     int lineNum;
     int charNum;
@@ -39,8 +42,5 @@ public abstract  class TableEntry {
      *      Leaf Entry
      *
      */
-    public int entryType() {
-        return 0;
-
-    }
+    public abstract int entryType();
 }

@@ -18,7 +18,7 @@ class SymbolEntry extends TableEntry{
     String symbolName;
     // Reference to the parent scope which this symbol entry resides in, the parent scope can be
     // accessed to check for duplicates, etc.
-    private TableEntry parent;
+    public TableEntry parent;
     // Holds mappings fromm symmbol strings to their actual objects
 
 
@@ -34,6 +34,10 @@ class SymbolEntry extends TableEntry{
         super(constructFrom);
         this.symbolName = symbolName;
 
+    }
+
+    public int entryType() {
+        return LEAF_ENTRY;
     }
 
     /***

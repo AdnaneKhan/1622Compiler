@@ -1,20 +1,54 @@
 package SymTable;
 
-import syntaxtree.ASTNode;
+import syntaxtree.*;
 
 import java.util.HashMap;
-
 /**
  * Created by adnankhan on 3/29/15.
  */
 public class MethodTable extends TableEntry {
+    protected HashMap<String, TableEntry> hash;
     // Reference to the parent scope which this symbol entry resides in, the parent scope can be
     // accessed to check for duplicates, etc.
-    private TableEntry parent;
+    public TableEntry parent;
 
     public MethodTable(ASTNode makeFrom) {
         super(makeFrom);
     }
 
-    protected HashMap<SymbolEntry, TableEntry> hash;
+    public int entryType() {
+        return METHOD_ENTRY;
+    }
+
+    // Var Declarations belonging to method
+    /**
+     *
+     * @param toAdd Var declaration for this method
+     */
+    public void putLeaf(VarDecl toAdd) {
+        SymbolEntry newLeaf = new SymbolEntry(toAdd.i.toString(),toAdd);
+        newLeaf.parent = this;
+        hash.put(toAdd.i.toString(),newLeaf);
+    }
+    // Now we add the statements belonging to this method
+
+    /**
+     *
+     * @param toAdd Statement of type Assign
+     */
+    public void putLeaf(Assign toAdd) {
+        SymbolEntry newLeaf = new SymbolEntry(toAdd.i.toString(),toAdd);
+        newLeaf.parent = this;
+        hash.put(toAdd.i.toString(),newLeaf);
+    }
+
+    /**
+     *
+     * @param toAdd Statement of type ArrayAssign
+     */
+    public void putLeaf(ArrayAssign toAdd) {
+        SymbolEntry newLeaf = new SymbolEntry(toAdd.i.toString(),toAdd);
+        newLeaf.parent = this;
+        hash.put(toAdd.i.toString(),newLeaf);
+    }
 }

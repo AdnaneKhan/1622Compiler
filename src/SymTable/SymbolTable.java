@@ -1,17 +1,10 @@
 package SymTable;
 
-import com.sun.tools.javac.util.Name;
 import syntaxtree.ASTNode;
-import syntaxtree.ClassDecl;
 import syntaxtree.ClassDeclExtends;
 import syntaxtree.ClassDeclSimple;
-
-import java.lang.Package;
 import java.util.HashMap;
-import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Set;
-
 
 /**
  * This is the root symbol table node for our tree of hash-tables.
@@ -39,22 +32,23 @@ public class SymbolTable extends TableEntry{
 
     }
 
-    public void putClass(ASTNode classNode) {
-        if (classNode instanceof ClassDeclExtends) {
-            ClassTable tableEntry = new ClassTable(classNode);
-            // Set parent of the table entry to this class
-            tableEntry.parent = this;
-            put( ((ClassDeclExtends) classNode).i.toString(),tableEntry);
-        } else if(classNode instanceof ClassDeclSimple) {
-            ClassTable tableEntry = new ClassTable(classNode);
-            // Set parent of the table entry to this class
-            tableEntry.parent = this;
+    public void putClass(ClassDeclExtends classNode) {
+        ClassTable tableEntry = new ClassTable(classNode);
+        // Set parent of the table entry to this class
+        tableEntry.parent = this;
+        put( classNode.i.toString(),tableEntry);
+    }
 
-            put( ((ClassDeclSimple) classNode).i.toString(),tableEntry);
-        } else {
-            // We tried to add something that isn't a class to the program's decendents, parser should have prevneted this so we
-            // should never reach this point.
-        }
+    public void putClass(ClassDeclSimple classNode) {
+        ClassTable tableEntry = new ClassTable(classNode);
+           // Set parent of the table entry to this class
+        tableEntry.parent = this;
+        put(classNode.i.toString(),tableEntry);
+
+    }
+
+    public int entryType() {
+        return ROOT_ENTRY;
     }
 
     /**
