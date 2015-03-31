@@ -41,12 +41,13 @@ public class NameAnalysisVisitor implements Visitor {
       base.descendScope(n.i1.toString());
       // We are in the main class scope now
 
+
     n.i1.accept(this);
 
       // Now we need to descend into the main method scope
       // Add this id to the main static method variable list
       SymbolEntry stringID = (new SymbolEntry(n.i2.toString(),n.i2));
-      stringID.parent = base.currentScope;
+      stringID.parent = base.getCurrentScope();
       base.currentScopeMap().put(n.i2.toString(), stringID ); // note we need to set parent
     n.i2.accept(this);
     n.s.accept(this);

@@ -13,7 +13,7 @@ import java.util.Set;
  * defined classes.
  */
 public class SymbolTable extends TableEntry{
-    public TableEntry currentScope;
+    private TableEntry currentScope;
 
     /*
 
@@ -58,6 +58,9 @@ public class SymbolTable extends TableEntry{
         return currentScope.hash;
     }
 
+    public TableEntry getCurrentScope() {
+        return this.currentScope;
+    }
 
 
     public SymbolTable(ASTNode root) {
@@ -77,7 +80,6 @@ public class SymbolTable extends TableEntry{
         // Given that what we will be adding here are classes we
 
     }
-
 
 
     public void putClass(ClassDeclExtends classNode) {

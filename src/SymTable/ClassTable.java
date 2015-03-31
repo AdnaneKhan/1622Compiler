@@ -2,6 +2,7 @@ package SymTable;
 
 import SyntaxTree.ASTNode;
 import SyntaxTree.MethodDecl;
+import SyntaxTree.VarDecl;
 
 import java.util.HashMap;
 
@@ -28,5 +29,11 @@ public class ClassTable extends TableEntry {
             MethodTable methTable = new MethodTable(methodNode);
             methTable.parent = this;
             put ( methodNode.i.toString(),methTable);
+    }
+
+    public void putVariable( VarDecl newVar ) {
+        SymbolEntry var = new SymbolEntry(newVar.i.toString(), newVar);
+        var.parent = this;
+        put (var.getSymbolName(), var);
     }
 }
