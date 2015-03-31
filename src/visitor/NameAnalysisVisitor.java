@@ -1,5 +1,6 @@
 package Visitor;
 
+import SymTable.ClassTable;
 import SymTable.MethodTable;
 import SymTable.SymbolEntry;
 import SymTable.SymbolTable;
@@ -81,10 +82,29 @@ public class NameAnalysisVisitor implements Visitor {
 
     n.i.accept(this);
     n.j.accept(this);
+
+      // These are class variables. What we need to check here is that
+      // there are no multiple definitions in this same list
+      // it is ok if there are variables that belong to the parent class, (since it
+      // would be an override)
+
+      // we need to pull the current scope
+      ClassTable cs = (ClassTable) base.getCurrentScope();
+
     for ( int i = 0; i < n.vl.size(); i++ ) {
+
+        // If this variable exists in the LOCAL scope of the class and the variable binds to a var (not
+        // a method) (use the entryType getter to check the static finals)
+
+        // ok if the var is not defined (or it is a method) then we can add it to this scope
+        // this process is repaeted
+
         n.vl.elementAt(i).accept(this);
     }
     for ( int i = 0; i < n.ml.size(); i++ ) {
+
+        // For methods we can check if they are already defined
+
         n.ml.elementAt(i).accept(this);
     }
 
