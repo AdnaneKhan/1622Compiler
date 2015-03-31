@@ -8,7 +8,7 @@
  *
  */
  import java_cup.runtime.*;
- import syntaxtree.*;
+ import SyntaxTree.*;
 %%
 %cup
 %public
