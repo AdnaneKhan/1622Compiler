@@ -1,8 +1,8 @@
 package SymTable;
 
-import syntaxtree.ASTNode;
-import syntaxtree.ClassDeclExtends;
-import syntaxtree.ClassDeclSimple;
+import SyntaxTree.ASTNode;
+import SyntaxTree.ClassDeclExtends;
+import SyntaxTree.ClassDeclSimple;
 import java.util.HashMap;
 import java.util.Set;
 

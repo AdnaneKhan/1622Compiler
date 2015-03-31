@@ -1,6 +1,6 @@
-package syntaxtree;
-import visitor.Visitor;
-import visitor.TypeVisitor;
+package SyntaxTree;
+import Visitor.Visitor;
+import Visitor.TypeVisitor;
 
 public class Times extends Exp {
   public Exp e1,e2;

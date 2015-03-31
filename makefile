@@ -2,8 +2,8 @@ JAVAC=javac
 OUTDIR=out
 CLASSPATH=java-cup-11a.jar
 sources = $(wildcard src/*.java) \
-          $(wildcard src/syntaxtree/*.java) \
-	  $(wildcard src/visitor/*.java) \
+          $(wildcard src/SyntaxTree/*.java) \
+	  $(wildcard src/Visitor/*.java) \
 	  $(wildcard src/SymTable/*.java) \
 	  $(wildcard src/IR/*.java)
 
@@ -19,8 +19,8 @@ lexer:
 
 clean:
 	rm -f src/*.class \
-	rm -f src/syntaxtree/*.class \
-	rm -f src/visitor/*.class \
+	rm -f src/SyntaxTree/*.class \
+	rm -f src/Visitor/*.class \
 	rm -f src/IR/*.class \
 	rm -f src/SymTable/*.class
 

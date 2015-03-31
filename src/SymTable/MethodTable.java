@@ -1,6 +1,6 @@
 package SymTable;
 
-import syntaxtree.*;
+import SyntaxTree.*;
 
 import java.util.HashMap;
 /**

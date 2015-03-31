@@ -1,6 +1,6 @@
-package syntaxtree;
-import visitor.Visitor;
-import visitor.TypeVisitor;
+package SyntaxTree;
+import Visitor.Visitor;
+import Visitor.TypeVisitor;
 
 public class MainClass extends ASTNode{
   public Identifier i1,i2;

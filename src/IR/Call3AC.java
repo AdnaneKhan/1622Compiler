@@ -2,7 +2,7 @@ package IR;
 
 
 import SymTable.TableEntry;
-import syntaxtree.MethodDecl;
+import SyntaxTree.MethodDecl;
 
 public class Call3AC extends ThreeAddressStatement {
 

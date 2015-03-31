@@ -1,6 +1,6 @@
-package syntaxtree;
-import visitor.Visitor;
-import visitor.TypeVisitor;
+package SyntaxTree;
+import Visitor.Visitor;
+import Visitor.TypeVisitor;
 
 public class BooleanType extends Type{
   public void accept(Visitor v) {

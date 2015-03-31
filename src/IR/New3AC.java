@@ -1,7 +1,6 @@
 package IR;
 
 import SymTable.TableEntry;
-import syntaxtree.ASTNode;
 
 public class New3AC extends ThreeAddressStatement {
 

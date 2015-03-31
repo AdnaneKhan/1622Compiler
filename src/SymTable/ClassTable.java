@@ -1,7 +1,7 @@
 package SymTable;
 
-import syntaxtree.ASTNode;
-import syntaxtree.MethodDecl;
+import SyntaxTree.ASTNode;
+import SyntaxTree.MethodDecl;
 
 import java.util.HashMap;
 

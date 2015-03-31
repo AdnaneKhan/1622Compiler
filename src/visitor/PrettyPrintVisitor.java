@@ -1,6 +1,6 @@
-package visitor;
+package Visitor;
 
-import syntaxtree.*;
+import SyntaxTree.*;
 
 public class PrettyPrintVisitor implements Visitor {
 

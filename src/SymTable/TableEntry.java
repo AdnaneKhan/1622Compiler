@@ -1,6 +1,6 @@
 package SymTable;
 
-import syntaxtree.ASTNode;
+import SyntaxTree.ASTNode;
 
 /**
  * Created by adnankhan on 3/29/15.

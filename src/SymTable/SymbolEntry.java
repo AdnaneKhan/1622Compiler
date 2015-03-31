@@ -1,7 +1,7 @@
 package SymTable;
 
 
-import syntaxtree.*;
+import SyntaxTree.*;
 
 
 /**

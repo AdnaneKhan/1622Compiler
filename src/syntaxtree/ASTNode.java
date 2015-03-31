@@ -1,4 +1,4 @@
-package syntaxtree;
+package SyntaxTree;
 
 /**
  * Created by adnankhan on 3/28/15.

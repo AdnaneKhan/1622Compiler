@@ -1,6 +1,6 @@
 import java_cup.runtime.Symbol;
 import java.util.LinkedList;
-import syntaxtree.*;
+import SyntaxTree.*;
 
 /* Preliminaries to use the scanner.  */
 scan with {: return lexer.next_token(); :};

@@ -1,6 +1,6 @@
-package visitor;
+package Visitor;
 
-import syntaxtree.*;
+import SyntaxTree.*;
 
 public interface Visitor {
   public void visit(Program n);
