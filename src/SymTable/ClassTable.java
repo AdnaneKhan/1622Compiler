@@ -31,6 +31,5 @@ public class ClassTable extends TableEntry {
             MethodTable methTable = new MethodTable(methodNode);
             methTable.parent = this;
             put ( methodNode.i.toString(),methTable);
-
     }
 }

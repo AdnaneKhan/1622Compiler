@@ -11,6 +11,8 @@ public abstract  class TableEntry {
     public final static int LEAF_ENTRY = 3;
     public final static int ROOT_ENTRY = 4;
 
+    String symbolName;
+
     private ASTNode actualNode;
 
     int lineNum;
@@ -27,6 +29,10 @@ public abstract  class TableEntry {
         this.actualNode = actualNode;
         this.lineNum = actualNode.lineNum();
         this.charNum = actualNode.charNum();
+    }
+
+    public String getSymbolName() {
+        return symbolName;
     }
 
     public ASTNode getNode() {
