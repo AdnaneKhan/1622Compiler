@@ -4,6 +4,7 @@ import SyntaxTree.ASTNode;
 import SyntaxTree.ClassDeclExtends;
 import SyntaxTree.ClassDeclSimple;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -13,7 +14,53 @@ import java.util.Set;
  * defined classes.
  */
 public class SymbolTable extends TableEntry{
-    protected HashMap<String, TableEntry> hash;
+    private TableEntry currentScope;
+
+    /*
+
+    The following methods are state control methods that help in tracking the scope
+
+     */
+
+    /**
+     *
+     * @param scopeID descends scope, if it is in highest scope it goes to a class, if it is in class scope
+     *                it goes to method scope
+     */
+    public void descendScope(String scopeID) {
+        if (currentScope.hash.containsKey(scopeID)){
+            TableEntry scopeCheck = currentScope.hash.get(scopeID);
+            if (scopeCheck instanceof SymbolEntry) {
+                System.out.println("Problem! We tried to descend scope to a leaf!");
+            } else {
+                currentScope = scopeCheck;
+            }
+        }
+    }
+
+    /**
+     * Goes up one level in scope, if it is already at root then it reports a problem
+     */
+    public void ascendScope() {
+        if (currentScope.parent != null) {
+            currentScope = currentScope.parent;
+        } else {
+            System.out.println("Problem! We tried to ascend scopes when there was no parent!");
+        }
+    }
+
+    /**
+     *
+     * @return the hashtable associated with the CURRENT scope level which may be global (children are classes)
+     *  class (children are methods or var declarations)
+     *  or method (children are statements or var declarations)
+     */
+    public Map<String, TableEntry> currentScopeMap() {
+        return currentScope.hash;
+    }
+
+
+
     public SymbolTable(ASTNode root) {
         super(root);
         hash = new HashMap<String,TableEntry>();
@@ -27,10 +74,12 @@ public class SymbolTable extends TableEntry{
      */
     public void put(String key, TableEntry value) {
         hash.put(key,value);
-
+        currentScope = this;
         // Given that what we will be adding here are classes we
 
     }
+
+
 
     public void putClass(ClassDeclExtends classNode) {
         ClassTable tableEntry = new ClassTable(classNode);

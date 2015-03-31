@@ -2,17 +2,22 @@ package SymTable;
 
 import SyntaxTree.ASTNode;
 
+import java.util.HashMap;
+
 /**
  * Created by adnankhan on 3/29/15.
  */
 public abstract  class TableEntry {
+    protected HashMap<String, TableEntry> hash;
     public final static int METHOD_ENTRY = 1;
     public final static int CLASS_ENTRY = 2;
     public final static int LEAF_ENTRY = 3;
     public final static int ROOT_ENTRY = 4;
 
     String symbolName;
-
+    // Reference to the parent scope which this symbol entry resides in, the parent scope can be
+    // accessed to check for duplicates, etc.
+    public TableEntry parent;
     private ASTNode actualNode;
 
     int lineNum;

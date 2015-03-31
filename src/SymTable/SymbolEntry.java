@@ -11,10 +11,6 @@ import SyntaxTree.*;
  */
 class SymbolEntry extends TableEntry{
 
-    // Reference to the parent scope which this symbol entry resides in, the parent scope can be
-    // accessed to check for duplicates, etc.
-    public TableEntry parent;
-
     /**
      *
      * @param symbolName of the symbol that this entry will represent
