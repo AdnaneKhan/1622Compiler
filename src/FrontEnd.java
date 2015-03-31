@@ -1,7 +1,7 @@
 
 import java_cup.runtime.Symbol;
-import syntaxtree.*;
-import visitor.PrettyPrintVisitor;
+import SyntaxTree.*;
+import Visitor.PrettyPrintVisitor;
 
 import java.io.*;
 
