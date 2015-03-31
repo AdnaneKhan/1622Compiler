@@ -4,9 +4,11 @@ import SyntaxTree.*;
 
 public class DepthFirstVisitor implements Visitor {
 
+
   // MainClass m;
   // ClassDeclList cl;
   public void visit(Program n) {
+
     n.m.accept(this);
     for ( int i = 0; i < n.cl.size(); i++ ) {
         n.cl.elementAt(i).accept(this);

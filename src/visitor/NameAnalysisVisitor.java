@@ -1,30 +1,65 @@
 package Visitor;
 
+import SymTable.MethodTable;
+import SymTable.SymbolEntry;
+import SymTable.SymbolTable;
 import SyntaxTree.*;
 
 public class NameAnalysisVisitor implements Visitor {
 
+    SymbolTable base;
+
+    public NameAnalysisVisitor(SymbolTable toPopulate, Program toUse) {
+        base = toPopulate;
+
+
+
+        // Initiate visitation process
+        this.visit(toUse);
+    }
+
   // MainClass m;
   // ClassDeclList cl;
   public void visit(Program n) {
+    // Add the main class to symbol
+      base.putClass(n.m);
+    // go to the main class scope
+
     n.m.accept(this);
+
     for ( int i = 0; i < n.cl.size(); i++ ) {
+
+        base.putClass(n.cl.elementAt(i));
         n.cl.elementAt(i).accept(this);
+
     }
   }
   
   // Identifier i1,i2;
   // Statement s;
   public void visit(MainClass n) {
+      base.descendScope(n.i1.toString());
+      // We are in the main class scope now
+
     n.i1.accept(this);
+
+      // Now we need to descend into the main method scope
+      // Add this id to the main static method variable list
+      SymbolEntry stringID = (new SymbolEntry(n.i2.toString(),n.i2));
+      stringID.parent = base.currentScope;
+      base.currentScopeMap().put(n.i2.toString(), stringID ); // note we need to set parent
     n.i2.accept(this);
     n.s.accept(this);
+
+      base.ascendScope();
   }
   
   // Identifier i;
   // VarDeclList vl;
   // MethodDeclList ml;
   public void visit(ClassDeclSimple n) {
+      base.descendScope(n.i.toString());
+
     n.i.accept(this);
     for ( int i = 0; i < n.vl.size(); i++ ) {
         n.vl.elementAt(i).accept(this);
@@ -32,6 +67,8 @@ public class NameAnalysisVisitor implements Visitor {
     for ( int i = 0; i < n.ml.size(); i++ ) {
         n.ml.elementAt(i).accept(this);
     }
+
+      base.ascendScope();
   }
  
   // Identifier i;
@@ -39,6 +76,8 @@ public class NameAnalysisVisitor implements Visitor {
   // VarDeclList vl;
   // MethodDeclList ml;
   public void visit(ClassDeclExtends n) {
+      base.descendScope(n.i.toString());
+
     n.i.accept(this);
     n.j.accept(this);
     for ( int i = 0; i < n.vl.size(); i++ ) {
@@ -47,6 +86,9 @@ public class NameAnalysisVisitor implements Visitor {
     for ( int i = 0; i < n.ml.size(); i++ ) {
         n.ml.elementAt(i).accept(this);
     }
+
+
+      base.ascendScope();
   }
 
   // Type t;

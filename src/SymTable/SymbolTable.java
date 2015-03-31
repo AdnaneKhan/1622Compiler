@@ -1,8 +1,7 @@
 package SymTable;
 
-import SyntaxTree.ASTNode;
-import SyntaxTree.ClassDeclExtends;
-import SyntaxTree.ClassDeclSimple;
+import SyntaxTree.*;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +13,7 @@ import java.util.Set;
  * defined classes.
  */
 public class SymbolTable extends TableEntry{
-    private TableEntry currentScope;
+    public TableEntry currentScope;
 
     /*
 
@@ -94,6 +93,21 @@ public class SymbolTable extends TableEntry{
         tableEntry.parent = this;
         put(classNode.i.toString(),tableEntry);
 
+    }
+
+    public void putClass(MainClass classNode) {
+
+        ClassTable tableEntry = new ClassTable(classNode);
+        tableEntry.parent = this;
+        put(classNode.i1.toString(),tableEntry);
+    }
+
+    public void putClass(ClassDecl classNode) {
+        if (classNode instanceof ClassDeclSimple) {
+            this.putClass((ClassDeclSimple)classNode);
+        } else {
+            this.putClass((ClassDeclExtends) classNode);
+        }
     }
 
     public int entryType() {

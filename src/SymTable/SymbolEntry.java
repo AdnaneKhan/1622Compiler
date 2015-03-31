@@ -1,6 +1,5 @@
 package SymTable;
 
-
 import SyntaxTree.*;
 
 
@@ -9,7 +8,7 @@ import SyntaxTree.*;
  * this can represent identifiers that do not lead to new scopes themselves
  * (anything that is not a method or a class)
  */
-class SymbolEntry extends TableEntry{
+public class SymbolEntry extends TableEntry{
 
     /**
      *

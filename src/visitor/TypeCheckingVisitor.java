@@ -2,7 +2,7 @@ package Visitor;
 
 import SyntaxTree.*;
 
-public class DepthFirstVisitor implements Visitor {
+public class TypeCheckingVisitor implements Visitor {
 
     // MainClass m;
     // ClassDeclList cl;
