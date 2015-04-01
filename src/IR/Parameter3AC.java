@@ -2,6 +2,7 @@ package IR;
 
 import SymTable.TableEntry;
 
+
 public class Parameter3AC extends ThreeAddressStatement {
     private TableEntry param;
 
@@ -14,6 +15,7 @@ public class Parameter3AC extends ThreeAddressStatement {
     public String statementType() {
         return null;
     }
+
 
     @Override
     public String toString() {

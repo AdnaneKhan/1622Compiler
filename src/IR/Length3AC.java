@@ -1,7 +1,6 @@
 package IR;
 
 import SymTable.TableEntry;
-import com.sun.tools.javac.util.Name;
 
 import java.lang.Override;
 
