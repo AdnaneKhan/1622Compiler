@@ -3,6 +3,7 @@ package Visitor;
 import SymTable.*;
 import SyntaxTree.*;
 
+
 public class NameAnalysisVisitor implements Visitor {
 
     SymbolTable base;
@@ -43,7 +44,7 @@ public class NameAnalysisVisitor implements Visitor {
             if (!(base.hasEntry(className, SymbolTable.CLASS_ENTRY))) {
                 base.putClass(cursor);
             } else {
-                NameErrors.multiplyDefinedError(cursor.lineNum(), cursor.charNum(), className);
+                Errors.multiplyDefinedError(cursor.lineNum(), cursor.charNum(), className);
             }
         }
 
@@ -57,7 +58,7 @@ public class NameAnalysisVisitor implements Visitor {
             if (cursor instanceof ClassDeclExtends) {
                 String extendsName = ((ClassDeclExtends) cursor).j.toString();
                 if (!(base.hasEntry(extendsName, SymbolTable.CLASS_ENTRY))) {
-                    NameErrors.identifierError(cursor.lineNum(), cursor.charNum(), className);
+                    Errors.identifierError(cursor.lineNum(), cursor.charNum(), className);
 
                 } else {
                     cursor.accept(this);
@@ -115,7 +116,7 @@ public class NameAnalysisVisitor implements Visitor {
             // Check for duplicate variable names in class
             for (int i = 0; i < n.vl.size(); i++) {
                 if (current.hasEntry(n.vl.elementAt(i).i.toString(), SymbolTable.LEAF_ENTRY)) {
-                    NameErrors.multiplyDefinedError(n.vl.elementAt(i).lineNum(), n.vl.elementAt(i).charNum(), n.vl.elementAt(i).i.s);
+                    Errors.multiplyDefinedError(n.vl.elementAt(i).lineNum(), n.vl.elementAt(i).charNum(), n.vl.elementAt(i).i.s);
 
                 } else {
                     if (base.getCurrentScope().isEntry(SymbolEntry.CLASS_ENTRY)) {
@@ -129,7 +130,7 @@ public class NameAnalysisVisitor implements Visitor {
             for (int i = 0; i < n.ml.size(); i++) {
                 if (current.hasEntry(n.ml.elementAt(i).i.toString(), SymbolTable.METHOD_ENTRY)) {
 
-                    NameErrors.multiplyDefinedError(n.ml.elementAt(i).lineNum(), n.ml.elementAt(i).charNum(), n.ml.elementAt(i).i.s);
+                    Errors.multiplyDefinedError(n.ml.elementAt(i).lineNum(), n.ml.elementAt(i).charNum(), n.ml.elementAt(i).i.s);
                 } else {
                     current.putMethod(n.ml.elementAt(i));
                 }
@@ -168,7 +169,7 @@ public class NameAnalysisVisitor implements Visitor {
             // Check for duplicate variable names in class
             for (int i = 0; i < n.vl.size(); i++) {
                 if (current.hasEntry(n.vl.elementAt(i).i.toString(), SymbolTable.LEAF_ENTRY)) {
-                    NameErrors.multiplyDefinedError(n.vl.elementAt(i).lineNum(), n.vl.elementAt(i).charNum(), n.vl.elementAt(i).i.s);
+                    Errors.multiplyDefinedError(n.vl.elementAt(i).lineNum(), n.vl.elementAt(i).charNum(), n.vl.elementAt(i).i.s);
                 } else {
                     if (base.getCurrentScope().isEntry(SymbolEntry.CLASS_ENTRY)) {
                         current.putVariable(n.vl.elementAt(i));
@@ -184,7 +185,7 @@ public class NameAnalysisVisitor implements Visitor {
                         base.getClassTable(n.j.toString()).hasEntry(n.ml.elementAt(i).i.toString(), SymbolEntry.METHOD_ENTRY)) {
 
 
-                    NameErrors.multiplyDefinedError(n.ml.lineNum(), n.i.charNum(), n.i.s);
+                    Errors.multiplyDefinedError(n.ml.lineNum(), n.i.charNum(), n.i.s);
                 } else {
                     current.putMethod(n.ml.elementAt(i));
                 }
@@ -231,7 +232,7 @@ public class NameAnalysisVisitor implements Visitor {
             // Checks formal list for duplicate variable names
             for (int i = 0; i < n.fl.size(); i++) {
                 if (current.hasEntry(n.fl.elementAt(i).i.toString(), SymbolTable.LEAF_ENTRY)) {
-                    NameErrors.multiplyDefinedError(n.fl.elementAt(i).lineNum(), n.fl.elementAt(i).charNum(), n.fl.elementAt(i).i.s);
+                    Errors.multiplyDefinedError(n.fl.elementAt(i).lineNum(), n.fl.elementAt(i).charNum(), n.fl.elementAt(i).i.s);
                 } else {
                     current.putVariable(n.fl.elementAt(i));
                     n.fl.elementAt(i).accept(this);
@@ -241,7 +242,7 @@ public class NameAnalysisVisitor implements Visitor {
             // Checks variable decls for duplicate names
             for (int i = 0; i < n.vl.size(); i++) {
                 if (current.hasEntry(n.vl.elementAt(i).i.toString(), SymbolTable.LEAF_ENTRY)) {
-                    NameErrors.multiplyDefinedError(n.vl.elementAt(i).lineNum(), n.vl.elementAt(i).charNum(), n.fl.elementAt(i).i.s);
+                    Errors.multiplyDefinedError(n.vl.elementAt(i).lineNum(), n.vl.elementAt(i).charNum(), n.fl.elementAt(i).i.s);
 
                 } else {
                     current.putVariable(n.vl.elementAt(i));
@@ -287,7 +288,7 @@ public class NameAnalysisVisitor implements Visitor {
 
 
         if (identifierFound == false) {
-            NameErrors.identifierError(n.lineNum(), n.charNum(), n.s);
+            Errors.identifierError(n.lineNum(), n.charNum(), n.s);
         }
     }
 
@@ -338,7 +339,7 @@ public class NameAnalysisVisitor implements Visitor {
         }
 
         if (!identifierFound) {
-            NameErrors.identifierError(n.i.lineNum(), n.i.charNum(), n.i.s);
+            Errors.identifierError(n.i.lineNum(), n.i.charNum(), n.i.s);
         } else {
             n.i.accept(this);
         }
@@ -364,7 +365,7 @@ public class NameAnalysisVisitor implements Visitor {
         }
 
         if (identifierFound == false) {
-            NameErrors.identifierError(n.i.lineNum(), n.i.charNum(), n.i.s);
+            Errors.identifierError(n.i.lineNum(), n.i.charNum(), n.i.s);
         } else {
             n.i.accept(this);
         }
@@ -444,7 +445,7 @@ public class NameAnalysisVisitor implements Visitor {
         }
 
         if (identifierFound == false) {
-            NameErrors.identifierError(n.i.lineNum(), n.i.charNum(), n.i.s);
+            Errors.identifierError(n.i.lineNum(), n.i.charNum(), n.i.s);
         } else {
             n.i.accept(this);
         }
@@ -482,7 +483,7 @@ public class NameAnalysisVisitor implements Visitor {
         }
 
         if (identifierFound == false) {
-            NameErrors.identifierError(n.lineNum(), n.charNum(), n.s);
+            Errors.identifierError(n.lineNum(), n.charNum(), n.s);
         }
     }
 
@@ -507,7 +508,7 @@ public class NameAnalysisVisitor implements Visitor {
         }
 
         if (identifierFound == false) {
-            NameErrors.identifierError(n.i.lineNum(), n.i.charNum(), n.i.s);
+            Errors.identifierError(n.i.lineNum(), n.i.charNum(), n.i.s);
         }
     }
 
