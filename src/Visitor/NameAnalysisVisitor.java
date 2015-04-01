@@ -7,6 +7,8 @@ public class NameAnalysisVisitor implements Visitor {
 
   SymbolTable base;
 
+    TableEntry swapper = null;
+
 
   public NameAnalysisVisitor(SymbolTable toPopulate) {
         base = toPopulate;
@@ -413,6 +415,13 @@ public class NameAnalysisVisitor implements Visitor {
         // f
 
 
+        if (swapper != null && swapper.hasEntry(n.i.toString(),SymbolTable.METHOD_ENTRY)) {
+            identifierFound = true;
+            break;
+        } else {
+            swapper = null;
+        }
+
       // Check the keys for the identifier, if found set to true, else ascend scope
       if (scopeCursor.hasEntry(n.i.toString(),SymbolEntry.METHOD_ENTRY) ) {
           identifierFound = true;
@@ -481,6 +490,9 @@ public class NameAnalysisVisitor implements Visitor {
     // Check if keys contain class name of new object
     if ( base.hasEntry(n.i.toString(),SymbolTable.CLASS_ENTRY)) {
         identifierFound = true;
+
+        // Set flag
+         swapper = base.getClassTable(n.i.toString());
     }
 
     if (identifierFound == false) {

@@ -123,18 +123,11 @@ public class SymbolTable extends TableEntry{
 
     /**
      *
-     * @param key
+     * @param key string
      * @return Object associated with the key
      */
-    public Object get(SymbolEntry key) {
+    public TableEntry getClassTable(String key) {
         return hash.get(key);
     }
 
-    /**
-     *
-     * @return enumeration of all keys in the symbol table
-     */
-    public Set keys() {
-        return hash.keySet();
-    }
 }
