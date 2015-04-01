@@ -320,23 +320,20 @@ public class NameAnalysisVisitor implements Visitor {
   // Identifier i;
   // Exp e1,e2;
   public void visit(ArrayAssign n) {
-    SymbolTable savedState = base;
-    boolean identifierFound = false;
 
+    boolean identifierFound = false;
+    TableEntry cursorScope = base.getCurrentScope();
     // While the parent isn't null and the identifier is not found
-    while ( ! base.getCurrentScope().isEntry(SymbolTable.ROOT_ENTRY) && identifierFound == false) {
+    while ( ! cursorScope.isEntry(SymbolTable.ROOT_ENTRY) && identifierFound == false) {
 
       // Check the keys for the identifier, if found set to true, else ascend scope
       if ( base.getCurrentScope().hasEntry( n.i.toString() , SymbolTable.LEAF_ENTRY)) {
           identifierFound = true;
       }
       else {
-        base.ascendScope();
+       cursorScope = cursorScope.parent;
       }
     }
-
-    // Return base to original state
-    base = savedState;
 
     if (identifierFound == false) {
       System.out.println("Use of undefined variable identifier at line " + n.i.lineNum() + ", character " + n.i.charNum());
@@ -394,7 +391,6 @@ public class NameAnalysisVisitor implements Visitor {
   // ExpList el;
   public void visit(Call n) {
     n.e.accept(this);
-    SymbolTable savedState = base;
     boolean identifierFound = false;
 
     TableEntry scopeCursor = base.getCurrentScope();
@@ -408,8 +404,6 @@ public class NameAnalysisVisitor implements Visitor {
         scopeCursor = scopeCursor.parent;
       }
     }
-
-    base = savedState;
 
     if (identifierFound == false) {
       System.out.println("Use of undefined variable identifier at line " + n.i.lineNum() + ", character " + n.i.charNum());

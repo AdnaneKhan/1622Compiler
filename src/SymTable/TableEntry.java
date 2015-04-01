@@ -31,6 +31,7 @@ public abstract  class TableEntry {
     }
 
      protected  TableEntry(ASTNode actualNode) {
+         hash = new HashMap<String,TableEntry>();
         this.actualNode = actualNode;
         this.lineNum = actualNode.lineNum();
         this.charNum = actualNode.charNum();
