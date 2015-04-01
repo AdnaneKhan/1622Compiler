@@ -31,11 +31,9 @@ public class NameAnalysisVisitor implements Visitor {
   // MainClass m;
   // ClassDeclList cl;
   public void visit(Program n) {
-    // Add the main class to symbol
-    base.putClass(n.m);
-    // go to the main class scope
 
-    n.m.accept(this);
+
+
 
     // Checks that classes do not have the same name while adding them to symbol table
     for ( int i = 0; i < n.cl.size(); i++ ) {
@@ -68,6 +66,15 @@ public class NameAnalysisVisitor implements Visitor {
         n.cl.elementAt(i).accept(this);
       }
     }
+
+
+      // go to the main class scope
+      // Add the main class to symbol
+      base.putClass(n.m);
+
+      n.m.accept(this);
+
+
   }
   
   // Identifier i1,i2;
@@ -123,10 +130,16 @@ public class NameAnalysisVisitor implements Visitor {
 
           // Check for duplicate method names in class
           for (int i = 0; i < n.ml.size(); i++) {
-              if (current.hasEntry(n.ml.elementAt(i).i.toString(),SymbolTable.METHOD_ENTRY)) {
+                  if (current.hasEntry(n.ml.elementAt(i).i.toString(),SymbolTable.METHOD_ENTRY)) {
                       System.out.println("Multiply defined method name at line " + n.ml.elementAt(i).lineNum() + ", character " + n.ml.elementAt(i).charNum());
-              } else {
-                  current.putMethod(n.ml.elementAt(i));
+                  } else {
+                      current.putMethod(n.ml.elementAt(i));
+                  }
+          }
+
+          // Now actually accept them
+          for (int i = 0; i < n.ml.size(); i++) {
+              if (!current.hasEntry(n.ml.elementAt(i).i.toString(),SymbolTable.METHOD_ENTRY)) {
                   n.ml.elementAt(i).accept(this);
               }
           }
@@ -397,6 +410,9 @@ public class NameAnalysisVisitor implements Visitor {
 
     // While the parent isn't null and the identifier is not found
     while (scopeCursor != null&& identifierFound == false) {
+        // f
+
+
       // Check the keys for the identifier, if found set to true, else ascend scope
       if (scopeCursor.hasEntry(n.i.toString(),SymbolEntry.METHOD_ENTRY) ) {
           identifierFound = true;
