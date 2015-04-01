@@ -434,7 +434,7 @@ public class NameAnalysisVisitor implements Visitor {
     boolean identifierFound = false;
 
     // While the parent isn't null and the identifier is not found
-    while (scopeCursor.isEntry(SymbolTable.ROOT_ENTRY) && identifierFound == false) {
+    while (!scopeCursor.isEntry(SymbolTable.ROOT_ENTRY) && identifierFound == false) {
 
       // Check the keys for the identifier, if found set to true, else ascend scope
       if ( scopeCursor.hasEntry(n.s,SymbolTable.LEAF_ENTRY) ) {
