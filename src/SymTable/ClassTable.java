@@ -21,6 +21,12 @@ public class ClassTable extends TableEntry {
         return CLASS_ENTRY;
     }
 
+    @Override
+    public boolean isEntry(int entryType) {
+        return entryType == CLASS_ENTRY;
+    }
+
+
     public void put(String key, TableEntry value) {
         hash.put(key,value);
     }

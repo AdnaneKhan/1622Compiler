@@ -18,6 +18,11 @@ public class MethodTable extends TableEntry {
         return METHOD_ENTRY;
     }
 
+    @Override
+    public boolean isEntry(int entryType) {
+        return entryType == METHOD_ENTRY;
+    }
+
     // Var Declarations belonging to method
     /**
      *

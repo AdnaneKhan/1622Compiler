@@ -36,6 +36,15 @@ public abstract  class TableEntry {
         this.charNum = actualNode.charNum();
     }
 
+    public boolean hasEntry(String key, int entry_type) {
+        if (this.hash.containsKey(key) && this.hash.get(key).isEntry(entry_type)) {
+            return true;
+        } else
+        {
+            return false;
+        }
+    }
+
     public String getSymbolName() {
         return symbolName;
     }
@@ -54,4 +63,11 @@ public abstract  class TableEntry {
      *
      */
     public abstract int entryType();
+
+
+    /**
+     *
+     * @return whether entry type is equal to that passed in
+     */
+    public abstract boolean isEntry(int entryType);
 }

@@ -25,4 +25,9 @@ public class SymbolEntry extends TableEntry{
     public int entryType() {
         return LEAF_ENTRY;
     }
+
+
+    public boolean isEntry( int entryType) {
+        return entryType == LEAF_ENTRY;
+    }
 }
