@@ -1,20 +1,22 @@
 package Visitor;
 
-import SymTable.ClassTable;
-import SymTable.MethodTable;
-import SymTable.SymbolEntry;
-import SymTable.SymbolTable;
+import SymTable.*;
 import SyntaxTree.*;
 
 public class NameAnalysisVisitor implements Visitor {
 
   SymbolTable base;
+  Program rootAST;
+
 
   public NameAnalysisVisitor(SymbolTable toPopulate, Program toUse) {
-    base = toPopulate;
+        base = toPopulate;
+        rootAST = toUse;
+  }
 
-    // Initiate visitation process
-    this.visit(toUse);
+  public void nameAnalysisPass() {
+        // Initiate visitation process
+        this.visit(rootAST);
   }
 
     /**
@@ -201,38 +203,35 @@ public class NameAnalysisVisitor implements Visitor {
           if (base.getCurrentScope().isEntry(SymbolTable.METHOD_ENTRY)) {
               MethodTable current = (MethodTable) base.getCurrentScope();
 
-          n.t.accept(this);
-          n.i.accept(this);
+              n.t.accept(this);
+              n.i.accept(this);
 
-
-          // Checks formal list for duplicate variable names
-          for (int i = 0; i < n.fl.size(); i++) {
-              if (current.hasEntry(n.fl.elementAt(i).i.toString(),SymbolTable.LEAF_ENTRY)) {
-                  System.out.println("Multiply defined variable name at line " + n.fl.elementAt(i).lineNum() + ", character " + n.fl.elementAt(i).charNum());
-              } else{
-                  current.putVariable( n.fl.elementAt(i) );
-                  n.fl.elementAt(i).accept(this);
+              // Checks formal list for duplicate variable names
+              for (int i = 0; i < n.fl.size(); i++) {
+                  if (current.hasEntry(n.fl.elementAt(i).i.toString(),SymbolTable.LEAF_ENTRY)) {
+                      System.out.println("Multiply defined variable name at line " + n.fl.elementAt(i).lineNum() + ", character " + n.fl.elementAt(i).charNum());
+                  } else{
+                      current.putVariable( n.fl.elementAt(i) );
+                      n.fl.elementAt(i).accept(this);
+                  }
               }
-          }
 
-          // Checks variable decls for duplicate names
-          for (int i = 0; i < n.vl.size(); i++) {
-              if ( current.hasEntry(n.vl.elementAt(i).i.toString(),SymbolTable.LEAF_ENTRY)) {
-                      System.out.println("Multiply defined variable name at line " + n.vl.elementAt(i).lineNum() + ", character " + n.vl.elementAt(i).charNum());
+              // Checks variable decls for duplicate names
+              for (int i = 0; i < n.vl.size(); i++) {
+                  if ( current.hasEntry(n.vl.elementAt(i).i.toString(),SymbolTable.LEAF_ENTRY)) {
+                          System.out.println("Multiply defined variable name at line " + n.vl.elementAt(i).lineNum() + ", character " + n.vl.elementAt(i).charNum());
 
-              } else {
-                  current.putVariable(n.vl.elementAt(i));
-                  n.vl.elementAt(i).accept(this);
+                  } else {
+                      current.putVariable(n.vl.elementAt(i));
+                      n.vl.elementAt(i).accept(this);
+                  }
               }
+
+              for (int i = 0; i < n.sl.size(); i++) {
+                  n.sl.elementAt(i).accept(this);
+              }
+              n.e.accept(this);
           }
-
-
-          for (int i = 0; i < n.sl.size(); i++) {
-              n.sl.elementAt(i).accept(this);
-          }
-          n.e.accept(this);
-
-      }
 
       base.ascendScope();
   }
@@ -255,24 +254,15 @@ public class NameAnalysisVisitor implements Visitor {
 
   // String s;
   public void visit(IdentifierType n) {
-    SymbolTable savedState = base;
     boolean identifierFound = false;
 
     // While the parent isn't null and the identifier is not found
-    while (identifierFound == false) {
-      // Check the keys for the identifier, if found set to true, else ascend scope
-      if (base.keys().contains(n.s)) {
-        if (base.hasEntry(n.s, SymbolTable.CLASS_ENTRY)) {
-          identifierFound = true;
-        }
-      }
-      else {
-        base.ascendScope();
-      }
+
+    // Check the keys for the identifier, if found set to true, else ascend scope
+    if (base.hasEntry(n.s, SymbolTable.CLASS_ENTRY)) {
+       identifierFound = true;
     }
 
-    // Return base to original state
-    base = savedState;
 
     if (identifierFound == false) {
       System.out.println("Use of undefined variable identifier at line " + n.lineNum() + ", character " + n.charNum());
@@ -309,33 +299,29 @@ public class NameAnalysisVisitor implements Visitor {
   // Identifier i;
   // Exp e;
   public void visit(Assign n) {
-    SymbolTable savedState = base;
-    boolean identifierFound = false;
 
-    // While the parent isn't null and the identifier is not found
-    while (base.parent != null && identifierFound == false) {
+          TableEntry scopeCursor = base.getCurrentScope();
 
-      // Check the keys for the identifier, if found set to true, else ascend scope
-      if (base.keys().contains(n.i.toString())) {
-        if (base.get(n.i.toString()).entryType() == 3) {
-          identifierFound = true;
-        }
-      }
-      else {
-        base.ascendScope();
-      }
-    }
+          boolean identifierFound = false;
 
-    // Return base to original state
-    base = savedState;
+          // While the current scope isn't root ( since we are checking id assignment)
+          while ( ! scopeCursor.isEntry(SymbolTable.ROOT_ENTRY) && identifierFound == false) {
 
-    if (identifierFound == false) {
-      System.out.println("Use of undefined variable identifier at line " + n.i.lineNum() + ", character " + n.i.charNum());
-    }
-    else {
-      n.i.accept(this);
-    }
-    n.e.accept(this);
+              // Check the keys for the identifier, if found set to true, else ascend scope
+              if (scopeCursor.hasEntry(n.i.toString(),SymbolTable.LEAF_ENTRY)) {
+                    identifierFound = true;
+              } else {
+                    scopeCursor = scopeCursor.parent;
+              }
+          }
+
+          if (identifierFound == false) {
+              System.out.println("Use of undefined variable identifier at line " + n.i.lineNum() + ", character " + n.i.charNum());
+          } else {
+              n.i.accept(this);
+          }
+          n.e.accept(this);
+
   }
 
   // Identifier i;
@@ -345,13 +331,11 @@ public class NameAnalysisVisitor implements Visitor {
     boolean identifierFound = false;
 
     // While the parent isn't null and the identifier is not found
-    while (base.parent != null && identifierFound == false) {
+    while ( ! base.getCurrentScope().isEntry(SymbolTable.ROOT_ENTRY) && identifierFound == false) {
 
       // Check the keys for the identifier, if found set to true, else ascend scope
-      if (base.keys().contains(n.i.toString())) {
-        if (base.get(n.i.toString()).entryType() == 3) {
+      if ( base.getCurrentScope().hasEntry( n.i.toString() , SymbolTable.LEAF_ENTRY)) {
           identifierFound = true;
-        }
       }
       else {
         base.ascendScope();
@@ -420,17 +404,15 @@ public class NameAnalysisVisitor implements Visitor {
     SymbolTable savedState = base;
     boolean identifierFound = false;
 
-    // While the parent isn't null and the identifier is not found
-    while (base.parent != null && identifierFound == false) {
+    TableEntry scopeCursor = base.getCurrentScope();
 
+    // While the parent isn't null and the identifier is not found
+    while ( !scopeCursor.isEntry(SymbolTable.ROOT_ENTRY) && identifierFound == false) {
       // Check the keys for the identifier, if found set to true, else ascend scope
-      if (base.keys().contains(n.i.toString())) {
-        if (base.get(n.i.toString()).entryType() == 1) {
+      if (scopeCursor.hasEntry(n.i.toString(),SymbolEntry.LEAF_ENTRY) ) {
           identifierFound = true;
-        }
-      }
-      else {
-        base.ascendScope();
+      } else {
+        scopeCursor = scopeCursor.parent;
       }
     }
 
@@ -460,26 +442,22 @@ public class NameAnalysisVisitor implements Visitor {
 
   // String s;
   public void visit(IdentifierExp n) {
-    SymbolTable savedState = base;
+
+    TableEntry scopeCursor = base.getCurrentScope();
     boolean identifierFound = false;
 
     // While the parent isn't null and the identifier is not found
-    while (base.parent != null && identifierFound == false) {
+    while (scopeCursor.isEntry(SymbolTable.ROOT_ENTRY) && identifierFound == false) {
 
       // Check the keys for the identifier, if found set to true, else ascend scope
-      if (base.keys().contains(n.s)) {
-        if (base.get(n.s).entryType() == 3) {
-          identiferFound = true;
-        }
+      if ( scopeCursor.hasEntry(n.s,SymbolTable.LEAF_ENTRY) ) {
+            identifierFound = true;
       }
       else {
-        base.ascendScope();
+        scopeCursor =  scopeCursor.parent;
       }
     }
-
-    // Return base to original state
-    base = savedState;
-
+      
     if (identifierFound == false) {
       System.out.println("Use of undefined variable identifier at line " + n.lineNum() + ", character " + n.charNum());
     }
@@ -495,23 +473,12 @@ public class NameAnalysisVisitor implements Visitor {
 
   // Identifier i;
   public void visit(NewObject n) {
-    SymbolTable savedState = base;
     boolean identifierFound = false;
 
-    // While the parent is not null (used to get to class level)
-    while (base.parent != null) {
-      base.ascendScope();
-    }
-
     // Check if keys contain class name of new object
-    if (base.keys().contains(n.i.toString())) {
-      if (base.get(n.i.toString()).entryType() == 2) {
+    if ( base.hasEntry(n.i.toString(),SymbolTable.CLASS_ENTRY)) {
         identifierFound = true;
-      }
     }
-
-    // Return base to original state
-    base = savedState;
 
     if (identifierFound == false) {
       System.out.println("Use of undefined variable identifier at line " + n.lineNum() + ", character " + n.charNum());
