@@ -43,10 +43,10 @@ public class NameAnalysisVisitor implements Visitor {
         String className = extractClassName(cursor);
 
       if (!(base.hasEntry( className , SymbolTable.CLASS_ENTRY))) {
-        base.putClass(n.cl.elementAt(i));
+        base.putClass(cursor);
       }
       else {
-        System.out.println("Multiply defined class name at line " + n.cl.elementAt(i).lineNum() + ", character " + n.cl.elementAt(i).charNum());
+        System.out.println("Multiply defined class name at line " + cursor.lineNum() + ", character " + cursor.charNum());
       }
     }
 
@@ -54,18 +54,19 @@ public class NameAnalysisVisitor implements Visitor {
     for (int i = 0; i < n.cl.size(); i++) {
 
         ClassDecl cursor = n.cl.elementAt(i);
-        String className = extractClassName(cursor);
 
-      if (n.cl.elementAt(i) instanceof ClassDeclExtends) {
-        if (!(base.hasEntry(className,SymbolTable.CLASS_ENTRY))) {
-          System.out.println("Use of undefined class identifier at line " + n.cl.elementAt(i).lineNum() + ", character " + n.cl.elementAt(i).charNum());
-        }
+      if (cursor instanceof ClassDeclExtends) {
+          String extendsName = ((ClassDeclExtends) cursor).j.toString();
+            if (!(base.hasEntry(extendsName,SymbolTable.CLASS_ENTRY))) {
+          System.out.println("Use of undefined class identifier at line " + cursor.lineNum() + ", character " + cursor.charNum());
+            }
+
         else {
-          n.cl.elementAt(i).accept(this);
+                cursor.accept(this);
         }
       }
       else {
-        n.cl.elementAt(i).accept(this);
+          cursor.accept(this);
       }
     }
 
@@ -160,33 +161,53 @@ public class NameAnalysisVisitor implements Visitor {
   public void visit(ClassDeclExtends n) {
     base.descendScope(n.i.toString());
 
-    n.i.accept(this);
-    n.j.accept(this);
+      ClassTable current;
+      if(base.getCurrentScope().isEntry(SymbolEntry.CLASS_ENTRY) ) {
+          current = (ClassTable) base.getCurrentScope();
 
-    // These are class variables. What we need to check here is that
-    // there are no multiple definitions in this same list
-    // it is ok if there are variables that belong to the parent class, (since it
-    // would be an override)
+          // Check the parent class
 
-    // we need to pull the current scope
-    ClassTable cs = (ClassTable) base.getCurrentScope();
+          n.i.accept(this);
+          n.j.accept(this);
 
-    for ( int i = 0; i < n.vl.size(); i++ ) {
+          // Check for duplicate variable names in class
+          for (int i = 0; i < n.vl.size(); i++) {
+              if (current.hasEntry(n.vl.elementAt(i).i.toString(), SymbolTable.LEAF_ENTRY)) {
 
-        // If this variable exists in the LOCAL scope of the class and the variable binds to a var (not
-        // a method) (use the entryType getter to check the static finals)
+                  System.out.println("Multiply defined variable name at line " + n.vl.elementAt(i).lineNum() + ", character " + n.vl.elementAt(i).charNum());
 
-        // ok if the var is not defined (or it is a method) then we can add it to this scope
-        // this process is repaeted
-        cs.putVariable(n.vl.elementAt(i));
-        n.vl.elementAt(i).accept(this);
-    }
+              } else {
+                  if (base.getCurrentScope().isEntry(SymbolEntry.CLASS_ENTRY)) {
+                      current.putVariable(n.vl.elementAt(i));
+                  }
+                  n.vl.elementAt(i).accept(this);
+              }
+          }
 
-    // Check for duplicate method names in class
-    for ( int i = 0; i < n.ml.size(); i++ ) {
-        cs.putMethod(n.ml.elementAt(i));
-        n.ml.elementAt(i).accept(this);
-    }
+          // Check for duplicate method names in class
+          for (int i = 0; i < n.ml.size(); i++) {
+              // Checks if there is a duplicate method in iether this class OR the suuper class because there is no overriding.
+              if (current.hasEntry(n.ml.elementAt(i).i.toString(),SymbolTable.METHOD_ENTRY) ||
+                      base.getClassTable(n.j.toString()).hasEntry(n.ml.elementAt(i).i.toString(),SymbolEntry.METHOD_ENTRY)) {
+
+
+                  System.out.println("Multiply defined method name at line " + n.ml.elementAt(i).lineNum() + ", character " + n.ml.elementAt(i).charNum());
+              } else {
+                  current.putMethod(n.ml.elementAt(i));
+              }
+          }
+
+          // Now actually accept them
+          for (int i = 0; i < n.ml.size(); i++) {
+              if (!current.hasEntry(n.ml.elementAt(i).i.toString(),SymbolTable.METHOD_ENTRY)) {
+                  n.ml.elementAt(i).accept(this);
+              }
+          }
+      } else {
+          System.err.println("PROBLEM WITH PROGRAM!!");
+          // CODE PROBLEM SHOULD NEVER REACH HERE UNDER NORMMAL
+          // FUNCTIONALITY
+      }
 
     base.ascendScope();
 
@@ -419,7 +440,7 @@ public class NameAnalysisVisitor implements Visitor {
             identifierFound = true;
             break;
         }
-        
+
         swapper = null;
 
 
