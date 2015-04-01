@@ -418,9 +418,10 @@ public class NameAnalysisVisitor implements Visitor {
         if (swapper != null && swapper.hasEntry(n.i.toString(),SymbolTable.METHOD_ENTRY)) {
             identifierFound = true;
             break;
-        } else {
-            swapper = null;
         }
+        
+        swapper = null;
+
 
       // Check the keys for the identifier, if found set to true, else ascend scope
       if (scopeCursor.hasEntry(n.i.toString(),SymbolEntry.METHOD_ENTRY) ) {
