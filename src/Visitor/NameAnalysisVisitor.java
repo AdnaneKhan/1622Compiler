@@ -12,8 +12,6 @@ public class NameAnalysisVisitor implements Visitor {
         base = toPopulate;
   }
 
-
-
     /**
      * Simple utility memthods checks the actual object and gets teh idenifier ffrom it
      * @param toExtract abstract class declaration
@@ -84,9 +82,9 @@ public class NameAnalysisVisitor implements Visitor {
 
           // Now we need to descend into the main method scope
           // Add this id to the main static method variable list
-          SymbolEntry stringID = (new SymbolEntry(n.i2.toString(), n.i2));
+          SymbolEntry stringID = new SymbolEntry(n.i2.toString(), n.i2);
           stringID.parent = base.getCurrentScope();
-          base.currentScopeMap().put(n.i2.toString(), stringID); // note we need to set parent
+          current.put(n.i2.toString(), stringID); // note we need to set parent
           n.i2.accept(this);
           n.s.accept(this);
       } else {
