@@ -76,6 +76,7 @@ IntegerLiteral = 0 | [1-9][0-9]*
        "true"                    { return symbol( sym.TRUE); }
        "false"                   { return symbol( sym.FALSE); }
        "while"                   { return symbol( sym.WHILE, yytext());}
+       "this"                    { return symbol( sym.THIS, yytext());}
       {IntegerLiteral}           { return symbol( sym.INTEGER_LITERAL, Integer.parseInt(yytext())); }
       {Comma}                    { return symbol( sym.COMMA,yytext()+" ");}
       {BrackClose}               { return symbol( sym.RIGHT_B,"]");}

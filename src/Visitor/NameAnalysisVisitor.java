@@ -258,7 +258,7 @@ public class NameAnalysisVisitor implements Visitor {
 
 
     if (identifierFound == false) {
-      System.out.println("Use of undefined variable identifier at line " + n.lineNum() + ", character " + n.charNum());
+      System.out.println("FROM CLASS Use of undefined variable identifier at line " + n.lineNum() + ", character " + n.charNum());
     }
   }
 
@@ -308,8 +308,8 @@ public class NameAnalysisVisitor implements Visitor {
               }
           }
 
-          if (identifierFound == false) {
-              System.out.println("Use of undefined variable identifier at line " + n.i.lineNum() + ", character " + n.i.charNum());
+          if (!identifierFound) {
+              System.out.println("FFROM MMETHOD Use of undefined variable identifier at line " + n.i.lineNum() + ", character " + n.i.charNum());
           } else {
               n.i.accept(this);
           }
@@ -324,10 +324,10 @@ public class NameAnalysisVisitor implements Visitor {
     boolean identifierFound = false;
     TableEntry cursorScope = base.getCurrentScope();
     // While the parent isn't null and the identifier is not found
-    while ( ! cursorScope.isEntry(SymbolTable.ROOT_ENTRY) && identifierFound == false) {
+    while ( ! cursorScope.isEntry(SymbolTable.ROOT_ENTRY) && !identifierFound) {
 
       // Check the keys for the identifier, if found set to true, else ascend scope
-      if ( base.getCurrentScope().hasEntry( n.i.toString() , SymbolTable.LEAF_ENTRY)) {
+      if ( cursorScope.hasEntry( n.i.toString() , SymbolTable.LEAF_ENTRY)) {
           identifierFound = true;
       }
       else {
@@ -336,7 +336,7 @@ public class NameAnalysisVisitor implements Visitor {
     }
 
     if (identifierFound == false) {
-      System.out.println("Use of undefined variable identifier at line " + n.i.lineNum() + ", character " + n.i.charNum());
+      System.out.println("FROM METHOD Use of undefined variable identifier at line " + n.i.lineNum() + ", character " + n.i.charNum());
     }
     else {
       n.i.accept(this);
