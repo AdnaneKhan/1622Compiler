@@ -6,18 +6,13 @@ import SyntaxTree.*;
 public class NameAnalysisVisitor implements Visitor {
 
   SymbolTable base;
-  Program rootAST;
 
 
-  public NameAnalysisVisitor(SymbolTable toPopulate, Program toUse) {
+  public NameAnalysisVisitor(SymbolTable toPopulate) {
         base = toPopulate;
-        rootAST = toUse;
   }
 
-  public void nameAnalysisPass() {
-        // Initiate visitation process
-        this.visit(rootAST);
-  }
+
 
     /**
      * Simple utility memthods checks the actual object and gets teh idenifier ffrom it
@@ -457,7 +452,7 @@ public class NameAnalysisVisitor implements Visitor {
         scopeCursor =  scopeCursor.parent;
       }
     }
-      
+
     if (identifierFound == false) {
       System.out.println("Use of undefined variable identifier at line " + n.lineNum() + ", character " + n.charNum());
     }
