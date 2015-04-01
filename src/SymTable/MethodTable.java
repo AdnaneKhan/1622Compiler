@@ -33,6 +33,13 @@ public class MethodTable extends TableEntry {
         newLeaf.parent = this;
         hash.put(toAdd.i.toString(),newLeaf);
     }
+
+
+    public void putVariable(Formal toAdd) {
+        SymbolEntry newLeaf = new SymbolEntry(toAdd.i.toString(),toAdd);
+        newLeaf.parent = this;
+        hash.put(toAdd.i.toString(),newLeaf);
+    }
     // Do we need to add statements? Or dont we just work with them at tree level
     // Now we add the statements belonging to this method
 //    /**
