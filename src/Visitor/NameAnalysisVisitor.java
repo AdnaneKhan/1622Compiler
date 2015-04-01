@@ -396,9 +396,9 @@ public class NameAnalysisVisitor implements Visitor {
     TableEntry scopeCursor = base.getCurrentScope();
 
     // While the parent isn't null and the identifier is not found
-    while ( !scopeCursor.isEntry(SymbolTable.ROOT_ENTRY) && identifierFound == false) {
+    while (scopeCursor != null&& identifierFound == false) {
       // Check the keys for the identifier, if found set to true, else ascend scope
-      if (scopeCursor.hasEntry(n.i.toString(),SymbolEntry.LEAF_ENTRY) ) {
+      if (scopeCursor.hasEntry(n.i.toString(),SymbolEntry.METHOD_ENTRY) ) {
           identifierFound = true;
       } else {
         scopeCursor = scopeCursor.parent;
