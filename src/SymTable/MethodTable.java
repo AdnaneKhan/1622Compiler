@@ -18,12 +18,24 @@ public class MethodTable extends TableEntry {
         return METHOD_ENTRY;
     }
 
+    @Override
+    public boolean isEntry(int entryType) {
+        return entryType == METHOD_ENTRY;
+    }
+
     // Var Declarations belonging to method
     /**
      *
      * @param toAdd Var declaration for this method
      */
     public void putVariable(VarDecl toAdd) {
+        SymbolEntry newLeaf = new SymbolEntry(toAdd.i.toString(),toAdd);
+        newLeaf.parent = this;
+        hash.put(toAdd.i.toString(),newLeaf);
+    }
+
+
+    public void putVariable(Formal toAdd) {
         SymbolEntry newLeaf = new SymbolEntry(toAdd.i.toString(),toAdd);
         newLeaf.parent = this;
         hash.put(toAdd.i.toString(),newLeaf);

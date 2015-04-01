@@ -74,7 +74,7 @@ public class SymbolTable extends TableEntry{
      * @param value Scope for the class
      * @return the HashTable belonging to the value (if it leads to a method/class) null otherwise
      */
-    public void put(String key, TableEntry value) {
+    protected void put(String key, TableEntry value) {
         hash.put(key,value);
         currentScope = this;
         // Given that what we will be adding here are classes we
@@ -114,6 +114,11 @@ public class SymbolTable extends TableEntry{
 
     public int entryType() {
         return ROOT_ENTRY;
+    }
+
+    @Override
+    public boolean isEntry(int entryType) {
+        return entryType == ROOT_ENTRY;
     }
 
     /**
