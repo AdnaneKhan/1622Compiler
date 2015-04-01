@@ -1,0 +1,24 @@
+class MathYo {
+    public 
+
+
+static      void main    (String[] args) {
+        System.out.println(new Math().doIt(1,2,3,4));
+    }
+}
+class Math {
+/**/
+/******
+
+
+
+
+********************/
+    public int doIt(int a1, int a2, int a3, int a4) {
+        int o;
+        boolean b;
+        o = !5 + 4 - 3 + 2 * 5 - 4 + 24;
+        b = true && 5 + 4 + 3 < 2;
+        return o;
+    }
+}
