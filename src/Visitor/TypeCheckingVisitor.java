@@ -6,6 +6,8 @@ import SymTable.SymbolTable;
 import SymTable.TableEntry;
 import SyntaxTree.*;
 
+import javax.print.DocFlavor;
+
 public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
     SymbolTable base;
@@ -194,21 +196,20 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     // Exp e;
     public Type visit(Assign n) {
 
-
         Type ret = n.i.accept(this);
-
-        // Look up variable in scope
-
-        // Find its type (by accessing the symmbol entry and reading type)
-
-
-
         Type eRet = n.e.accept(this);
 
-        if ( !ret.getClass().equals(eRet.getClass())){
-              Errors.typeMismatch(n.i.lineNum(),n.i.charNum());
+        if ( ret instanceof IdentifierType && ((IdentifierType) ret).methClass) {
+            Errors.classMethodAssign(n.i.lineNum(),n.i.charNum(),n.i.s,((IdentifierType) ret).s);
         }
 
+        if ( eRet instanceof IdentifierType && ((IdentifierType) ret).methClass) {
+            Errors.assignFromMethodClass(n.e.lineNum(), n.e.charNum(), n.e.toString(), ((IdentifierType) eRet).s);
+        }
+
+        else if ( !ret.getClass().equals(eRet.getClass())){
+              Errors.typeMismatch(n.i.lineNum(),n.i.charNum());
+        }
 
         return null;
     }
@@ -237,11 +238,15 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         Type ret1 = n.e1.accept(this);
         Type ret2 = n.e2.accept(this);
 
+
+        // Check if type mismatch
         if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof BooleanType))) {
             Errors.nonBooleanOperand(n.lineNum(), n.charNum(), "&&");
         } else {
             return new BooleanType();
         }
+
+        // Check if
 
         return null;
     }
@@ -350,18 +355,42 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
     // String s;
     public Type visit(IdentifierExp n) {
+        Type returnVal = null;
 
+        TableEntry entry = base.getCurrentScope().getEntryWalk(n.s,TableEntry.LEAF_ENTRY);
 
-        if (base.getCurrentScope().hasEntry(n.s, TableEntry.LEAF_ENTRY)) {
-            TableEntry entry = base.getEntry(n.s, TableEntry.LEAF_ENTRY);
-            if (entry instanceof SymbolEntry) {
-                return ((SymbolEntry)entry).getType();
-            }
+        if (entry instanceof SymbolEntry) {
+                returnVal = ((SymbolEntry)entry).getType();
+        } else
+        // If fhis is a class or a mathod type in the scope, we make a node that says this
+        // so when it is checked with expressions the error can be reported
+        // note we only check this if we DON'T first find a type in the scope
+        if (base.getCurrentScope().hasEntryWalk(n.s,TableEntry.CLASS_ENTRY) ||
+                base.getCurrentScope().hasEntry(n.s,TableEntry.METHOD_ENTRY)) {
+
+            /// NOTE that we make an ID as a placeholder that can not
+            /// posbbily be made in a valid Minijava program so
+            /// that further expressions can be checked
+            IdentifierType toRet = (new IdentifierType(".CLASS/METHOD",n.lineNum(),n.charNum()));
+            toRet.methClass = true;
+            returnVal = toRet;
         }
-        return null;
+
+        return returnVal;
     }
 
     public Type visit(This n) {
+        /// Check if the current scope is the main method,
+        /// if so then print the error
+
+        boolean thisInMain = false;
+
+        /// TODO
+
+        if (thisInMain) {
+            Errors.thisInMain(n.lineNum(),n.charNum());
+
+        }
         return null;
     }
 
