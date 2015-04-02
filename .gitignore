@@ -2,3 +2,4 @@
 .idea
 1622Compiler.iml
 out
+*.class
