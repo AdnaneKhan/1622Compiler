@@ -88,7 +88,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
 
             // Now we need to descend into the main method scope
             // Add this id to the main static method variable list
-            SymbolEntry stringID = new SymbolEntry(n.i2.toString(), n.i2);
+            SymbolEntry stringID = new SymbolEntry(n.i2.toString(),new IdentifierType("String[]",n.i2.lineNum(),n.i2.charNum()), n.i2);
             stringID.parent = base.getCurrentScope();
             current.put(n.i2.toString(), stringID,SymbolTable.LEAF_ENTRY); // note we need to set parent
             n.i2.accept(this);

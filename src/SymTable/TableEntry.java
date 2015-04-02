@@ -48,6 +48,17 @@ public abstract  class TableEntry {
         }
     }
 
+    public TableEntry getEntry(String key, int entry_type) {
+        KeyWrapper checkWrap = new KeyWrapper(key,entry_type);
+
+        if (this.hash.containsKey(checkWrap)) {
+            return hash.get(checkWrap);
+        } else
+        {
+            return null;
+        }
+    }
+
     public String getSymbolName() {
         return symbolName;
     }

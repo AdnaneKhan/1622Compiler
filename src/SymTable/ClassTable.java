@@ -40,7 +40,7 @@ public class ClassTable extends TableEntry {
     }
 
     public void putVariable( VarDecl newVar ) {
-        SymbolEntry var = new SymbolEntry(newVar.i.toString(), newVar);
+        SymbolEntry var = new SymbolEntry(newVar.i.s,newVar.t, newVar);
         var.parent = this;
         put (var.getSymbolName(), var, LEAF_ENTRY);
     }

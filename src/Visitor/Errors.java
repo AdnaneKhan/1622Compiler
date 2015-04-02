@@ -37,8 +37,8 @@ public abstract class Errors {
         System.out.println("Call of method " + id + " does not match its declared signature at line " + line + ", character " + column + "");
     }
 
-    public static void nonIntegerOperand(int line, int column) {
-        System.out.println("Non-integer operand for operator %c at line " + line + ", character " + column + "");
+    public static void nonIntegerOperand(int line, int column, char op) {
+        System.out.println("Non-integer operand for operator "+op+" at line " + line + ", character " + column + "");
     }
 
     public static void nonBooleanOperand(int line, int column, String id) {
@@ -60,6 +60,8 @@ public abstract class Errors {
     public static void thisInMain(int line, int column) {
         System.out.println("Illegal use of keyword ‘this’ in static method at line " + line + ", character " + column + "");
     }
-
+    public static void badType(int line, int column) {
+        System.out.println("Identifier is not a type at line" + line + ", character " + column);
+    }
 
 }

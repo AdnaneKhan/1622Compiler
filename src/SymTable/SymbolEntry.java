@@ -9,7 +9,7 @@ import SyntaxTree.*;
  * (anything that is not a method or a class)
  */
 public class SymbolEntry extends TableEntry{
-
+    Type symType;
     /**
      *
      * @param symbolName of the symbol that this entry will represent
@@ -17,13 +17,19 @@ public class SymbolEntry extends TableEntry{
      * will represent.
      *
      */
-    public SymbolEntry(String symbolName, ASTNode constructFrom) {
+    public SymbolEntry(String symbolName,Type t, ASTNode constructFrom) {
         super(constructFrom);
+
+        symType = t;
         this.symbolName = symbolName;
     }
 
     public int entryType() {
         return LEAF_ENTRY;
+    }
+
+    public Type getType() {
+        return symType;
     }
 
 
