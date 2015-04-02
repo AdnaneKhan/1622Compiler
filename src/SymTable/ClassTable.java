@@ -27,19 +27,21 @@ public class ClassTable extends TableEntry {
     }
 
 
-    public void put(String key, TableEntry value) {
-        hash.put(key,value);
+    public void put(String key, TableEntry value, int type) {
+        KeyWrapper keyWrap = new KeyWrapper(key, type);
+
+        hash.put(keyWrap,value);
     }
 
     public void putMethod( MethodDecl methodNode) {
             MethodTable methTable = new MethodTable(methodNode);
             methTable.parent = this;
-            put ( methodNode.i.toString(),methTable);
+            put ( methodNode.i.toString(),methTable, METHOD_ENTRY);
     }
 
     public void putVariable( VarDecl newVar ) {
         SymbolEntry var = new SymbolEntry(newVar.i.toString(), newVar);
         var.parent = this;
-        put (var.getSymbolName(), var);
+        put (var.getSymbolName(), var, LEAF_ENTRY);
     }
 }

@@ -8,7 +8,7 @@ import java.util.HashMap;
  * Created by adnankhan on 3/29/15.
  */
 public abstract  class TableEntry {
-    protected HashMap<String, TableEntry> hash;
+    protected HashMap<KeyWrapper, TableEntry> hash;
     public final static int METHOD_ENTRY = 1;
     public final static int CLASS_ENTRY = 2;
     public final static int LEAF_ENTRY = 3;
@@ -31,14 +31,16 @@ public abstract  class TableEntry {
     }
 
      protected  TableEntry(ASTNode actualNode) {
-         hash = new HashMap<String,TableEntry>();
+         hash = new HashMap<KeyWrapper,TableEntry>();
         this.actualNode = actualNode;
         this.lineNum = actualNode.lineNum();
         this.charNum = actualNode.charNum();
     }
 
     public boolean hasEntry(String key, int entry_type) {
-        if (this.hash.containsKey(key) && this.hash.get(key).isEntry(entry_type)) {
+        KeyWrapper checkWrap = new KeyWrapper(key,entry_type);
+
+        if (this.hash.containsKey(checkWrap)) {
             return true;
         } else
         {

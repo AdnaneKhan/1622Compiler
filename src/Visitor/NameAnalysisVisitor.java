@@ -41,7 +41,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
             ClassDecl cursor = n.cl.elementAt(i);
             String className = extractClassName(cursor);
 
-            if (!(base.hasEntry(className, SymbolTable.CLASS_ENTRY))) {
+            if (!(base.hasEntry(className,SymbolTable.CLASS_ENTRY))) {
                 base.putClass(cursor);
             } else {
                 Errors.multiplyDefinedError(cursor.lineNum(), cursor.charNum(), className);
@@ -79,7 +79,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
     // Identifier i1,i2;
     // Statement s;
     public void visit(MainClass n) {
-        base.descendScope(n.i1.toString());
+        base.descendScope( new KeyWrapper(n.i1.s, SymbolTable.CLASS_ENTRY));
         // We are in the main class scope now
         if (base.getCurrentScope().isEntry(SymbolTable.CLASS_ENTRY)) {
             ClassTable current = (ClassTable) base.getCurrentScope();
@@ -90,7 +90,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
             // Add this id to the main static method variable list
             SymbolEntry stringID = new SymbolEntry(n.i2.toString(), n.i2);
             stringID.parent = base.getCurrentScope();
-            current.put(n.i2.toString(), stringID); // note we need to set parent
+            current.put(n.i2.toString(), stringID,SymbolTable.LEAF_ENTRY); // note we need to set parent
             n.i2.accept(this);
             n.s.accept(this);
         } else {
@@ -105,7 +105,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
     // VarDeclList vl;
     // MethodDeclList ml;
     public void visit(ClassDeclSimple n) {
-        base.descendScope(n.i.toString());
+        base.descendScope(new KeyWrapper(n.i.s,SymbolTable.CLASS_ENTRY));
 
         ClassTable current;
         if (base.getCurrentScope().isEntry(SymbolEntry.CLASS_ENTRY)) {
@@ -115,20 +115,18 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
 
             // Check for duplicate variable names in class
             for (int i = 0; i < n.vl.size(); i++) {
-                if (current.hasEntry(n.vl.elementAt(i).i.toString(), SymbolTable.LEAF_ENTRY)) {
+                if (current.hasEntry(n.vl.elementAt(i).i.toString(),SymbolTable.LEAF_ENTRY)) {
                     Errors.multiplyDefinedError(n.vl.elementAt(i).lineNum(), n.vl.elementAt(i).charNum(), n.vl.elementAt(i).i.s);
 
                 } else {
-                    if (base.getCurrentScope().isEntry(SymbolEntry.CLASS_ENTRY)) {
-                        current.putVariable(n.vl.elementAt(i));
-                    }
+                    current.putVariable(n.vl.elementAt(i));
                     n.vl.elementAt(i).accept(this);
                 }
             }
 
             // Check for duplicate method names in class
             for (int i = 0; i < n.ml.size(); i++) {
-                if (current.hasEntry(n.ml.elementAt(i).i.toString(), SymbolTable.METHOD_ENTRY)) {
+                if (current.hasEntry(n.ml.elementAt(i).i.toString(),SymbolTable.METHOD_ENTRY)) {
 
                     Errors.multiplyDefinedError(n.ml.elementAt(i).lineNum(), n.ml.elementAt(i).charNum(), n.ml.elementAt(i).i.s);
                 } else {
@@ -138,7 +136,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
 
             // Now actually accept them
             for (int i = 0; i < n.ml.size(); i++) {
-                if (!current.hasEntry(n.ml.elementAt(i).i.toString(), SymbolTable.METHOD_ENTRY)) {
+                if (current.hasEntry(n.ml.elementAt(i).i.toString(), SymbolTable.METHOD_ENTRY)) {
                     n.ml.elementAt(i).accept(this);
                 }
             }
@@ -155,7 +153,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
     // VarDeclList vl;
     // MethodDeclList ml;
     public void visit(ClassDeclExtends n) {
-        base.descendScope(n.i.toString());
+        base.descendScope(new KeyWrapper(n.i.s,SymbolTable.CLASS_ENTRY));
 
         ClassTable current;
         if (base.getCurrentScope().isEntry(SymbolEntry.CLASS_ENTRY)) {
@@ -214,7 +212,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
     // StatementList sl;
     // Exp e;
     public void visit(MethodDecl n) {
-        base.descendScope(n.i.toString());
+        base.descendScope(new KeyWrapper(n.i.s,SymbolTable.METHOD_ENTRY));
 
         if (base.getCurrentScope().isEntry(SymbolTable.METHOD_ENTRY)) {
             MethodTable current = (MethodTable) base.getCurrentScope();
@@ -279,7 +277,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
         boolean identifierFound = false;
 
         // While the current scope isn't root ( since we are checking id assignment)
-        while (!scopeCursor.isEntry(SymbolTable.ROOT_ENTRY) && identifierFound == false) {
+        while (!scopeCursor.isEntry(SymbolTable.ROOT_ENTRY) && !identifierFound) {
 
             // Check the keys for the identifier, if found set to true, else ascend scope
             if (scopeCursor.hasEntry(n.i.toString(), SymbolTable.LEAF_ENTRY)) {
@@ -335,7 +333,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
         TableEntry scopeCursor = base.getCurrentScope();
 
         // While the parent isn't null and the identifier is not found
-        while (scopeCursor != null && identifierFound == false) {
+        while (scopeCursor != null && !identifierFound) {
             // f
 
 
@@ -355,7 +353,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
             }
         }
 
-        if (identifierFound == false) {
+        if (!identifierFound) {
             Errors.identifierError(n.i.lineNum(), n.i.charNum(), n.i.s);
         } else {
             n.i.accept(this);
@@ -383,7 +381,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
             }
         }
 
-        if (identifierFound == false) {
+        if (!identifierFound) {
             Errors.identifierError(n.lineNum(), n.charNum(), n.s);
         }
     }
@@ -400,7 +398,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
             swapper = base.getClassTable(n.i.toString());
         }
 
-        if (identifierFound == false) {
+        if (!identifierFound) {
             Errors.identifierError(n.i.lineNum(), n.i.charNum(), n.i.s);
         }
     }

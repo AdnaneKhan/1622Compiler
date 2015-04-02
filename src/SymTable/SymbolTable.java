@@ -2,10 +2,6 @@ package SymTable;
 
 import SyntaxTree.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * This is the root symbol table node for our tree of hash-tables.
  *
@@ -26,7 +22,7 @@ public class SymbolTable extends TableEntry{
      * @param scopeID descends scope, if it is in highest scope it goes to a class, if it is in class scope
      *                it goes to method scope
      */
-    public void descendScope(String scopeID) {
+    public void descendScope(KeyWrapper scopeID) {
         if (currentScope.hash.containsKey(scopeID)){
             TableEntry scopeCheck = currentScope.hash.get(scopeID);
             if (scopeCheck instanceof SymbolEntry) {
@@ -48,16 +44,6 @@ public class SymbolTable extends TableEntry{
         }
     }
 
-    /**
-     *
-     * @return the hashtable associated with the CURRENT scope level which may be global (children are classes)
-     *  class (children are methods or var declarations)
-     *  or method (children are statements or var declarations)
-     */
-    public Map<String, TableEntry> currentScopeMap() {
-        return currentScope.hash;
-    }
-
     public TableEntry getCurrentScope() {
         return this.currentScope;
     }
@@ -65,7 +51,6 @@ public class SymbolTable extends TableEntry{
 
     public SymbolTable(ASTNode root) {
         super(root);
-        hash = new HashMap<String,TableEntry>();
     }
 
     /**
@@ -75,7 +60,8 @@ public class SymbolTable extends TableEntry{
      * @return the HashTable belonging to the value (if it leads to a method/class) null otherwise
      */
     protected void put(String key, TableEntry value) {
-        hash.put(key,value);
+        KeyWrapper wrap = new KeyWrapper(key,CLASS_ENTRY);
+        hash.put(wrap,value);
         currentScope = this;
         // Given that what we will be adding here are classes we
 
@@ -127,7 +113,9 @@ public class SymbolTable extends TableEntry{
      * @return Object associated with the key
      */
     public TableEntry getClassTable(String key) {
-        return hash.get(key);
+
+        KeyWrapper checkWrap = new KeyWrapper(key, CLASS_ENTRY);
+        return hash.get(checkWrap);
     }
 
 }
