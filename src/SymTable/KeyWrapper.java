@@ -11,11 +11,6 @@ public class KeyWrapper {
     public String toHash;
     public int type;
 
-    public KeyWrapper(String id) {
-        toHash = id;
-        this.type= 0;
-    }
-
     public KeyWrapper(String id, int type) {
         toHash = id;
         this.type= type;
