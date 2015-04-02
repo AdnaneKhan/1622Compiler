@@ -8,7 +8,7 @@ public class TypeCheckingVisitor implements Visitor {
     // ClassDeclList cl;
     public void visit(Program n) {
         n.m.accept(this);
-        for ( int i = 0; i < n.cl.size(); i++ ) {
+        for (int i = 0; i < n.cl.size(); i++) {
             n.cl.elementAt(i).accept(this);
         }
     }
@@ -26,10 +26,10 @@ public class TypeCheckingVisitor implements Visitor {
     // MethodDeclList ml;
     public void visit(ClassDeclSimple n) {
         n.i.accept(this);
-        for ( int i = 0; i < n.vl.size(); i++ ) {
+        for (int i = 0; i < n.vl.size(); i++) {
             n.vl.elementAt(i).accept(this);
         }
-        for ( int i = 0; i < n.ml.size(); i++ ) {
+        for (int i = 0; i < n.ml.size(); i++) {
             n.ml.elementAt(i).accept(this);
         }
     }
@@ -41,10 +41,10 @@ public class TypeCheckingVisitor implements Visitor {
     public void visit(ClassDeclExtends n) {
         n.i.accept(this);
         n.j.accept(this);
-        for ( int i = 0; i < n.vl.size(); i++ ) {
+        for (int i = 0; i < n.vl.size(); i++) {
             n.vl.elementAt(i).accept(this);
         }
-        for ( int i = 0; i < n.ml.size(); i++ ) {
+        for (int i = 0; i < n.ml.size(); i++) {
             n.ml.elementAt(i).accept(this);
         }
     }
@@ -65,13 +65,13 @@ public class TypeCheckingVisitor implements Visitor {
     public void visit(MethodDecl n) {
         n.t.accept(this);
         n.i.accept(this);
-        for ( int i = 0; i < n.fl.size(); i++ ) {
+        for (int i = 0; i < n.fl.size(); i++) {
             n.fl.elementAt(i).accept(this);
         }
-        for ( int i = 0; i < n.vl.size(); i++ ) {
+        for (int i = 0; i < n.vl.size(); i++) {
             n.vl.elementAt(i).accept(this);
         }
-        for ( int i = 0; i < n.sl.size(); i++ ) {
+        for (int i = 0; i < n.sl.size(); i++) {
             n.sl.elementAt(i).accept(this);
         }
         n.e.accept(this);
@@ -99,7 +99,7 @@ public class TypeCheckingVisitor implements Visitor {
 
     // StatementList sl;
     public void visit(Block n) {
-        for ( int i = 0; i < n.sl.size(); i++ ) {
+        for (int i = 0; i < n.sl.size(); i++) {
             n.sl.elementAt(i).accept(this);
         }
     }
@@ -186,7 +186,7 @@ public class TypeCheckingVisitor implements Visitor {
     public void visit(Call n) {
         n.e.accept(this);
         n.i.accept(this);
-        for ( int i = 0; i < n.el.size(); i++ ) {
+        for (int i = 0; i < n.el.size(); i++) {
             n.el.elementAt(i).accept(this);
         }
     }
