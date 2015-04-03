@@ -406,6 +406,8 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
             IdentifierType toRet = (new IdentifierType(".CLASS/METHOD",n.lineNum(),n.charNum()));
             toRet.methClass = true;
             returnVal = toRet;
+        } else {
+             returnVal = new IdentifierType(":ERROR",n.lineNum(),n.charNum());
         }
 
         return returnVal;

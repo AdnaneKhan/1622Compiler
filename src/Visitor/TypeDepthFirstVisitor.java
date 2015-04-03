@@ -259,4 +259,8 @@ public class TypeDepthFirstVisitor implements TypeVisitor {
     public Type visit(Identifier n) {
         return null;
     }
+
+    public Type visit(ErroneousStatement n) {
+        return null;
+    }
 }

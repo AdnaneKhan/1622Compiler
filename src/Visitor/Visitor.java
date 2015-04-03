@@ -70,4 +70,6 @@ public interface Visitor {
     public void visit(Not n);
 
     public void visit(Identifier n);
+
+    public void visit(ErroneousStatement n);
 }

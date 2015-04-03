@@ -61,7 +61,7 @@ public abstract class Errors {
         System.out.println("Illegal use of keyword ‘this’ in static method at line " + line + ", character " + column + "");
     }
     public static void badType(int line, int column) {
-        System.out.println("Identifier is not a type at line" + line + ", character " + column);
+        System.out.println("Identifier is not a type at line " + line + ", character " + column);
     }
 
 }

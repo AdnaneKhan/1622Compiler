@@ -70,4 +70,6 @@ public interface TypeVisitor {
     public Type visit(Not n);
 
     public Type visit(Identifier n);
+
+    public Type visit(ErroneousStatement n);
 }

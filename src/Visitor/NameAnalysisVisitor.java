@@ -402,4 +402,6 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
             Errors.identifierError(n.i.lineNum(), n.i.charNum(), n.i.s);
         }
     }
+
+
 }

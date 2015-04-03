@@ -329,4 +329,8 @@ public class PrettyPrintVisitor implements Visitor {
     public void visit(Identifier n) {
         System.out.print(n.s);
     }
+
+    public void visit(ErroneousStatement n) {
+        /// NO OP
+    }
 }

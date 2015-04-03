@@ -226,4 +226,9 @@ public class DepthFirstVisitor implements Visitor {
     // String s;
     public void visit(Identifier n) {
     }
+
+    // Error e
+    public void visit(ErroneousStatement n) {
+
+    }
 }
