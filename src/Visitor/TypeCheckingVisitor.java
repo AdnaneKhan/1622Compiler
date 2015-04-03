@@ -189,7 +189,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         if (!(check instanceof IntArrayType)) {
             Errors.typeMismatch(n.e.lineNum(),n.e.charNum());
         }
-        
+
         return null;
     }
 
@@ -341,14 +341,34 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
                 // Now we get the type associated with the methid
                 toReturn = ((MethodDecl)calling.getNode()).t;
+                FormalList called = ((MethodDecl) calling.getNode()).fl;
+
+                // If sizes of expression lists don't match print them
+                if (n.el.size() != called.size()) {
+                    Errors.argCount(n.lineNum(),n.charNum(),n.i.s);
+                } else {
+                    // If counts are the same then we iterate comparing types
+                    for (int i = 0; i < n.el.size(); i++) {
+
+                        Type param = n.el.elementAt(i).accept(this);
+                        Type formal = called.elementAt(i).t;
+
+                        if (!param.getClass().equals(formal.getClass())) {
+                            Errors.argTypeMismatch(n.el.lineNum(),n.el.charNum(),n.i.s);
+                        }
+                    }
+                }
             }
         } else  if (!base.hasEntryWalk(n.i.s, TableEntry.METHOD_ENTRY)) {
             Errors.badCall(n.i.lineNum(),n.i.charNum());
+
+            /// Regardless we do type checking on the param list anyway
+            for (int i = 0; i < n.el.size(); i++) {
+                n.el.elementAt(i).accept(this);
+            }
         }
 
-        for (int i = 0; i < n.el.size(); i++) {
-            n.el.elementAt(i).accept(this);
-        }
+
         return toReturn;
     }
 
@@ -434,7 +454,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
             /// Extract the class
 
 
-
+            // Check the nummber
 
 
             // Get the identiffier type
@@ -457,7 +477,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
     // String s;
     public Type visit(Identifier n) {
-        Type retV = null;
+        Type retV;
 
         if (base.getCurrentScope().hasEntry(n.s, TableEntry.METHOD_ENTRY)) {
             MethodTable typeVar = (MethodTable) base.getCurrentScope().getEntry(n.s, TableEntry.METHOD_ENTRY);
