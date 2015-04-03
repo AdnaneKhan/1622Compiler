@@ -7,10 +7,19 @@ import java.util.HashMap;
  * Created by adnankhan on 3/29/15.
  */
 public class MethodTable extends TableEntry {
-
+    Type retType;
 
     public MethodTable(ASTNode makeFrom) {
         super(makeFrom);
+
+        if (makeFrom instanceof MethodDecl) {
+            retType = ((MethodDecl) makeFrom).t;
+        }
+
+    }
+
+    public Type getRetType() {
+        return retType;
     }
 
     public int entryType() {

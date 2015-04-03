@@ -79,7 +79,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
     // Identifier i1,i2;
     // Statement s;
     public void visit(MainClass n) {
-        base.descendScope( new KeyWrapper(n.i1.s, SymbolTable.CLASS_ENTRY));
+        base.descendScope(n.i1.s, SymbolTable.CLASS_ENTRY);
         // We are in the main class scope now
         if (base.getCurrentScope().isEntry(SymbolTable.CLASS_ENTRY)) {
             ClassTable current = (ClassTable) base.getCurrentScope();
@@ -105,7 +105,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
     // VarDeclList vl;
     // MethodDeclList ml;
     public void visit(ClassDeclSimple n) {
-        base.descendScope(new KeyWrapper(n.i.s,SymbolTable.CLASS_ENTRY));
+        base.descendScope(n.i.s,SymbolTable.CLASS_ENTRY);
 
         ClassTable current;
         if (base.getCurrentScope().isEntry(SymbolEntry.CLASS_ENTRY)) {
@@ -153,7 +153,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
     // VarDeclList vl;
     // MethodDeclList ml;
     public void visit(ClassDeclExtends n) {
-        base.descendScope(new KeyWrapper(n.i.s,SymbolTable.CLASS_ENTRY));
+        base.descendScope(n.i.s,SymbolTable.CLASS_ENTRY);
 
         ClassTable current;
         if (base.getCurrentScope().isEntry(SymbolEntry.CLASS_ENTRY)) {
@@ -212,7 +212,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
     // StatementList sl;
     // Exp e;
     public void visit(MethodDecl n) {
-        base.descendScope(new KeyWrapper(n.i.s,SymbolTable.METHOD_ENTRY));
+        base.descendScope(n.i.s,SymbolTable.METHOD_ENTRY);
 
         if (base.getCurrentScope().isEntry(SymbolTable.METHOD_ENTRY)) {
             MethodTable current = (MethodTable) base.getCurrentScope();

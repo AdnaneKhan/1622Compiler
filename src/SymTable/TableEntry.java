@@ -1,6 +1,7 @@
 package SymTable;
 
 import SyntaxTree.ASTNode;
+import SyntaxTree.VarDecl;
 import javafx.scene.control.Tab;
 
 import java.util.HashMap;
@@ -129,6 +130,7 @@ public abstract  class TableEntry {
 
        return found;
     }
+
 
     /**
      The string name of this symbol associated with the ID type

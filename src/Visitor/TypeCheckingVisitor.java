@@ -1,12 +1,10 @@
 package Visitor;
 
-import SymTable.KeyWrapper;
-import SymTable.SymbolEntry;
-import SymTable.SymbolTable;
-import SymTable.TableEntry;
+import SymTable.*;
 import SyntaxTree.*;
 
-import javax.print.DocFlavor;
+
+
 
 public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
@@ -34,6 +32,21 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         return className;
     }
 
+
+
+    private Type extractDeclName(ASTNode declOrFormal) {
+        Type returnType = null;
+        if ( declOrFormal instanceof Formal) {
+            returnType = ((Formal) declOrFormal).t;
+        } else if ( declOrFormal instanceof VarDecl) {
+            returnType = ((VarDecl) declOrFormal).t;
+
+        } else {
+            System.err.println("PROBLEM WITH PROGRAM, SHOULD NEVER PASS NON DECL NODE");
+        }
+        return returnType;
+    }
+
     // MainClass m;
     // ClassDeclList cl;
     public Type visit(Program n) {
@@ -47,7 +60,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     // Identifier i1,i2;
     // Statement s;
     public Type visit(MainClass n) {
-        base.descendScope(new KeyWrapper(n.i1.s,SymbolTable.CLASS_ENTRY));
+        base.descendScope(n.i1.s,SymbolTable.CLASS_ENTRY);
 
         n.i1.accept(this);
         n.i2.accept(this);
@@ -61,6 +74,9 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     // VarDeclList vl;
     // MethodDeclList ml;
     public Type visit(ClassDeclSimple n) {
+        base.descendScope(n.i.s,SymbolEntry.CLASS_ENTRY);
+
+
         n.i.accept(this);
         for (int i = 0; i < n.vl.size(); i++) {
             n.vl.elementAt(i).accept(this);
@@ -68,6 +84,9 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         for (int i = 0; i < n.ml.size(); i++) {
             n.ml.elementAt(i).accept(this);
         }
+
+
+        base.ascendScope();
         return null;
     }
 
@@ -76,6 +95,9 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     // VarDeclList vl;
     // MethodDeclList ml;
     public Type visit(ClassDeclExtends n) {
+
+        base.descendScope(n.i.s,SymbolTable.CLASS_ENTRY);
+
         n.i.accept(this);
         n.j.accept(this);
         for (int i = 0; i < n.vl.size(); i++) {
@@ -84,6 +106,8 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         for (int i = 0; i < n.ml.size(); i++) {
             n.ml.elementAt(i).accept(this);
         }
+
+        base.ascendScope();
         return null;
     }
 
@@ -102,6 +126,8 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     // StatementList sl;
     // Exp e;
     public Type visit(MethodDecl n) {
+        base.descendScope(n.i.s,SymbolTable.METHOD_ENTRY);
+
         n.t.accept(this);
         n.i.accept(this);
         for (int i = 0; i < n.fl.size(); i++) {
@@ -114,7 +140,9 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
             n.sl.elementAt(i).accept(this);
         }
         n.e.accept(this);
-        return null;
+
+        base.ascendScope();
+        return n.t;
     }
 
     // Type t;
@@ -203,11 +231,13 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
             Errors.classMethodAssign(n.i.lineNum(),n.i.charNum(),n.i.s,((IdentifierType) ret).s);
         }
 
-        if ( eRet instanceof IdentifierType && ((IdentifierType) ret).methClass) {
+        if ( eRet instanceof IdentifierType && ((IdentifierType) eRet).methClass) {
             Errors.assignFromMethodClass(n.e.lineNum(), n.e.charNum(), n.e.toString(), ((IdentifierType) eRet).s);
         }
 
-        else if ( ret != null && !ret.getClass().equals(eRet.getClass())){
+        else if ( ret != null && eRet != null && !ret.getClass().equals(eRet.getClass())){
+            System.out.println(ret);
+            System.out.println(eRet);
               Errors.typeMismatch(n.i.lineNum(),n.i.charNum());
         }
 
@@ -322,15 +352,27 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     // Identifier i;
     // ExpList el;
     public Type visit(Call n)  {
-        n.e.accept(this);
-        if (!base.hasEntryWalk(n.i.s, TableEntry.METHOD_ENTRY)) {
-                     Errors.badCall(n.i.lineNum(),n.i.charNum());
+        Type toReturn = null;
+
+        Type callObject = n.e.accept(this);
+
+        if (callObject instanceof IdentifierType) {
+            String callClass = ((IdentifierType) callObject).s;
+            ClassTable toCheck = base.getClassTable(callClass);
+            if (toCheck != null && toCheck.hasEntry(n.i.s,TableEntry.METHOD_ENTRY)) {
+                MethodTable calling = (MethodTable) toCheck.getEntry(n.i.s,TableEntry.METHOD_ENTRY);
+
+                // Now we get the type associated with the methid
+                toReturn = ((MethodDecl)calling.getNode()).t;
+            }
+        } else  if (!base.hasEntryWalk(n.i.s, TableEntry.METHOD_ENTRY)) {
+            Errors.badCall(n.i.lineNum(),n.i.charNum());
         }
 
         for (int i = 0; i < n.el.size(); i++) {
             n.el.elementAt(i).accept(this);
         }
-        return null;
+        return toReturn;
     }
 
     // int i;
@@ -373,20 +415,32 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     }
 
     public Type visit(This n) {
-        /// Check if the current scope is the main method,
-        /// if so then print the error
+        IdentifierType toReturn = null;
 
-        boolean thisInMain = false;
-
-        /// TODO
-
-        if (thisInMain) {
-            Errors.thisInMain(n.lineNum(),n.charNum());
-        }
         // get current scope's class
 
+        // if it is class entry it means we aren't in a method and therefore calling from main.
+        if (base.getCurrentScope().isEntry(TableEntry.CLASS_ENTRY)) {
 
-        return null;
+            Errors.thisInMain(n.lineNum(),n.charNum());
+        // if it is a method then we know we are in the right place
+        } else if (base.getCurrentScope().isEntry(TableEntry.METHOD_ENTRY)) {
+            ASTNode classNode = base.getCurrentScope().parent.getNode();
+            if (classNode instanceof ClassDeclSimple) {
+                toReturn = new IdentifierType(((ClassDeclSimple) classNode).i.s,n.lineNum(),n.charNum() );
+                toReturn.methClass = true;
+
+            } else if (classNode instanceof ClassDeclExtends) {
+                toReturn = new IdentifierType(((ClassDeclExtends) classNode).i.s,n.lineNum(),n.charNum() );
+                toReturn.methClass = true;
+            }
+        } else {
+            // WE SHOULD NEVER GET HERE
+            System.err.println("PROBLEM IN PROGRAM!!");
+            toReturn = new IdentifierType("this",n.lineNum(),n.charNum());
+        }
+
+        return toReturn;
     }
 
     // Exp e;
@@ -421,22 +475,19 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     // String s;
     public Type visit(Identifier n) {
         Type retV = null;
-        // Look up type in symmboltable
 
 
 
         if (base.getCurrentScope().hasEntry(n.s,TableEntry.METHOD_ENTRY)) {
-
+            MethodTable typeVar = (MethodTable) base.getCurrentScope().getEntry(n.s,TableEntry.LEAF_ENTRY);
+            retV = typeVar.getRetType();
         }
 
         if (base.getCurrentScope().hasEntry(n.s,TableEntry.LEAF_ENTRY)) {
-           TableEntry typeVar = base.getCurrentScope().getEntry(n.s,TableEntry.LEAF_ENTRY);
-          retV = new IdentifierType(typeVar.getSymbolName(),n.lineNum(),n.charNum());
-
+           SymbolEntry typeVar = (SymbolEntry) base.getCurrentScope().getEntry(n.s,TableEntry.LEAF_ENTRY);
+           retV = typeVar.getType();
         }
 
         return retV;
     }
-
-
 }

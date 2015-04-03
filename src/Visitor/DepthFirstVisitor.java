@@ -4,7 +4,6 @@ import SyntaxTree.*;
 
 public class DepthFirstVisitor implements Visitor {
 
-
     // MainClass m;
     // ClassDeclList cl;
     public void visit(Program n) {

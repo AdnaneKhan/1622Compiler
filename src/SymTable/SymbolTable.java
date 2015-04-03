@@ -22,7 +22,7 @@ public class SymbolTable extends TableEntry{
      * @param scopeID descends scope, if it is in highest scope it goes to a class, if it is in class scope
      *                it goes to method scope
      */
-    public void descendScope(KeyWrapper scopeID) {
+    private void descendScope(KeyWrapper scopeID) {
         if (currentScope.hash.containsKey(scopeID)){
             TableEntry scopeCheck = currentScope.hash.get(scopeID);
             if (scopeCheck instanceof SymbolEntry) {
@@ -32,6 +32,27 @@ public class SymbolTable extends TableEntry{
             }
         }
     }
+
+    /**
+     *
+     * @param scopeID descends scope, if it is in highest scope it goes to a class, if it is in class scope
+     *                it goes to method scope
+     */
+    public void descendScope(String scopeID, int scope_type ) {
+        KeyWrapper key = new KeyWrapper( scopeID, scope_type);
+
+        if (currentScope.hash.containsKey(new KeyWrapper(scopeID,scope_type))){
+            TableEntry scopeCheck = currentScope.hash.get(key);
+            if (scopeCheck instanceof SymbolEntry) {
+                System.out.println("Problem! We tried to descend scope to a leaf!");
+            } else {
+                currentScope = scopeCheck;
+            }
+        } else {
+            System.out.println("PROBLEM, we tried to descend to a scope that does not exist!");
+        }
+    }
+
 
     /**
      * Goes up one level in scope, if it is already at root then it reports a problem
@@ -112,10 +133,10 @@ public class SymbolTable extends TableEntry{
      * @param key string
      * @return Object associated with the key
      */
-    public TableEntry getClassTable(String key) {
+    public ClassTable getClassTable(String key) {
 
         KeyWrapper checkWrap = new KeyWrapper(key, CLASS_ENTRY);
-        return hash.get(checkWrap);
+        return (ClassTable) hash.get(checkWrap);
     }
 
 }
