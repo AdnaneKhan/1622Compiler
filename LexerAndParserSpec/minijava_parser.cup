@@ -14,7 +14,7 @@ public parser(MiniJavaLexer lex) {
 }
 
 public void printError(int line, int column) {
-    System.out.format("There is a parse error at line " + line + ", column " + column);
+    System.out.println("There is a parse error at line " + line + ", column " + column);
 }
 
 
@@ -81,6 +81,8 @@ non terminal StatementList StatementList;
 non terminal FormalList FormalRest;
 non terminal Statement Statement;
 non terminal Formal Formal;
+non terminal FormalList FormalSeparate;
+non terminal ExpList ExpSeparate;
 
 /*
 Mathematical Precedence
@@ -116,15 +118,19 @@ VarDeclList ::= VarDeclList:vdl VarDecl:vd  {: vdl.addElement(vd); RESULT = vdl;
        ;
 
 VarDecl ::= Type:t ID:i SEMI {: RESULT = new VarDecl(t,i,tleft,tright); :}
-        | error:e SEMI {: parser.printError(eleft, eright); :}
+        | error:e SEMI {: parser.printError(eleft, eright); RESULT = new ErroneousDecl(eleft,eright); :}
         ;
 
 MethodDeclList ::= MethodDeclList:mdl MethodDecl:md  {: mdl.addElement(md); RESULT = mdl; :}
        | {: RESULT = new MethodDeclList(); :}
        ;
 
-MethodDecl ::= PUBLIC Type:t ID:i LEFT_PAREN FormalList:fl RIGHT_PAREN LEFT_CURLY VarDeclList:v StatementList:sl RETURN Exp:e SEMI RIGHT_CURLY {: RESULT = new MethodDecl(t,i,fl,v,sl,e,ileft,iright); :}
+MethodDecl ::= PUBLIC Type:t ID:i LEFT_PAREN FormalSeparate:fl LEFT_CURLY VarDeclList:v StatementList:sl RETURN Exp:e SEMI RIGHT_CURLY {: RESULT = new MethodDecl(t,i,fl,v,sl,e,ileft,iright); :}
         | error:e RIGHT_CURLY {: parser.printError(eleft, eright);  :}
+        ;
+
+FormalSeparate ::=  FormalList:fl RIGHT_PAREN {: RESULT = fl; :}
+        | error:e RIGHT_PAREN {: parser.printError(eleft,eright); RESULT = new ErroneousFormalList(); :}
         ;
 
 FormalList ::= FormalRest:fr Formal:f {: fr.addElement( f ); RESULT = fr; :}
@@ -154,7 +160,7 @@ Statement ::= LEFT_CURLY StatementList:sl RIGHT_CURLY {: RESULT = new Block(sl,s
        | PRINT LEFT_PAREN Exp:e RIGHT_PAREN SEMI {: RESULT = new Print(e,eleft,eright); :}
        | ID:i ASSIGN Exp:e SEMI {: RESULT = new Assign(i,e,ileft,iright); :}
        | ID:i LEFT_B Exp:e RIGHT_B ASSIGN Exp:e1 SEMI {: RESULT = new ArrayAssign(i,e,e1,ileft,iright); :}
-       | error:e SEMI {: parser.printError(eleft,eright); :}
+       | error:e SEMI {: parser.printError(eleft,eright); RESULT = new ErroneousStatement(eleft,eright); :}
        ;
 
 Exp ::=  Exp:e PLUS Exp:e1 {: RESULT = new Plus(e,e1,eleft,eright); :}
@@ -164,7 +170,7 @@ Exp ::=  Exp:e PLUS Exp:e1 {: RESULT = new Plus(e,e1,eleft,eright); :}
        | Exp:e AND Exp:e1 {: RESULT = new And(e,e1,eleft,eright); :}
        | Exp:e LEFT_B Exp:e1 RIGHT_B {: RESULT = new ArrayLookup(e,e1,eleft,eright); :}
        | Exp:e DOT LENGTH {: RESULT = new ArrayLength(e,eleft,eright); :}
-       | Exp:e DOT ID:i LEFT_PAREN ExpList:el RIGHT_PAREN {: RESULT = new Call(e,i,el,eleft,eright); :}
+       | Exp:e DOT ID:i ExpSeparate:el {: RESULT = new Call(e,i,el,eleft,eright); :}
        | INTEGER_LITERAL:i {: RESULT = new IntegerLiteral(i,ileft,iright);  :}
        | TRUE {: RESULT = new True(); :}
        | FALSE {: RESULT = new False(); :}
@@ -175,6 +181,10 @@ Exp ::=  Exp:e PLUS Exp:e1 {: RESULT = new Plus(e,e1,eleft,eright); :}
        | NOT Exp:e {: RESULT = new Not(e,eleft,eright); :}
        | LEFT_PAREN Exp:e RIGHT_PAREN {: RESULT = e; :}
        ;
+
+ExpSeparate ::= LEFT_PAREN ExpList:el RIGHT_PAREN {: RESULT = el; :}
+        | LEFT_PAREN error:e RIGHT_PAREN {: RESULT = new ErroneousExpList(); :}
+        ;
 
 ExpList ::=  ExpRest:er Exp:e  {: er.addElement(e); RESULT = er; :}
         | {: RESULT = new ExpList(); :}
