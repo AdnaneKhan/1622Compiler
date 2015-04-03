@@ -4,18 +4,18 @@ package IR;
 import SymTable.TableEntry;
 import SyntaxTree.MethodDecl;
 
-public class Call3AC extends ThreeAddressStatement {
+public class Print3AC extends ThreeAddressStatement {
 
     private TableEntry lhsVar;
-    private TableEntry callMethod;
+    private String callMethod;
     private int paramCount;
 
-    public Call3AC (TableEntry lhsVar, TableEntry callMethod) {
+    public Print3AC () {
         this.lhsVar = lhsVar;
 
-        this.callMethod = callMethod;
+        this.callMethod = "println";
         // Get the parameter count from the AST node associated with symbol table entry for the methods
-        this.paramCount = ((MethodDecl)callMethod.getNode()).fl.size();
+        this.paramCount = 1;
     }
 
     @Override
@@ -26,6 +26,6 @@ public class Call3AC extends ThreeAddressStatement {
 
     @Override
     public String toString() {
-        return lhsVar + " := call " + callMethod+","+ paramCount;
+        return "call " + callMethod+","+ paramCount;
     }
 }

@@ -1,4 +1,9 @@
 
+import SymTable.SymbolEntry;
+import SymTable.SymbolTable;
+import Visitor.NameAnalysisVisitor;
+import Visitor.TypeCheckingVisitor;
+import Visitor.TypeDepthFirstVisitor;
 import java_cup.runtime.Symbol;
 import SyntaxTree.*;
 import Visitor.PrettyPrintVisitor;
@@ -30,11 +35,16 @@ public class FrontEnd {
             // that is what the parser will report
             Program minJProgram = (Program)parse_tree.value;
 
-            PrettyPrintVisitor visitor = new PrettyPrintVisitor();
 
-            // Visit is being given the start symbol, which
-            // will now go and properly print everything.
+            // Symbol table constructed
+            SymbolTable compilerTable = new SymbolTable(minJProgram);
+
+            NameAnalysisVisitor visitor = new NameAnalysisVisitor(compilerTable);
             visitor.visit(minJProgram);
+
+            TypeCheckingVisitor typeVisir = new TypeCheckingVisitor(compilerTable);
+            typeVisir.visit(minJProgram);
+            // now we can use our samme symbol table
 
 
         } catch (FileNotFoundException e) {
@@ -43,8 +53,6 @@ public class FrontEnd {
             e.printStackTrace();
         }
 
-
         // Exit
-
     }
 }

@@ -233,7 +233,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
             // Checks variable decls for duplicate names
             for (int i = 0; i < n.vl.size(); i++) {
                 if (current.hasEntry(n.vl.elementAt(i).i.toString(), SymbolTable.LEAF_ENTRY)) {
-                    Errors.multiplyDefinedError(n.vl.elementAt(i).lineNum(), n.vl.elementAt(i).charNum(), n.fl.elementAt(i).i.s);
+                    Errors.multiplyDefinedError(n.vl.elementAt(i).lineNum(), n.vl.elementAt(i).charNum(), n.vl.elementAt(i).i.s);
 
                 } else {
                     current.putVariable(n.vl.elementAt(i));

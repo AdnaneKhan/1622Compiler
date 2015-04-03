@@ -3,8 +3,7 @@ package IR;
 
 import SymTable.TableEntry;
 
-public class
-        Return3AC extends ThreeAddressStatement {
+public class Return3AC extends ThreeAddressStatement {
     private TableEntry returnVar;
 
     public Return3AC(TableEntry toReturn) {

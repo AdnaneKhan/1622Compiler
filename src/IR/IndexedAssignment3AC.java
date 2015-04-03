@@ -2,8 +2,7 @@ package IR;
 
 import SymTable.TableEntry;
 
-public class
-        IndexedAssignment3AC extends ThreeAddressStatement {
+public class IndexedAssignment3AC extends ThreeAddressStatement {
     TableEntry lhsVar;
     TableEntry arrayVar;
     TableEntry index;

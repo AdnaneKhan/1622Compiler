@@ -1,8 +1,8 @@
 package IR;
 
-abstract class ThreeAddressStatement {
+public class Quadruple {
 
-    public final static int ASSIGNMENT = 1;
+	public final static int ASSIGNMENT = 1;
     public final static int UNARY_ASSIGNMENT= 2;
     public final static int COPY = 3;
     public final static int UNCONDITIONAL_JUMP = 4;
@@ -15,10 +15,16 @@ abstract class ThreeAddressStatement {
     public final static int NEW_ARRAY = 11;
     public final static int LENGTH_3AC = 12;
 
-    /**
-     *
-     * @return type of the statement (human readable, for debugging, etc)
-     */
-    public abstract String statementType();
+	TableEntry arg1;
+	TableEntry arg2;
+	String op;
+	TableEntry result;
+	int type;
+
+	public Quadruple(int type) {
+		arg1 = NULL;
+		arg2 = NULL;
+		result = NULL;
+	}
 
 }
