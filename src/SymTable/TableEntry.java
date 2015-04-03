@@ -92,8 +92,8 @@ public abstract  class TableEntry {
         TableEntry cursor =this;
 
         do {
-            if (this.entryType() != LEAF_ENTRY) {
-                retV = this.hash.get(new KeyWrapper(key,entry_type));
+            if (cursor.entryType() != LEAF_ENTRY) {
+                retV = cursor.hash.get(new KeyWrapper(key,entry_type));
                 if (retV != null) {
                     break;
                 }
@@ -117,8 +117,8 @@ public abstract  class TableEntry {
 
         do {
 
-           if (this.entryType() != LEAF_ENTRY) {
-                TableEntry val = this.hash.get(new KeyWrapper(key,entry_type));
+           if (cursor.entryType() != LEAF_ENTRY) {
+                TableEntry val = cursor.hash.get(new KeyWrapper(key,entry_type));
                if (val != null) {
                    found = true;
                    break;

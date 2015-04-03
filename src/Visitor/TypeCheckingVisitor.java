@@ -15,38 +15,6 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         base = toUse;
     }
 
-    /**
-     * Simple utility memthods checks the actual object and gets teh idenifier ffrom it
-     *
-     * @param toExtract abstract class declaration
-     * @return name of class
-     */
-    private String extractClassName(ClassDecl toExtract) {
-
-        String className;
-        if (toExtract instanceof ClassDeclSimple) {
-            className = ((ClassDeclSimple) toExtract).i.toString();
-        } else {
-            className = ((ClassDeclExtends) toExtract).i.toString();
-        }
-        return className;
-    }
-
-
-
-    private Type extractDeclName(ASTNode declOrFormal) {
-        Type returnType = null;
-        if ( declOrFormal instanceof Formal) {
-            returnType = ((Formal) declOrFormal).t;
-        } else if ( declOrFormal instanceof VarDecl) {
-            returnType = ((VarDecl) declOrFormal).t;
-
-        } else {
-            System.err.println("PROBLEM WITH PROGRAM, SHOULD NEVER PASS NON DECL NODE");
-        }
-        return returnType;
-    }
-
     // MainClass m;
     // ClassDeclList cl;
     public Type visit(Program n) {
@@ -216,7 +184,12 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
     // Exp e;
     public Type visit(Print n) {
-        n.e.accept(this);
+        Type check = n.e.accept(this);
+
+        if (!(check instanceof IntArrayType)) {
+            Errors.typeMismatch(n.e.lineNum(),n.e.charNum());
+        }
+        
         return null;
     }
 
@@ -235,9 +208,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
             Errors.assignFromMethodClass(n.e.lineNum(), n.e.charNum(), n.e.toString(), ((IdentifierType) eRet).s);
         }
 
-        else if ( ret != null && eRet != null && !ret.getClass().equals(eRet.getClass())){
-            System.out.println(ret);
-            System.out.println(eRet);
+        else if (!ret.getClass().equals(eRet.getClass())){
               Errors.typeMismatch(n.i.lineNum(),n.i.charNum());
         }
 
@@ -247,12 +218,14 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     // Identifier i;
     // Exp e1,e2;
     public Type visit(ArrayAssign n) {
-
-
         // Look up ID in symbol table to ensure it is an integer array
 
         n.i.accept(this);
-
+        Type toCheck = ((SymbolEntry) base.getCurrentScope().getEntryWalk(n.i.s,TableEntry.LEAF_ENTRY)).getType();
+        // If the type is not an instancce of int array
+        if (!(toCheck instanceof IntArrayType)) {
+            Errors.typeMismatch(n.lineNum(),n.charNum());
+        }
 
         Type checkLhs = n.e1.accept(this);
 
@@ -260,7 +233,11 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         if (!(checkRhs instanceof IntegerType)) {
             Errors.typeMismatch(n.e2.lineNum(),n.e2.charNum());
         }
-        return null;
+
+        if (!(checkLhs instanceof IntegerType)) {
+            Errors.typeMismatch(n.e1.lineNum(),n.e1.charNum());
+        }
+        return new IntArrayType();
     }
 
     // Exp e1,e2;
@@ -282,7 +259,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         Type ret1 = n.e1.accept(this);
         Type ret2 = n.e2.accept(this);
 
-        if (ret1 != null && ret2 != null &&!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
+        if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
             Errors.nonIntegerOperand(n.lineNum(),n.charNum(),'<');
         }
 
@@ -294,7 +271,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         Type ret1 = n.e1.accept(this);
         Type ret2 = n.e2.accept(this);
 
-        if (ret1 != null && ret2 != null &&!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
+        if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
             Errors.nonIntegerOperand(n.lineNum(),n.charNum(),'+');
         }
 
@@ -306,7 +283,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         Type ret1 = n.e1.accept(this);
         Type ret2 = n.e2.accept(this);
 
-        if ( ret1 != null && ret2 != null && !(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
+        if ( !(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
             Errors.nonIntegerOperand(n.lineNum(),n.charNum(),'-');
         }
 
@@ -468,7 +445,13 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
     // Exp e;
     public Type visit(Not n) {
-        n.e.accept(this);
+        Type toCheck = n.e.accept(this);
+
+        if (! (toCheck instanceof BooleanType)) {
+            Errors.nonBooleanOperand(n.e.lineNum(),n.e.charNum(),"!");
+        }
+
+
         return new BooleanType();
     }
 
@@ -476,16 +459,17 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     public Type visit(Identifier n) {
         Type retV = null;
 
-
-
-        if (base.getCurrentScope().hasEntry(n.s,TableEntry.METHOD_ENTRY)) {
-            MethodTable typeVar = (MethodTable) base.getCurrentScope().getEntry(n.s,TableEntry.LEAF_ENTRY);
+        if (base.getCurrentScope().hasEntry(n.s, TableEntry.METHOD_ENTRY)) {
+            MethodTable typeVar = (MethodTable) base.getCurrentScope().getEntry(n.s, TableEntry.METHOD_ENTRY);
             retV = typeVar.getRetType();
-        }
-
-        if (base.getCurrentScope().hasEntry(n.s,TableEntry.LEAF_ENTRY)) {
-           SymbolEntry typeVar = (SymbolEntry) base.getCurrentScope().getEntry(n.s,TableEntry.LEAF_ENTRY);
+        } else if (base.getCurrentScope().hasEntryWalk(n.s,TableEntry.LEAF_ENTRY)) {
+           SymbolEntry typeVar = (SymbolEntry) base.getCurrentScope().getEntryWalk(n.s,TableEntry.LEAF_ENTRY);
            retV = typeVar.getType();
+        } else {
+            // We don't know the type, so we lie and create fake ID
+            // We use a string that can not be used as a valid type
+            // as to avoid any conflicts
+            retV = new IdentifierType(":UNKNOWN_TYPE:",n.lineNum(),n.charNum() );
         }
 
         return retV;

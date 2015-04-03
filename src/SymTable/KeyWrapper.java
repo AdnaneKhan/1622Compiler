@@ -27,7 +27,7 @@ public class KeyWrapper {
 
 
     public boolean equals(Object toCheck) {
-        if (toCheck instanceof KeyWrapper && this.type == ((KeyWrapper) toCheck).type && this.toHash.equals(((KeyWrapper) toCheck).toHash)) {
+        if ((toCheck instanceof KeyWrapper) && (this.type == ((KeyWrapper) toCheck).type) && this.toHash.equals(((KeyWrapper) toCheck).toHash)) {
             return true;
         }
         return false;
