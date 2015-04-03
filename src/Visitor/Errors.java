@@ -14,11 +14,11 @@ public abstract class Errors {
     }
 
     public static void classMethodAssign(int line, int column, String id1, String id2) {
-        System.out.println("Invalid l-value, " + id1 + " is a " + id1 + ", at line " + line + ", character " + column);
+        System.out.println("Invalid l-value, " + id1 + " is a " + id2 + ", at line " + line + ", character " + column);
     }
 
     public static void assignFromMethodClass(int line, int column, String id1, String id2) {
-        System.out.println("Invalid r-value, " + id1 + " is a " + id1 + ", at line " + line + ", character " + column);
+        System.out.println("Invalid r-value, " + id1 + " is a " + id2 + ", at line " + line + ", character " + column);
     }
 
     public static void methClassOp(int line, int column, String id) {

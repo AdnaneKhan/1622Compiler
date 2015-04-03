@@ -207,11 +207,11 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
             Errors.assignFromMethodClass(n.e.lineNum(), n.e.charNum(), n.e.toString(), ((IdentifierType) eRet).s);
         }
 
-        else if ( !ret.getClass().equals(eRet.getClass())){
+        else if ( ret != null && !ret.getClass().equals(eRet.getClass())){
               Errors.typeMismatch(n.i.lineNum(),n.i.charNum());
         }
 
-        return null;
+        return ret;
     }
 
     // Identifier i;
@@ -242,13 +242,9 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         // Check if type mismatch
         if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof BooleanType))) {
             Errors.nonBooleanOperand(n.lineNum(), n.charNum(), "&&");
-        } else {
-            return new BooleanType();
         }
 
-        // Check if
-
-        return null;
+        return new BooleanType();
     }
 
     // Exp e1,e2;
@@ -256,13 +252,11 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         Type ret1 = n.e1.accept(this);
         Type ret2 = n.e2.accept(this);
 
-        if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
+        if (ret1 != null && ret2 != null &&!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
             Errors.nonIntegerOperand(n.lineNum(),n.charNum(),'<');
-        } else {
-            return new BooleanType();
         }
 
-        return null;
+        return new BooleanType();
     }
 
     // Exp e1,e2;
@@ -270,13 +264,11 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         Type ret1 = n.e1.accept(this);
         Type ret2 = n.e2.accept(this);
 
-        if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
+        if (ret1 != null && ret2 != null &&!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
             Errors.nonIntegerOperand(n.lineNum(),n.charNum(),'+');
-        } else {
-            return new IntegerType();
         }
 
-        return null;
+        return new IntegerType();
     }
 
     // Exp e1,e2;
@@ -284,13 +276,11 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         Type ret1 = n.e1.accept(this);
         Type ret2 = n.e2.accept(this);
 
-        if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
+        if ( ret1 != null && ret2 != null && !(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
             Errors.nonIntegerOperand(n.lineNum(),n.charNum(),'-');
-        } else {
-            return new IntegerType();
         }
 
-        return null;
+        return new IntegerType();
     }
 
     // Exp e1,e2;
@@ -331,9 +321,12 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     // Exp e;
     // Identifier i;
     // ExpList el;
-    public Type visit(Call n) {
+    public Type visit(Call n)  {
         n.e.accept(this);
-        n.i.accept(this);
+        if (!base.hasEntryWalk(n.i.s, TableEntry.METHOD_ENTRY)) {
+                     Errors.badCall(n.i.lineNum(),n.i.charNum());
+        }
+
         for (int i = 0; i < n.el.size(); i++) {
             n.el.elementAt(i).accept(this);
         }
@@ -389,8 +382,10 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
         if (thisInMain) {
             Errors.thisInMain(n.lineNum(),n.charNum());
-
         }
+        // get current scope's class
+
+
         return null;
     }
 
@@ -402,18 +397,45 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
     // Identifier i;
     public Type visit(NewObject n) {
-        return null;
+
+        /// Check for class in this scope
+        if (base.getCurrentScope().hasEntry(n.i.s,TableEntry.CLASS_ENTRY)) {
+            /// Extract the class
+
+
+
+
+
+            // Get the identiffier type
+        }
+
+        return new IdentifierType(n.i.s,n.lineNum(),n.charNum());
     }
 
     // Exp e;
     public Type visit(Not n) {
         n.e.accept(this);
-        return null;
+        return new BooleanType();
     }
 
     // String s;
     public Type visit(Identifier n) {
-        return null;
+        Type retV = null;
+        // Look up type in symmboltable
+
+
+
+        if (base.getCurrentScope().hasEntry(n.s,TableEntry.METHOD_ENTRY)) {
+
+        }
+
+        if (base.getCurrentScope().hasEntry(n.s,TableEntry.LEAF_ENTRY)) {
+           TableEntry typeVar = base.getCurrentScope().getEntry(n.s,TableEntry.LEAF_ENTRY);
+          retV = new IdentifierType(typeVar.getSymbolName(),n.lineNum(),n.charNum());
+
+        }
+
+        return retV;
     }
 
 
