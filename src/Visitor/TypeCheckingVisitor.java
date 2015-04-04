@@ -153,7 +153,6 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         String idCheck = n.s;
 
         if (!base.hasEntry(idCheck,SymbolTable.CLASS_ENTRY) && !n.erroneous){
-            System.out.println(n.s);
             Errors.badType(n.lineNum(), n.charNum());
         }
 
@@ -382,7 +381,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
                 // If sizes of expression lists don't match print them
                 if (n.el.size() != called.size()) {
-                    Errors.argCount(n.lineNum(),n.charNum(),n.i.s);
+                    Errors.argCount(n.i.lineNum(),n.i.charNum(),n.i.s);
                 } else {
                     // If counts are the same then we iterate comparing types
                     for (int i = 0; i < n.el.size(); i++) {
@@ -391,7 +390,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
                         Type formal = called.elementAt(i).t;
 
                         if (!param.getClass().equals(formal.getClass())) {
-                            Errors.argTypeMismatch(n.el.lineNum(),n.el.charNum(),n.i.s);
+                            Errors.argTypeMismatch(n.i.lineNum(),n.i.charNum(),n.i.s);
                         }
                     }
                 }

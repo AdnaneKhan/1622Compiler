@@ -58,6 +58,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
             if (cursor instanceof ClassDeclExtends) {
                 String extendsName = ((ClassDeclExtends) cursor).j.toString();
                 if (!(base.hasEntry(extendsName, SymbolTable.CLASS_ENTRY))) {
+
                     Errors.identifierError(cursor.lineNum(), cursor.charNum(), className);
 
                 } else {
@@ -226,12 +227,12 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
 
             // Checks formal list for duplicate variable names
             for (int i = 0; i < n.fl.size(); i++) {
-                if (current.hasEntry(n.fl.elementAt(i).i.toString(), SymbolTable.LEAF_ENTRY)) {
-                    Errors.multiplyDefinedError(n.fl.elementAt(i).lineNum(), n.fl.elementAt(i).charNum(), n.fl.elementAt(i).i.s);
-                } else {
-                    current.putVariable(n.fl.elementAt(i));
-                    n.fl.elementAt(i).accept(this);
-                }
+                    if (current.hasEntry(n.fl.elementAt(i).i.toString(), SymbolTable.LEAF_ENTRY)) {
+                        Errors.multiplyDefinedError(n.fl.elementAt(i).lineNum(), n.fl.elementAt(i).charNum(), n.fl.elementAt(i).i.s);
+                    } else {
+                        current.putVariable(n.fl.elementAt(i));
+                        n.fl.elementAt(i).accept(this);
+                    }
             }
 
             // Checks variable decls for duplicate names
@@ -268,8 +269,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
             identifierFound = true;
         }
 
-
-        if (!identifierFound) {
+        if (!identifierFound && !n.erroneous) {
             Errors.identifierError(n.lineNum(), n.charNum(), n.s);
         }
     }
