@@ -240,7 +240,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
                   if( node instanceof ClassDeclExtends) {
                       // We can now check if the class declaration on the rhs extends the left
                       Identifier superId = ((ClassDeclExtends) node).j;
-                      if (!superId.equals(((IdentifierType) ret).s)) {
+                      if (!superId.s.equals(((IdentifierType) ret).s)) {
                           Errors.typeMismatch(n.i.lineNum(),n.i.charNum());
                       }
 
@@ -377,10 +377,8 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     // Exp e1,e2;
     public Type visit(ArrayLookup n) {
 
-
-        Type ret1 = n.e1.accept(this);
-        Type ret2 = n.e2.accept(this);
-
+        n.e1.accept(this);
+        n.e2.accept(this);
 
         return new IntegerType();
     }
@@ -406,7 +404,19 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         if (callObject instanceof IdentifierType) {
             String callClass = ((IdentifierType) callObject).s;
             ClassTable toCheck = base.getClassTable(callClass);
-            if (toCheck != null && toCheck.hasEntry(n.i.s,TableEntry.METHOD_ENTRY)) {
+            ClassDecl actualNode = (ClassDecl) toCheck.getNode();
+            MethodTable toLookup;
+
+            // first try child
+            toLookup = (MethodTable) toCheck.getEntry(n.i.s,TableEntry.METHOD_ENTRY);
+            // Check if toCheck has a super class
+            if (toLookup == null && actualNode instanceof ClassDeclExtends) {
+                    TableEntry superTable = base.getEntry(((ClassDeclExtends)actualNode).j.s, TableEntry.CLASS_ENTRY);
+                    toLookup = (MethodTable) superTable.getEntry(n.i.s,TableEntry.METHOD_ENTRY);
+            }
+
+            // If we found a method
+            if (toLookup != null) {
                 MethodTable calling = (MethodTable) toCheck.getEntry(n.i.s,TableEntry.METHOD_ENTRY);
 
                 // Now we get the type associated with the methid
@@ -430,7 +440,6 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
                 }
             } else {
                 Errors.badCall(n.i.lineNum(),n.i.charNum());
-
             }
         } else  if (!base.hasEntryWalk(n.i.s, TableEntry.METHOD_ENTRY)) {
             Errors.badCall(n.i.lineNum(),n.i.charNum());
@@ -439,7 +448,6 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
             for (int i = 0; i < n.el.size(); i++) {
                 n.el.elementAt(i).accept(this);
             }
-
         }
 
         // Don't return null
@@ -532,19 +540,19 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
     // Identifier i;
     public Type visit(NewObject n) {
-
-        /// Check for class in this scope
-        if (base.hasEntry(n.i.s,TableEntry.CLASS_ENTRY)) {
-            /// Extract the class
-            ClassTable toCheck = base.getClassTable(n.i.s);
-
-
-
-            // Check the nummber
-
-
-            // Get the identiffier type
-        }
+//
+//        /// Check for class in this scope
+//        if (base.hasEntry(n.i.s,TableEntry.CLASS_ENTRY)) {
+//            /// Extract the class
+//            ClassTable toCheck = base.getClassTable(n.i.s);
+//
+//
+//
+//            // Check the
+//
+//
+//            // Get the identiffier type
+//        }
 
         return new IdentifierType(n.i.s,n.lineNum(),n.charNum());
     }
@@ -558,7 +566,6 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         if (! (toCheck instanceof BooleanType)) {
             Errors.nonBooleanOperand(n.e.lineNum(),n.e.charNum(),"!");
         }
-
 
         return new BooleanType();
     }

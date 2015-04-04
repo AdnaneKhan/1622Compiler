@@ -1,5 +1,4 @@
 
-import SymTable.SymbolEntry;
 import SymTable.SymbolTable;
 import Visitor.*;
 import java_cup.runtime.Symbol;

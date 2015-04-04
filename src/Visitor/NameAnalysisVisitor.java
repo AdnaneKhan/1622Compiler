@@ -267,9 +267,9 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
     public void visit(IdentifierType n) {
         boolean identifierFound = false;
 
-        // While the parent isn't null and the identifier is not found
 
-        // Check the keys for the identifier, if found set to true, else ascend scope
+        // Check the base scope for the existence of a class with
+        // The same identifier
         if (base.hasEntry(n.s, SymbolTable.CLASS_ENTRY)) {
             identifierFound = true;
         }
