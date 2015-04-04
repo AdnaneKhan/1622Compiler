@@ -3,6 +3,7 @@ package Visitor;
 import SymTable.*;
 import SyntaxTree.*;
 import IR.*;
+import java.util.ArrayList;
 
 public class IRGeneratorVisitor implements Visitor {
 
@@ -27,16 +28,18 @@ public class IRGeneratorVisitor implements Visitor {
             n.cl.elementAt(i).accept(this);
         }
 
+        System.out.println("soup");
         for (int i = 0; i<methods.size(); i++) {
             methods.get(i).toString();
         }
+        System.out.println("Howdy");
 
     }
 
     // Identifier i1,i2;
     // Statement s;
     public void visit(MainClass n) {
-        base.descend(n.i1.s,SymbolTable.CLASS_ENTRY);
+        base.descendScope(n.i1.s, SymbolTable.CLASS_ENTRY);
 
         currentMethod = new IRMethod("main"); 
         n.i1.accept(this);
@@ -126,13 +129,13 @@ public class IRGeneratorVisitor implements Visitor {
         n.i.accept(this);
     }
 
-    public String visit(IntArrayType n) {
+    public void visit(IntArrayType n) {
     }
 
-    public String visit(BooleanType n) {
+    public void visit(BooleanType n) {
     }
 
-    public String visit(IntegerType n) {
+    public void visit(IntegerType n) {
     }
 
     // String s;
@@ -169,10 +172,10 @@ public class IRGeneratorVisitor implements Visitor {
     // Identifier i;
     // Exp e;
     public void visit(Assign n) {
-        if (currentQuad.op == "") {
+        if (currentQuad.op.equals("")) {
             currentQuad.type = Quadruple.COPY;
         }
-        else if (currentQuad.arg2 == "") {
+        else if (currentQuad.arg2.equals("")) {
             currentQuad.type = Quadruple.UNARY_ASSIGNMENT;
         }
         else {
@@ -208,7 +211,7 @@ public class IRGeneratorVisitor implements Visitor {
 
     // Exp e1,e2;
     public void visit(Plus n) {
-        curretQuad.op = "+";
+        currentQuad.op = "+";
         n.e1.accept(this);
         n.e2.accept(this);
     }
@@ -255,10 +258,11 @@ public class IRGeneratorVisitor implements Visitor {
 
     // int i;
     public void visit(IntegerLiteral n) {
-        if (arg1 != "") {
+        if (currentQuad.arg1 != "") {
             currentQuad.arg2 = Integer.toString(n.i);
             currentQuad.result = "_t" + tempNum;
             currentMethod.add(currentQuad);
+            System.out.println("ADDED!");
             currentQuad = new Quadruple();
             currentQuad.arg1 = "_t" + tempNum;
             tempNum++;
@@ -277,10 +281,11 @@ public class IRGeneratorVisitor implements Visitor {
 
     // String s;
     public void visit(IdentifierExp n) {
-        if (arg1 != "") {
+        if (currentQuad.arg1 != "") {
             currentQuad.arg2 = n.s;
             currentQuad.result = "_t" + tempNum;
             currentMethod.add(currentQuad);
+            System.out.println("ADDED!");
             currentQuad = new Quadruple();
             currentQuad.arg1 = "_t" + tempNum;
             tempNum++;
@@ -302,6 +307,7 @@ public class IRGeneratorVisitor implements Visitor {
 
     // Identifier i;
     public void visit(NewObject n) {
+        currentQuad = new Quadruple();
         currentQuad.type = Quadruple.NEW_3AC;
         currentQuad.arg1 = n.i.s;
     }
@@ -313,5 +319,10 @@ public class IRGeneratorVisitor implements Visitor {
 
     // String s;
     public void visit(Identifier n) {
+    }
+
+    public void visit(ErroneousStatement n) {
+    }
+    public void visit(ErroneousClassDecl n) {
     }
 }

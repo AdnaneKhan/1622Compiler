@@ -4,6 +4,7 @@ import SymTable.SymbolTable;
 import Visitor.NameAnalysisVisitor;
 import Visitor.TypeCheckingVisitor;
 import Visitor.TypeDepthFirstVisitor;
+import Visitor.IRGeneratorVisitor;
 import java_cup.runtime.Symbol;
 import SyntaxTree.*;
 import Visitor.PrettyPrintVisitor;
@@ -45,6 +46,9 @@ public class FrontEnd {
             TypeCheckingVisitor typeVisir = new TypeCheckingVisitor(compilerTable);
             typeVisir.visit(minJProgram);
             // now we can use our samme symbol table
+
+            IRGeneratorVisitor irVisitor = new IRGeneratorVisitor(compilerTable);
+            irVisitor.visit(minJProgram);
 
 
         } catch (FileNotFoundException e) {

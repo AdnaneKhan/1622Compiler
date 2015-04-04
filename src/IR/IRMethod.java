@@ -1,6 +1,6 @@
 package IR;
 
-import SymTable.TableEntry;
+import java.util.ArrayList;
 
 import java.lang.Override;
 
@@ -17,7 +17,7 @@ public class IRMethod {
         return lines.size();
     }
 
-    public add(Quadruple x) {
+    public void add(Quadruple x) {
         lines.add(x);
     }
 
@@ -25,10 +25,12 @@ public class IRMethod {
      *
      * @return the 3AC representation in string form to be outputted in the 3AC generation
      */
+    @Override
     public String toString() {
         String ret = "";
         for (int i = 0; i < this.getLength(); i++) {
             ret += lines.get(i).toString() + "\n";
         }
+        return ret;
     }
 }

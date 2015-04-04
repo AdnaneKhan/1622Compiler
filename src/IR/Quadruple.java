@@ -16,30 +16,34 @@ public class Quadruple {
     public final static int LENGTH_3AC = 12;
     public final static int PRINT = 13;
 
-	String arg1;
-	String arg2;
-	String op;
-	String result;
-	int type;
+	public String arg1;
+	public String arg2;
+	public String op;
+	public String result;
+	public int type;
 
 	public Quadruple() {
 		arg1 = "";
 		arg2 = "";
 		op = "";
 		result = "";
-		type = "";
+		type = 0;
 	}
 
+    @Override
 	public String toString() {
+        String ret = "";
 		if (this.type == 1) {
-			return result " := " + arg1 + op + arg2;
+			ret = result + " := " + arg1 + op + arg2;
 		}
 		else if (this.type == 2) {
-			return result " := " + op + arg1;
+			ret = result + " := " + op + arg1;
 		}
 		else if (this.type == 3) {
-			return result " := " + arg1;
+			ret = result + " := " + arg1;
 		}
+
+        return ret;
 	}
 
 }

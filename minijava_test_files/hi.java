@@ -11,6 +11,7 @@ class Fac {
 		int y;
 		x = 1 + 2 + 3;
 		y = x;
+        return 2;
     }
 
 }
