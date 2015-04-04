@@ -15,6 +15,19 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         base = toUse;
     }
 
+    private void classOpCheck(Type toCheck, Exp e) {
+        if (toCheck instanceof IdentifierType) {
+            if (e instanceof IdentifierExp) {
+                String nameCheck = ((IdentifierExp) e).s;
+
+                if (base.getCurrentScope().hasEntryWalk(nameCheck,SymbolEntry.CLASS_ENTRY) ||
+                        base.getCurrentScope().hasEntryWalk(nameCheck, SymbolEntry.METHOD_ENTRY)) {
+                    Errors.methClassOp(e.lineNum(),e.charNum(),nameCheck);
+                }
+            }
+        }
+    }
+
     // MainClass m;
     // ClassDeclList cl;
     public Type visit(Program n) {
@@ -139,7 +152,8 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         // Look up this string in the symbol table
         String idCheck = n.s;
 
-        if (!base.hasEntry(idCheck,SymbolTable.CLASS_ENTRY)){
+        if (!base.hasEntry(idCheck,SymbolTable.CLASS_ENTRY) && !n.erroneous){
+            System.out.println(n.s);
             Errors.badType(n.lineNum(), n.charNum());
         }
 
@@ -186,7 +200,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     public Type visit(Print n) {
         Type check = n.e.accept(this);
 
-        if (!(check instanceof IntArrayType)) {
+        if (!(check instanceof IntegerType)) {
             Errors.typeMismatch(n.e.lineNum(),n.e.charNum());
         }
 
@@ -245,6 +259,9 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         Type ret1 = n.e1.accept(this);
         Type ret2 = n.e2.accept(this);
 
+        // Check if we are trying to operate on method or class
+        classOpCheck(ret1, n.e1);
+        classOpCheck(ret2,n.e2);
 
         // Check if type mismatch
         if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof BooleanType))) {
@@ -259,6 +276,10 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         Type ret1 = n.e1.accept(this);
         Type ret2 = n.e2.accept(this);
 
+        // Check if we are trying to operate on method or class
+        classOpCheck(ret1, n.e1);
+        classOpCheck(ret2,n.e2);
+
         if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
             Errors.nonIntegerOperand(n.lineNum(),n.charNum(),'<');
         }
@@ -271,6 +292,12 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         Type ret1 = n.e1.accept(this);
         Type ret2 = n.e2.accept(this);
 
+
+        // Check if we are trying to operate on method or class
+        classOpCheck(ret1, n.e1);
+        classOpCheck(ret2,n.e2);
+
+
         if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
             Errors.nonIntegerOperand(n.lineNum(),n.charNum(),'+');
         }
@@ -282,6 +309,12 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     public Type visit(Minus n) {
         Type ret1 = n.e1.accept(this);
         Type ret2 = n.e2.accept(this);
+
+
+        // Check if we are trying to operate on method or class
+        classOpCheck(ret1, n.e1);
+        classOpCheck(ret2,n.e2);
+
 
         if ( !(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
             Errors.nonIntegerOperand(n.lineNum(),n.charNum(),'-');
@@ -296,6 +329,10 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
         Type ret1 = n.e1.accept(this);
         Type ret2 = n.e2.accept(this);
+
+        // Check if we are trying to operate on method or class
+        classOpCheck(ret1, n.e1);
+        classOpCheck(ret2,n.e2);
 
         if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
             Errors.nonIntegerOperand(n.lineNum(),n.charNum(),'*');
@@ -407,7 +444,10 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
             toRet.methClass = true;
             returnVal = toRet;
         } else {
-             returnVal = new IdentifierType(":ERROR",n.lineNum(),n.charNum());
+             IdentifierType temp = new IdentifierType(":ERROR:",n.lineNum(),n.charNum());
+            temp.erroneous = true;
+
+            returnVal = temp;
         }
 
         return returnVal;
@@ -469,6 +509,8 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     public Type visit(Not n) {
         Type toCheck = n.e.accept(this);
 
+        classOpCheck(toCheck,n.e);
+
         if (! (toCheck instanceof BooleanType)) {
             Errors.nonBooleanOperand(n.e.lineNum(),n.e.charNum(),"!");
         }
@@ -491,7 +533,9 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
             // We don't know the type, so we lie and create fake ID
             // We use a string that can not be used as a valid type
             // as to avoid any conflicts
-            retV = new IdentifierType(":UNKNOWN_TYPE:",n.lineNum(),n.charNum() );
+            IdentifierType temp = new IdentifierType(":UNKNOWN_TYPE:",n.lineNum(),n.charNum() );
+            temp.erroneous = true;
+            retV = temp;
         }
 
         return retV;

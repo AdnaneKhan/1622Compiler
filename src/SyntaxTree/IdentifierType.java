@@ -5,11 +5,18 @@ import Visitor.TypeVisitor;
 public class IdentifierType extends Type {
   public String s;
     public boolean methClass = false;
+    public boolean erroneous = false;
 
   public IdentifierType(String as,int col,int line) {
     s=as;
       setValues(col,line);
   }
+
+    public IdentifierType(int col,int line) {
+        setValues(col,line);
+        s = ":ERROR";
+        erroneous = true;
+    }
 
   public void accept(Visitor v) {
     v.visit(this);

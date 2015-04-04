@@ -115,12 +115,14 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
 
             // Check for duplicate variable names in class
             for (int i = 0; i < n.vl.size(); i++) {
-                if (current.hasEntry(n.vl.elementAt(i).i.toString(),SymbolTable.LEAF_ENTRY)) {
-                    Errors.multiplyDefinedError(n.vl.elementAt(i).lineNum(), n.vl.elementAt(i).charNum(), n.vl.elementAt(i).i.s);
+                if (!(n.vl.elementAt(i) instanceof ErroneousDecl)) {
+                    if (current.hasEntry(n.vl.elementAt(i).i.toString(),SymbolTable.LEAF_ENTRY)) {
+                        Errors.multiplyDefinedError(n.vl.elementAt(i).lineNum(), n.vl.elementAt(i).charNum(), n.vl.elementAt(i).i.s);
 
-                } else {
-                    current.putVariable(n.vl.elementAt(i));
-                    n.vl.elementAt(i).accept(this);
+                    } else {
+                        current.putVariable(n.vl.elementAt(i));
+                        n.vl.elementAt(i).accept(this);
+                    }
                 }
             }
 
@@ -166,13 +168,15 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
 
             // Check for duplicate variable names in class
             for (int i = 0; i < n.vl.size(); i++) {
-                if (current.hasEntry(n.vl.elementAt(i).i.toString(), SymbolTable.LEAF_ENTRY)) {
-                    Errors.multiplyDefinedError(n.vl.elementAt(i).lineNum(), n.vl.elementAt(i).charNum(), n.vl.elementAt(i).i.s);
-                } else {
-                    if (base.getCurrentScope().isEntry(SymbolEntry.CLASS_ENTRY)) {
-                        current.putVariable(n.vl.elementAt(i));
+                if (!(n.vl.elementAt(i) instanceof ErroneousDecl)) {
+                    if (current.hasEntry(n.vl.elementAt(i).i.toString(), SymbolTable.LEAF_ENTRY)) {
+                        Errors.multiplyDefinedError(n.vl.elementAt(i).lineNum(), n.vl.elementAt(i).charNum(), n.vl.elementAt(i).i.s);
+                    } else {
+                        if (base.getCurrentScope().isEntry(SymbolEntry.CLASS_ENTRY)) {
+                            current.putVariable(n.vl.elementAt(i));
+                        }
+                        n.vl.elementAt(i).accept(this);
                     }
-                    n.vl.elementAt(i).accept(this);
                 }
             }
 
@@ -232,12 +236,14 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
 
             // Checks variable decls for duplicate names
             for (int i = 0; i < n.vl.size(); i++) {
-                if (current.hasEntry(n.vl.elementAt(i).i.toString(), SymbolTable.LEAF_ENTRY)) {
-                    Errors.multiplyDefinedError(n.vl.elementAt(i).lineNum(), n.vl.elementAt(i).charNum(), n.vl.elementAt(i).i.s);
+                if (!(n.vl.elementAt(i) instanceof ErroneousDecl)) {
+                    if (current.hasEntry(n.vl.elementAt(i).i.toString(), SymbolTable.LEAF_ENTRY)) {
+                        Errors.multiplyDefinedError(n.vl.elementAt(i).lineNum(), n.vl.elementAt(i).charNum(), n.vl.elementAt(i).i.s);
 
-                } else {
-                    current.putVariable(n.vl.elementAt(i));
-                    n.vl.elementAt(i).accept(this);
+                    } else {
+                        current.putVariable(n.vl.elementAt(i));
+                        n.vl.elementAt(i).accept(this);
+                    }
                 }
             }
 
@@ -263,7 +269,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
         }
 
 
-        if (identifierFound == false) {
+        if (!identifierFound) {
             Errors.identifierError(n.lineNum(), n.charNum(), n.s);
         }
     }
@@ -313,7 +319,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
             }
         }
 
-        if (identifierFound == false) {
+        if (!identifierFound) {
             Errors.identifierError(n.i.lineNum(), n.i.charNum(), n.i.s);
         } else {
             n.i.accept(this);
@@ -371,7 +377,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
         boolean identifierFound = false;
 
         // While the parent isn't null and the identifier is not found
-        while (!scopeCursor.isEntry(SymbolTable.ROOT_ENTRY) && identifierFound == false) {
+        while (!scopeCursor.isEntry(SymbolTable.ROOT_ENTRY) && !identifierFound) {
 
             // Check the keys for the identifier, if found set to true, else ascend scope
             if (scopeCursor.hasEntry(n.s, SymbolTable.LEAF_ENTRY)) {

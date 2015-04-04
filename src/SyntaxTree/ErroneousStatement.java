@@ -19,7 +19,7 @@ public class ErroneousStatement extends Statement {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
     }
 
     @Override
