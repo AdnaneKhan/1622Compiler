@@ -26,7 +26,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
         String className;
         if (toExtract instanceof ClassDeclSimple) {
             className = ((ClassDeclSimple) toExtract).i.toString();
-        } else {
+        } else  {
             className = ((ClassDeclExtends) toExtract).i.toString();
         }
         return className;
@@ -39,12 +39,15 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
         // Checks that classes do not have the same name while adding them to symbol table
         for (int i = 0; i < n.cl.size(); i++) {
             ClassDecl cursor = n.cl.elementAt(i);
-            String className = extractClassName(cursor);
 
-            if (!(base.hasEntry(className,SymbolTable.CLASS_ENTRY))) {
-                base.putClass(cursor);
-            } else {
-                Errors.multiplyDefinedError(cursor.lineNum(), cursor.charNum(), className);
+            if (!cursor.erroneous) {
+                String className = extractClassName(cursor);
+
+                if (!(base.hasEntry(className,SymbolTable.CLASS_ENTRY))) {
+                    base.putClass(cursor);
+                } else {
+                    Errors.multiplyDefinedError(cursor.lineNum(), cursor.charNum(), className);
+                }
             }
         }
 
@@ -53,19 +56,21 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
 
             ClassDecl cursor = n.cl.elementAt(i);
 
-            String className = extractClassName(cursor);
+            if (!cursor.erroneous) {
+                String className = extractClassName(cursor);
 
-            if (cursor instanceof ClassDeclExtends) {
-                String extendsName = ((ClassDeclExtends) cursor).j.toString();
-                if (!(base.hasEntry(extendsName, SymbolTable.CLASS_ENTRY))) {
+                if (cursor instanceof ClassDeclExtends) {
+                    String extendsName = ((ClassDeclExtends) cursor).j.toString();
+                    if (!(base.hasEntry(extendsName, SymbolTable.CLASS_ENTRY))) {
 
-                    Errors.identifierError(cursor.lineNum(), cursor.charNum(), className);
+                        Errors.identifierError(cursor.lineNum(), cursor.charNum(), className);
 
+                    } else {
+                        cursor.accept(this);
+                    }
                 } else {
                     cursor.accept(this);
                 }
-            } else {
-                cursor.accept(this);
             }
         }
 

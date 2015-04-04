@@ -333,4 +333,8 @@ public class PrettyPrintVisitor implements Visitor {
     public void visit(ErroneousStatement n) {
         /// NO OP
     }
+
+    public void visit(ErroneousClassDecl n) {
+
+    }
 }

@@ -365,7 +365,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     // Identifier i;
     // ExpList el;
     public Type visit(Call n)  {
-        Type toReturn = null;
+        Type toReturn= null;
 
         Type callObject = n.e.accept(this);
 
@@ -394,6 +394,9 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
                         }
                     }
                 }
+            } else {
+                Errors.badCall(n.i.lineNum(),n.i.charNum());
+
             }
         } else  if (!base.hasEntryWalk(n.i.s, TableEntry.METHOD_ENTRY)) {
             Errors.badCall(n.i.lineNum(),n.i.charNum());
@@ -402,8 +405,13 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
             for (int i = 0; i < n.el.size(); i++) {
                 n.el.elementAt(i).accept(this);
             }
+
         }
 
+        // Don't return null
+        if (toReturn == null) {
+            toReturn = new IdentifierType(n.i.lineNum(),n.i.charNum());
+        }
 
         return toReturn;
     }
@@ -423,7 +431,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
     // String s;
     public Type visit(IdentifierExp n) {
-        Type returnVal = null;
+        Type returnVal;
 
         TableEntry entry = base.getCurrentScope().getEntryWalk(n.s,TableEntry.LEAF_ENTRY);
 

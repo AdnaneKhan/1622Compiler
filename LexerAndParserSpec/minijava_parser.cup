@@ -110,7 +110,7 @@ ClassDeclList ::=  ClassDeclList:cdl ClassDecl:cd {: cdl.addElement(cd); RESULT 
 
 ClassDecl ::= CLASS ID:name LEFT_CURLY VarDeclList:v MethodDeclList:mdl RIGHT_CURLY {: RESULT = new ClassDeclSimple(name,v,mdl,nameleft,nameright); :}
         | CLASS ID:name EXTENDS ID:parent LEFT_CURLY VarDeclList:v MethodDeclList:mdl RIGHT_CURLY {: RESULT = new ClassDeclExtends(name,parent,v,mdl,nameleft,nameright); :}
-        | error:e RIGHT_CURLY {: parser.printError(eleft, eright);  :}
+        | error:e RIGHT_CURLY {: parser.printError(eleft, eright); RESULT = new ErroneousClassDecl();  :}
         ;
 
 VarDeclList ::= VarDeclList:vdl VarDecl:vd  {: vdl.addElement(vd); RESULT = vdl; :}
@@ -170,7 +170,7 @@ Exp ::=  Exp:e PLUS Exp:e1 {: RESULT = new Plus(e,e1,eleft,eright); :}
        | Exp:e AND Exp:e1 {: RESULT = new And(e,e1,eleft,eright); :}
        | Exp:e LEFT_B Exp:e1 RIGHT_B {: RESULT = new ArrayLookup(e,e1,eleft,eright); :}
        | Exp:e DOT LENGTH {: RESULT = new ArrayLength(e,eleft,eright); :}
-       | Exp:e DOT ID:i ExpSeparate:el {: RESULT = new Call(e,i,el,eleft,eright); :}
+       | Exp:e DOT ID:i ExpSeparate:el {: RESULT = new Call(e,i,el,ileft,iright); :}
        | INTEGER_LITERAL:i {: RESULT = new IntegerLiteral(i,ileft,iright);  :}
        | TRUE {: RESULT = new True(); :}
        | FALSE {: RESULT = new False(); :}

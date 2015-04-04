@@ -72,4 +72,6 @@ public interface TypeVisitor {
     public Type visit(Identifier n);
 
     public Type visit(ErroneousStatement n);
+
+    public Type visit(ErroneousClassDecl n);
 }
