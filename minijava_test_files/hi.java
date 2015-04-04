@@ -7,6 +7,8 @@ class Factorial{
 class Fac {
 
     public int ComputeFac(int num){
+		int x;
+		int y;
 		x = 1 + 2 + 3;
 		y = x;
     }

@@ -242,6 +242,11 @@ public class IRGeneratorVisitor implements Visitor {
     // ExpList el;
     public void visit(Call n) {
         n.e.accept(this);
+        if (currentQuad.type == Quadruple.NEW_3AC) {
+            currentQuad.result = "_t" + tempNum;
+            currentMethod.add(currentQuad);
+            currentQuad = new Quadruple();
+        }
         n.i.accept(this);
         for (int i = 0; i < n.el.size(); i++) {
             n.el.elementAt(i).accept(this);
@@ -283,6 +288,7 @@ public class IRGeneratorVisitor implements Visitor {
         else {
             currentQuad = new Quadruple();
             currentQuad.arg1 = n.s;
+            currentQuad.op = "new";
         }
     }
 
@@ -297,7 +303,7 @@ public class IRGeneratorVisitor implements Visitor {
     // Identifier i;
     public void visit(NewObject n) {
         currentQuad.type = Quadruple.NEW_3AC;
-        currentQuad.arg2 = n.i.s;
+        currentQuad.arg1 = n.i.s;
     }
 
     // Exp e;
