@@ -14,17 +14,32 @@ public class Quadruple {
     public final static int NEW_3AC = 10;
     public final static int NEW_ARRAY = 11;
     public final static int LENGTH_3AC = 12;
+    public final static int PRINT = 13;
 
-	TableEntry arg1;
-	TableEntry arg2;
+	String arg1;
+	String arg2;
 	String op;
-	TableEntry result;
+	String result;
 	int type;
 
-	public Quadruple(int type) {
-		arg1 = NULL;
-		arg2 = NULL;
-		result = NULL;
+	public Quadruple() {
+		arg1 = "";
+		arg2 = "";
+		op = "";
+		result = "";
+		type = "";
+	}
+
+	public String toString() {
+		if (this.type == 1) {
+			return result " := " + arg1 + op + arg2;
+		}
+		else if (this.type == 2) {
+			return result " := " + op + arg1;
+		}
+		else if (this.type == 3) {
+			return result " := " + arg1;
+		}
 	}
 
 }
