@@ -17,15 +17,18 @@ Implementation Details:
 ------------
  
  The compiler is built using JFlex as a lexer, JavaCUP as a parser generator. The AST Nodes are provided as part of
- the Modern Compiler Implemmentation in Java textbook. The nodes have been modified to include line and colummn information
+ the Modern Compiler Implementation in Java textbook. The nodes have been modified to include line and column information
  for purposes of error reporting.
+ 
+ In addition to this nodes that represent parse errors have been added. This allows name analysis and type checking to continue
+ in cases where pare errors were recovered from.
 
 Project Progress:
 -----------
 
-Parser Errors [ ]
-Name Analysis [ ]
-Type Checking [ ]
+Parser Errors [ x ]
+Name Analysis [ x ]
+Type Checking [  ]
 
     Symbol Table Generation:
 
