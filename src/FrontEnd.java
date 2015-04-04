@@ -31,9 +31,7 @@ public class FrontEnd {
             // Since we defined the root non terminal as the executable
             // that is what the parser will report
             Program minJProgram = (Program)parse_tree.value;
-
-            PrettyIRMaker visi = new PrettyIRMaker();
-            visi.visit(minJProgram);
+            
             // Symbol table constructed
             SymbolTable compilerTable = new SymbolTable(minJProgram);
 
