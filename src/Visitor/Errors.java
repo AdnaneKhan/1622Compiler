@@ -7,9 +7,8 @@ package Visitor;
 public abstract class Errors {
     public static void identifierError(int line, int column, String name) {
 
-        if (!name.equals(":ERROR:")){
             System.out.println("Use of undefined identifier " + name + " at line " + line + ", character " + column);
-        }
+
     }
 
     public static void multiplyDefinedError(int line, int column, String name) {

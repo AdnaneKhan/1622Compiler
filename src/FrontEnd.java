@@ -31,7 +31,7 @@ public class FrontEnd {
             // Since we defined the root non terminal as the executable
             // that is what the parser will report
             Program minJProgram = (Program)parse_tree.value;
-            
+
             // Symbol table constructed
             SymbolTable compilerTable = new SymbolTable(minJProgram);
 
