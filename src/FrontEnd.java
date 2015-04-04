@@ -1,12 +1,9 @@
 
 import SymTable.SymbolEntry;
 import SymTable.SymbolTable;
-import Visitor.NameAnalysisVisitor;
-import Visitor.TypeCheckingVisitor;
-import Visitor.TypeDepthFirstVisitor;
+import Visitor.*;
 import java_cup.runtime.Symbol;
 import SyntaxTree.*;
-import Visitor.PrettyPrintVisitor;
 
 import java.io.*;
 
@@ -35,7 +32,8 @@ public class FrontEnd {
             // that is what the parser will report
             Program minJProgram = (Program)parse_tree.value;
 
-
+            PrettyIRMaker visi = new PrettyIRMaker();
+            visi.visit(minJProgram);
             // Symbol table constructed
             SymbolTable compilerTable = new SymbolTable(minJProgram);
 
