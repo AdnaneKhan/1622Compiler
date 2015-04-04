@@ -33,13 +33,13 @@ public class Quadruple {
     @Override
 	public String toString() {
         String ret = "";
-		if (this.type == 1) {
+		if (type == 1) {
 			ret = result + " := " + arg1 + op + arg2;
 		}
-		else if (this.type == 2) {
+		else if (type == 2) {
 			ret = result + " := " + op + arg1;
 		}
-		else if (this.type == 3) {
+		else if (type == 3) {
 			ret = result + " := " + arg1;
 		}
 

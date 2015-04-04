@@ -12,13 +12,28 @@ public class IRGeneratorVisitor implements Visitor {
 	IRMethod currentMethod;
     Quadruple currentQuad;
 
+    ArrayList<Quadruple> quadstack;
+
     int tempNum = 0;
 
 
 	public IRGeneratorVisitor(SymbolTable toUse) {
 		base = toUse;
 		methods = new ArrayList<IRMethod>();
+        quadstack = new ArrayList<Quadruple>();
 	}
+
+    public int getType(Exp e) {
+        int x = 0;
+        if (e instanceof And || e instanceof LessThan || e instanceof Plus || e instanceof Minus || e instanceof Times) {
+            x = Quadruple.ASSIGNMENT;
+        }
+        else if (e instanceof ArrayLookup) {
+            x = Quadruple.
+        }
+        return x;
+    }
+
 
     // MainClass m;
     // ClassDeclList cl;
@@ -28,11 +43,9 @@ public class IRGeneratorVisitor implements Visitor {
             n.cl.elementAt(i).accept(this);
         }
 
-        System.out.println("soup");
         for (int i = 0; i<methods.size(); i++) {
-            methods.get(i).toString();
+            System.out.println(methods.get(i).toString());
         }
-        System.out.println("Howdy");
 
     }
 
@@ -172,19 +185,11 @@ public class IRGeneratorVisitor implements Visitor {
     // Identifier i;
     // Exp e;
     public void visit(Assign n) {
-        if (currentQuad.op.equals("")) {
-            currentQuad.type = Quadruple.COPY;
-        }
-        else if (currentQuad.arg2.equals("")) {
-            currentQuad.type = Quadruple.UNARY_ASSIGNMENT;
-        }
-        else {
-            currentQuad.type = Quadruple.ASSIGNMENT;
-        }
-        currentQuad.result = n.i.s;
-        currentMethod.add(currentQuad);
+
         n.i.accept(this);
         n.e.accept(this);
+        currentQuad.result = n.i.s;
+        currentMethod.add(currentQuad);
     }
 
     // Identifier i;
@@ -211,6 +216,7 @@ public class IRGeneratorVisitor implements Visitor {
 
     // Exp e1,e2;
     public void visit(Plus n) {
+
         currentQuad.op = "+";
         n.e1.accept(this);
         n.e2.accept(this);
@@ -225,6 +231,7 @@ public class IRGeneratorVisitor implements Visitor {
 
     // Exp e1,e2;
     public void visit(Times n) {
+
         n.e1.accept(this);
         n.e2.accept(this);
     }
