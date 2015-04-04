@@ -549,6 +549,7 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad.arg1 = n.i.s;
         quadstack.set(top(), currentQuad);
 
+        // Need to look at number of arguments needed for the call
         currentQuad = new Quadruple();
         currentQuad.type = getType(n.e);
         pushStack(currentQuad);

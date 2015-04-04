@@ -268,7 +268,13 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         // Look up ID in symbol table to ensure it is an integer array
 
         n.i.accept(this);
-        Type toCheck = ((SymbolEntry) base.getCurrentScope().getEntryWalk(n.i.s,TableEntry.LEAF_ENTRY)).getType();
+        SymbolEntry temp =((SymbolEntry) base.getCurrentScope().getEntryWalk(n.i.s,TableEntry.LEAF_ENTRY));
+        Type toCheck = null;
+        if (temp != null) {
+            toCheck = temp.getType();
+        }
+
+
         // If the type is not an instancce of int array
         if (!(toCheck instanceof IntArrayType)) {
             Errors.typeMismatch(n.lineNum(),n.charNum());
