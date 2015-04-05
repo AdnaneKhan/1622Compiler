@@ -82,4 +82,9 @@ public abstract class Errors {
         System.out.println("Identifier is not a type at line " + line + ", character " + column);
     }
 
+    public static void badPrint(int line, int column ) {
+        clear = false;
+        System.out.println("Parameter to print, is the incorrect type at line " + line + ", character " + column);
+    }
+
 }

@@ -292,20 +292,11 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
     // Identifier i;
     // Exp e;
     public void visit(Assign n) {
-
-        TableEntry scopeCursor = base.getCurrentScope();
-
         boolean identifierFound = false;
 
-        // While the current scope isn't root ( since we are checking id assignment)
-        while (!scopeCursor.isEntry(SymbolTable.ROOT_ENTRY) && !identifierFound) {
 
-            // Check the keys for the identifier, if found set to true, else ascend scope
-            if (scopeCursor.hasEntry(n.i.toString(), SymbolTable.LEAF_ENTRY)) {
-                identifierFound = true;
-            } else {
-                scopeCursor = scopeCursor.parent;
-            }
+        if (base.getCurrentScope().hasEntryWalk(n.i.s,SymbolTable.LEAF_ENTRY)) {
+            identifierFound = true;
         }
 
         if (!identifierFound) {
@@ -387,20 +378,16 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
 
     // String s;
     public void visit(IdentifierExp n) {
-
-        TableEntry scopeCursor = base.getCurrentScope();
         boolean identifierFound = false;
 
         // While the parent isn't null and the identifier is not found
-        while (!scopeCursor.isEntry(SymbolTable.ROOT_ENTRY) && !identifierFound) {
 
             // Check the keys for the identifier, if found set to true, else ascend scope
-            if (scopeCursor.hasEntry(n.s, SymbolTable.LEAF_ENTRY)) {
+            if (base.getCurrentScope().hasEntryWalk(n.s, SymbolTable.LEAF_ENTRY) ||
+                    base.getCurrentScope().hasEntryWalk(n.s,SymbolTable.METHOD_ENTRY) ||
+                    base.getCurrentScope().hasEntryWalk(n.s,SymbolTable.CLASS_ENTRY)) {
                 identifierFound = true;
-            } else {
-                scopeCursor = scopeCursor.parent;
             }
-        }
 
         if (!identifierFound) {
             Errors.identifierError(n.lineNum(), n.charNum(), n.s);

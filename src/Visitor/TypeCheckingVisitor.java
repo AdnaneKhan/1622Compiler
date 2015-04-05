@@ -3,9 +3,6 @@ package Visitor;
 import SymTable.*;
 import SyntaxTree.*;
 
-
-
-
 public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
     SymbolTable base;
@@ -15,14 +12,14 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         base = toUse;
     }
 
-    private void classOpCheck(Type toCheck, Exp e) {
+    private void classOpCheck(Type toCheck, Exp e, String operator) {
         if (toCheck instanceof IdentifierType) {
             if (e instanceof IdentifierExp) {
                 String nameCheck = ((IdentifierExp) e).s;
 
                 if (base.getCurrentScope().hasEntryWalk(nameCheck,SymbolEntry.CLASS_ENTRY) ||
                         base.getCurrentScope().hasEntryWalk(nameCheck, SymbolEntry.METHOD_ENTRY)) {
-                    Errors.methClassOp(e.lineNum(),e.charNum(),nameCheck);
+                    Errors.methClassOp(e.lineNum(),e.charNum(),operator);
                 }
             }
         }
@@ -200,7 +197,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         Type check = n.e.accept(this);
 
         if (!(check instanceof IntegerType)) {
-            Errors.typeMismatch(n.e.lineNum(),n.e.charNum());
+            Errors.badPrint(n.e.lineNum(), n.e.charNum());
         }
 
         return null;
@@ -221,7 +218,12 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
         // If the rhs is a method or class
         if ( eRet instanceof IdentifierType && ((IdentifierType) eRet).methClass) {
-            Errors.assignFromMethodClass(n.e.lineNum(), n.e.charNum(), n.e.toString(), ((IdentifierType) eRet).s);
+            if (n.e instanceof This) {
+                Errors.assignFromMethodClass(n.e.lineNum(),n.e.charNum(),"this", ((IdentifierType) eRet).s);
+            } else if (n.e instanceof IdentifierExp) {
+                Errors.assignFromMethodClass(n.e.lineNum(), n.e.charNum(),((IdentifierExp) n.e).s , ((IdentifierType) eRet).s);
+            }
+
 
         // If both sides are valid identifiers but there is a type mismatch between the two
         }
@@ -299,8 +301,8 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         Type ret2 = n.e2.accept(this);
 
         // Check if we are trying to operate on method or class
-        classOpCheck(ret1, n.e1);
-        classOpCheck(ret2,n.e2);
+        classOpCheck(ret1, n.e1, "&&");
+        classOpCheck(ret2,n.e2, "&&");
 
         // Check if type mismatch
         if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof BooleanType))) {
@@ -316,8 +318,8 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         Type ret2 = n.e2.accept(this);
 
         // Check if we are trying to operate on method or class
-        classOpCheck(ret1, n.e1);
-        classOpCheck(ret2,n.e2);
+        classOpCheck(ret1, n.e1, "<");
+        classOpCheck(ret2,n.e2, "<");
 
         if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
             Errors.nonIntegerOperand(n.lineNum(),n.charNum(),'<');
@@ -333,8 +335,8 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
 
         // Check if we are trying to operate on method or class
-        classOpCheck(ret1, n.e1);
-        classOpCheck(ret2,n.e2);
+        classOpCheck(ret1, n.e1, "+");
+        classOpCheck(ret2,n.e2, "+");
 
 
         if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
@@ -351,8 +353,8 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
 
         // Check if we are trying to operate on method or class
-        classOpCheck(ret1, n.e1);
-        classOpCheck(ret2,n.e2);
+        classOpCheck(ret1, n.e1,"-");
+        classOpCheck(ret2,n.e2, "-");
 
 
         if ( !(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
@@ -370,8 +372,8 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         Type ret2 = n.e2.accept(this);
 
         // Check if we are trying to operate on method or class
-        classOpCheck(ret1, n.e1);
-        classOpCheck(ret2,n.e2);
+        classOpCheck(ret1, n.e1,"*");
+        classOpCheck(ret2,n.e2, "*");
 
         if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
             Errors.nonIntegerOperand(n.lineNum(),n.charNum(),'*');
@@ -423,11 +425,9 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
             // If we found a method
             if (toLookup != null) {
-                MethodTable calling = (MethodTable) toCheck.getEntry(n.i.s,TableEntry.METHOD_ENTRY);
-
                 // Now we get the type associated with the methid
-                toReturn = ((MethodDecl)calling.getNode()).t;
-                FormalList called = ((MethodDecl) calling.getNode()).fl;
+                toReturn = ((MethodDecl)toLookup.getNode()).t;
+                FormalList called = ((MethodDecl) toLookup.getNode()).fl;
 
                 // If sizes of expression lists don't match print them
                 if (n.el.size() != called.size()) {
@@ -489,13 +489,20 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         // If fhis is a class or a mathod type in the scope, we make a node that says this
         // so when it is checked with expressions the error can be reported
         // note we only check this if we DON'T first find a type in the scope
-        if (base.getCurrentScope().hasEntryWalk(n.s,TableEntry.CLASS_ENTRY) ||
-                base.getCurrentScope().hasEntry(n.s,TableEntry.METHOD_ENTRY)) {
+        if (base.getCurrentScope().hasEntryWalk(n.s,TableEntry.CLASS_ENTRY) ){
 
             /// NOTE that we make an ID as a placeholder that can not
             /// posbbily be made in a valid Minijava program so
             /// that further expressions can be checked
-            IdentifierType toRet = (new IdentifierType(".CLASS/METHOD",n.lineNum(),n.charNum()));
+            IdentifierType toRet = (new IdentifierType("METHOD",n.lineNum(),n.charNum()));
+            toRet.methClass = true;
+            returnVal = toRet;
+        } else if (base.getCurrentScope().hasEntry(n.s,TableEntry.METHOD_ENTRY)) {
+
+            /// NOTE that we make an ID as a placeholder that can not
+            /// posbbily be made in a valid Minijava program so
+            /// that further expressions can be checked
+            IdentifierType toRet = (new IdentifierType("METHOD",n.lineNum(),n.charNum()));
             toRet.methClass = true;
             returnVal = toRet;
         } else {
@@ -547,20 +554,6 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
     // Identifier i;
     public Type visit(NewObject n) {
-//
-//        /// Check for class in this scope
-//        if (base.hasEntry(n.i.s,TableEntry.CLASS_ENTRY)) {
-//            /// Extract the class
-//            ClassTable toCheck = base.getClassTable(n.i.s);
-//
-//
-//
-//            // Check the
-//
-//
-//            // Get the identiffier type
-//        }
-
         return new IdentifierType(n.i.s,n.lineNum(),n.charNum());
     }
 
@@ -568,7 +561,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     public Type visit(Not n) {
         Type toCheck = n.e.accept(this);
 
-        classOpCheck(toCheck,n.e);
+        classOpCheck(toCheck,n.e,"!");
 
         if (! (toCheck instanceof BooleanType)) {
             Errors.nonBooleanOperand(n.e.lineNum(),n.e.charNum(),"!");
