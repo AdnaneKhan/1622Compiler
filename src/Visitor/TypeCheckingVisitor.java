@@ -407,7 +407,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
         Type callObject = n.e.accept(this);
 
-        if (callObject instanceof IdentifierType) {
+        if (callObject instanceof IdentifierType && !((IdentifierType) callObject).erroneous) {
             String callClass = ((IdentifierType) callObject).s;
             ClassTable toCheck = base.getClassTable(callClass);
             ClassDecl actualNode = (ClassDecl) toCheck.getNode();
@@ -518,6 +518,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
             Errors.thisInMain(n.lineNum(),n.charNum());
             toReturn = new IdentifierType("this",n.lineNum(),n.charNum());
+            toReturn.erroneous = true;
         // if it is a method then we know we are in the right place
         } else if (base.getCurrentScope().isEntry(TableEntry.METHOD_ENTRY)) {
             ASTNode classNode = base.getCurrentScope().parent.getNode();
