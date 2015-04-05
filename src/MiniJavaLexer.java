@@ -446,12 +446,12 @@ public class MiniJavaLexer implements java_cup.runtime.Scanner {
 
   private Symbol symbol(int type, Object value) {
       //  System.out.println("We are outputting: " + type + " and " + value.toString());
-        return new Symbol(type,yyline,yycolumn ,value);
+        return new Symbol(type,yyline+1,yycolumn ,value);
   }
 
   private Symbol symbol(int type) {
        // System.out.println("We are outputting: " + type);
-        return new Symbol(type,yyline,yycolumn);
+        return new Symbol(type,yyline+1,yycolumn);
   }
 
 

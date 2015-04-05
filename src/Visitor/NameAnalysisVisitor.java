@@ -1,5 +1,6 @@
 package Visitor;
 
+import IR.Parameter3AC;
 import SymTable.*;
 import SyntaxTree.*;
 
@@ -48,6 +49,8 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
                 } else {
                     Errors.multiplyDefinedError(cursor.lineNum(), cursor.charNum(), className);
                 }
+            } else {
+                Errors.clear = false;
             }
         }
 
@@ -71,6 +74,8 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
                 } else {
                     cursor.accept(this);
                 }
+            } else {
+                Errors.clear = false;
             }
         }
 
@@ -277,6 +282,11 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
         if (!identifierFound && !n.erroneous) {
             Errors.identifierError(n.lineNum(), n.charNum(), n.s);
         }
+
+        if (n.erroneous) {
+            Errors.clear = false;
+        }
+
     }
 
     // Identifier i;
