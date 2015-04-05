@@ -8,18 +8,21 @@ import java.util.ArrayList;
 public class IRGeneratorVisitor implements Visitor {
 
     SymbolTable base;
-    ArrayList<IRMethod> methods;
+    ArrayList<IRClass> classes;
+    IRClass currentClass;
     IRMethod currentMethod;
     Quadruple currentQuad;
 
     ArrayList<Quadruple> quadstack;
 
     int tempNum = 0;
+    int methodSubscriptNum = 0;
+    int varSubscriptNum = 0;
 
 
     public IRGeneratorVisitor(SymbolTable toUse) {
         base = toUse;
-        methods = new ArrayList<IRMethod>();
+        classes = new ArrayList<IRMethod>();
         quadstack = new ArrayList<Quadruple>();
     }
 
@@ -90,15 +93,13 @@ public class IRGeneratorVisitor implements Visitor {
     // MainClass m;
     // ClassDeclList cl;
     public void visit(Program n) {
+        currentClass = new IRClass(m.i1.s);
         n.m.accept(this);
+        classes.add(currentClass);
+        methodSubscriptNum++;
         for (int i = 0; i < n.cl.size(); i++) {
             n.cl.elementAt(i).accept(this);
         }
-
-        for (int i = 0; i<methods.size(); i++) {
-            System.out.println(methods.get(i).toString());
-        }
-
     }
 
     // Identifier i1,i2;
@@ -106,7 +107,7 @@ public class IRGeneratorVisitor implements Visitor {
     public void visit(MainClass n) {
         base.descendScope(n.i1.s, SymbolTable.CLASS_ENTRY);
 
-        currentMethod = new IRMethod("main");
+        currentMethod = new IRMethod("main_" + methodSubscriptNum);
         n.i1.accept(this);
         n.i2.accept(this);
         currentQuad = new Quadruple();
@@ -118,7 +119,7 @@ public class IRGeneratorVisitor implements Visitor {
             currentMethod.add(tempQuad);
         }
 
-        methods.add(currentMethod);
+        currentClass.add(currentMethod);
         base.ascendScope();
     }
 
@@ -126,6 +127,8 @@ public class IRGeneratorVisitor implements Visitor {
     // VarDeclList vl;
     // MethodDeclList ml;
     public void visit(ClassDeclSimple n) {
+        currentClass = new IRClass(n.i.s);
+
         base.descendScope(n.i.s,SymbolTable.CLASS_ENTRY);
 
         n.i.accept(this);
@@ -133,12 +136,15 @@ public class IRGeneratorVisitor implements Visitor {
             n.vl.elementAt(i).accept(this);
         }
         for (int i = 0; i < n.ml.size(); i++) {
-            currentMethod = new IRMethod(n.ml.elementAt(i).i.toString());
+            currentMethod = new IRMethod(n.ml.elementAt(i).i.toString() + "_" + methodSubscriptNum);
             n.ml.elementAt(i).accept(this);
-            methods.add(currentMethod);
+            currentClass.add(currentMethod);
         }
 
         base.ascendScope();
+
+        classes.add(currentClass);
+        methodSubscriptNum++;
     }
 
     // Identifier i;
@@ -146,6 +152,8 @@ public class IRGeneratorVisitor implements Visitor {
     // VarDeclList vl;
     // MethodDeclList ml;
     public void visit(ClassDeclExtends n) {
+        currentClass = new IRClass(n.i.s, n.j.s);
+
         base.descendScope(n.i.s,SymbolTable.CLASS_ENTRY);
 
         n.i.accept(this);
@@ -154,12 +162,15 @@ public class IRGeneratorVisitor implements Visitor {
             n.vl.elementAt(i).accept(this);
         }
         for (int i = 0; i < n.ml.size(); i++) {
-            currentMethod = new IRMethod(n.ml.elementAt(i).i.toString());
+            currentMethod = new IRMethod(n.ml.elementAt(i).i.toString() + "_" + methodSubscriptNum);
             n.ml.elementAt(i).accept(this);
-            methods.add(currentMethod);
+            currentClass.add(currentMethod);
         }
 
         base.ascendScope();
+
+        classes.add(currentClass);
+        methodSubscriptNum++;
     }
 
     // Type t;
@@ -324,8 +335,8 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad = quadstack.set(top(), currentQuad);
         currentMethod.add(currentQuad);
 
-                // Add statement
-                currentQuad = new Quadruple();
+        // Add statement
+        currentQuad = new Quadruple();
         currentQuad.type = getType(n.s);
         pushStack(currentQuad);
         n.s.accept(this);

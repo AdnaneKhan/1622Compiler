@@ -4,38 +4,48 @@ import java.util.ArrayList;
 
 import java.lang.Override;
 
-public class IRMethod {
-    private ArrayList<Quadruple> lines;
+public class IRClass {
+    private ArrayList<IRMethod> lines;
     private String name;
+    private String extends;
 
-    public IRMethod(String s) {
-        lines = new ArrayList<Quadruple>();
+    public IRClass(String s) {
+        lines = new ArrayList<IRMethod>();
         name = s;
+        extends = "";
+    }
+
+    public IRClass(String s1, String s2) {
+        lines = new ArrayList<IRMethod>();
+        name = s1;
+        extends = s2;
     }
 
     public int getLength() {
         return lines.size();
     }
 
-    public String getName() {
-        return name;
+    public IRMethod get(int i) {
+        return lines.get(i);
     }
 
-    public void add(Quadruple x) {
+    public void add(IRMethod x) {
         lines.add(x);
     }
 
-    public Quadruple get(int i) {
-        line.get(i);
-    }
-
     public String getName() {
         return name;
     }
 
-    public void replace(Quadruple quad, int i) {
-        lines.set(i, quad);
+    public String getExtends() {
+        return extends;
     }
+
+    public void replace(IRMethod method, int i) {
+        lines.set(i, method);
+    }
+
+
 
     /**
      *
