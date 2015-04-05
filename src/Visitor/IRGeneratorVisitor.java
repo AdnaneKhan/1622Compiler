@@ -7,9 +7,9 @@ import java.util.ArrayList;
 
 public class IRGeneratorVisitor implements Visitor {
 
-	SymbolTable base;
-	ArrayList<IRMethod> methods;
-	IRMethod currentMethod;
+    SymbolTable base;
+    ArrayList<IRMethod> methods;
+    IRMethod currentMethod;
     Quadruple currentQuad;
 
     ArrayList<Quadruple> quadstack;
@@ -17,11 +17,11 @@ public class IRGeneratorVisitor implements Visitor {
     int tempNum = 0;
 
 
-	public IRGeneratorVisitor(SymbolTable toUse) {
-		base = toUse;
-		methods = new ArrayList<IRMethod>();
+    public IRGeneratorVisitor(SymbolTable toUse) {
+        base = toUse;
+        methods = new ArrayList<IRMethod>();
         quadstack = new ArrayList<Quadruple>();
-	}
+    }
 
     public void pushStack(Quadruple q) {
         quadstack.add(q);
@@ -106,14 +106,17 @@ public class IRGeneratorVisitor implements Visitor {
     public void visit(MainClass n) {
         base.descendScope(n.i1.s, SymbolTable.CLASS_ENTRY);
 
-        currentMethod = new IRMethod("main"); 
+        currentMethod = new IRMethod("main");
         n.i1.accept(this);
         n.i2.accept(this);
         currentQuad = new Quadruple();
         currentQuad.type = getType(n.s);
         pushStack(currentQuad);
         n.s.accept(this);
-        currentMethod.add(popStack());
+        Quadruple tempQuad = popStack();
+        if (tempQuad.type != Quadruple.CONDITIONAL_JUMP) {
+            currentMethod.add(tempQuad);
+        }
 
         methods.add(currentMethod);
         base.ascendScope();
@@ -188,7 +191,10 @@ public class IRGeneratorVisitor implements Visitor {
             currentQuad.type = getType(n.sl.elementAt(i));
             pushStack(currentQuad);
             n.sl.elementAt(i).accept(this);
-            currentMethod.add(popStack());
+            Quadruple tempQuad = popStack();
+            if (tempQuad.type != Quadruple.CONDITIONAL_JUMP) {
+                currentMethod.add(tempQuad);
+            }
         }
         currentQuad = new Quadruple();
         currentQuad.type = Quadruple.RETURN_3AC;
@@ -226,7 +232,10 @@ public class IRGeneratorVisitor implements Visitor {
             currentQuad.type = getType(n.sl.elementAt(i));
             pushStack(currentQuad);
             n.sl.elementAt(i).accept(this);
-            currentMethod.add(popStack());
+            Quadruple tempQuad = popStack();
+            if (tempQuad.type != Quadruple.CONDITIONAL_JUMP) {
+                currentMethod.add(tempQuad);
+            }
         }
     }
 
@@ -244,20 +253,23 @@ public class IRGeneratorVisitor implements Visitor {
         n.e.accept(this);
         Quadruple tempQuad = popStack();
 
-        // Set up if
+        // Set up if, add if
         currentQuad = quadstack.get(top());
-        currentQuad.result = "if";
         currentQuad.arg1 = tempQuad.result;
         currentQuad.arg2 = tempLabel;
+        currentQuad.result = "iffalse";
         currentQuad = quadstack.set(top(), currentQuad);
         currentMethod.add(currentQuad);
 
         // Add statement 1
         currentQuad = new Quadruple();
         currentQuad.type = getType(n.s1);
-        pushStack(currentQuad);        
+        pushStack(currentQuad);
         n.s1.accept(this);
-        currentMethod.add(popStack());
+        tempQuad = popStack();
+        if (tempQuad.type != Quadruple.CONDITIONAL_JUMP) {
+            currentMethod.add(tempQuad);
+        }
 
         // Add unconditional jump
         currentQuad = new Quadruple();
@@ -270,13 +282,16 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad.type = Quadruple.LABEL;
         currentQuad.result = tempLabel;
         currentMethod.add(currentQuad);
-        
+
         //Add statement 2
         currentQuad = new Quadruple();
         currentQuad.type = getType(n.s2);
         pushStack(currentQuad);
         n.s2.accept(this);
-        currentMethod.add(popStack());
+        tempQuad = popStack();
+        if (tempQuad.type != Quadruple.CONDITIONAL_JUMP) {
+            currentMethod.add(tempQuad);
+        }
 
         //Add in last label for unconditional jump
         currentQuad = new Quadruple();
@@ -288,8 +303,48 @@ public class IRGeneratorVisitor implements Visitor {
     // Exp e;
     // Statement s;
     public void visit(While n) {
+        String tempLabel = "_t" + tempNum;
+        tempNum++;
+        String tempLabel2 = "_t" + tempNum;
+        tempNum++;
+
+        currentQuad = new Quadruple();
+        currentQuad.type = getType(n.e);
+        pushStack(currentQuad);
         n.e.accept(this);
+        Quadruple tempQuad = popStack();
+
+
+        // Set up while, add while
+        currentQuad = quadstack.get(top());
+        currentQuad.arg1 = tempQuad.result;
+        currentQuad.arg2 = tempLabel2;
+        currentQuad.label = tempLabel;
+        currentQuad.result = "iffalse";
+        currentQuad = quadstack.set(top(), currentQuad);
+        currentMethod.add(currentQuad);
+
+                // Add statement
+                currentQuad = new Quadruple();
+        currentQuad.type = getType(n.s);
+        pushStack(currentQuad);
         n.s.accept(this);
+        tempQuad = popStack();
+        if (tempQuad.type != Quadruple.CONDITIONAL_JUMP) {
+            currentMethod.add(tempQuad);
+        }
+
+        // Add unconditional jump
+        currentQuad = new Quadruple();
+        currentQuad.type = Quadruple.UNCONDITIONAL_JUMP;
+        currentQuad.result = tempLabel;
+        currentMethod.add(currentQuad);
+
+        // Add label for first jump
+        currentQuad = new Quadruple();
+        currentQuad.type = Quadruple.LABEL;
+        currentQuad.result = tempLabel2;
+        currentMethod.add(currentQuad);
     }
 
     // Exp e;
@@ -543,13 +598,14 @@ public class IRGeneratorVisitor implements Visitor {
     // Identifier i;
     // ExpList el;
     public void visit(Call n) {
+        ArrayList<Quadruple> params = new ArrayList<Quadruple>();
+
         currentQuad = quadstack.get(top());
         currentQuad.result = "_t" + tempNum;
         tempNum++;
         currentQuad.arg1 = n.i.s;
         quadstack.set(top(), currentQuad);
 
-        // Need to look at number of arguments needed for the call
         currentQuad = new Quadruple();
         currentQuad.type = getType(n.e);
         pushStack(currentQuad);
@@ -558,20 +614,24 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad = new Quadruple();
         currentQuad.type = Quadruple.PARAMETER;
         currentQuad.result = tempQuad.result;
-        currentMethod.add(currentQuad);
+        params.add(currentQuad);
 
         n.i.accept(this);
 
         for (int i = 0; i < n.el.size(); i++) {
             currentQuad = new Quadruple();
-            currentQuad.type = getType(n.e);
+            currentQuad.type = getType(n.el.elementAt(i));
             pushStack(currentQuad);
             n.el.elementAt(i).accept(this);
             tempQuad = popStack();
             currentQuad = new Quadruple();
             currentQuad.type = Quadruple.PARAMETER;
             currentQuad.result = tempQuad.result;
-            currentMethod.add(currentQuad);
+            params.add(currentQuad);
+        }
+
+        for (int i = 0; i < params.size(); i++) {
+            currentMethod.add(params.get(i));
         }
 
         currentQuad = quadstack.get(top());

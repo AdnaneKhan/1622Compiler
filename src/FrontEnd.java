@@ -42,6 +42,7 @@ public class FrontEnd {
             TypeCheckingVisitor typeVisir = new TypeCheckingVisitor(compilerTable);
             typeVisir.visit(minJProgram);
 
+
             // Only move forward with IR generation if fthere are NO ERRORS
             if (Errors.clear) {
                 IRGeneratorVisitor irGen = new IRGeneratorVisitor(compilerTable);

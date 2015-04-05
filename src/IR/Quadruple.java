@@ -85,6 +85,10 @@ public class Quadruple {
 		else if (type == UNCONDITIONAL_JUMP) {
 			ret += "goto " + result;
 		}
+		else if (type == CONDITIONAL_JUMP) {
+			ret += result + " " + arg1 + " goto " + arg2;
+		}
+
 
         return ret;
 	}
