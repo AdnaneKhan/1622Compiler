@@ -213,14 +213,48 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         Type ret = n.i.accept(this);
         Type eRet = n.e.accept(this);
 
+
+        // If the lhs is a method or class
         if ( ret instanceof IdentifierType && ((IdentifierType) ret).methClass) {
             Errors.classMethodAssign(n.i.lineNum(),n.i.charNum(),n.i.s,((IdentifierType) ret).s);
         }
 
+        // If the rhs is a method or class
         if ( eRet instanceof IdentifierType && ((IdentifierType) eRet).methClass) {
             Errors.assignFromMethodClass(n.e.lineNum(), n.e.charNum(), n.e.toString(), ((IdentifierType) eRet).s);
+
+        // If both sides are valid identifiers but there is a type mismatch between the two
         }
 
+        if ( ret instanceof IdentifierType && eRet instanceof IdentifierType  ) {
+            IdentifierType checkClass = (IdentifierType) eRet;
+
+            ClassTable rhsClass = base.getClassTable(checkClass.s);
+            if (rhsClass != null) {
+                // Check if it is a sub class
+                ClassDecl node = (ClassDecl) rhsClass.getNode();
+
+                // if node is not an error, then we can
+                // check its declared type
+                if ( !node.erroneous ) {
+                  if( node instanceof ClassDeclExtends) {
+                      // We can now check if the class declaration on the rhs extends the left
+                      Identifier superId = ((ClassDeclExtends) node).j;
+                      if (!superId.s.equals(((IdentifierType) ret).s)) {
+                          Errors.typeMismatch(n.i.lineNum(),n.i.charNum());
+                      }
+
+                  } else if (node instanceof ClassDeclSimple) {
+                     // Simple equality check, if they are not equal it is
+                      // a type mmismatch
+                      if (!((ClassDeclSimple) node).i.s.equals(((IdentifierType) ret).s)) {
+                          Errors.typeMismatch(n.i.lineNum(),n.i.charNum());
+                      }
+                  }
+                }
+            }
+            // check to see if the rhs is a superclass of the lhs
+        }
         else if (!ret.getClass().equals(eRet.getClass())){
               Errors.typeMismatch(n.i.lineNum(),n.i.charNum());
         }
@@ -234,7 +268,13 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         // Look up ID in symbol table to ensure it is an integer array
 
         n.i.accept(this);
-        Type toCheck = ((SymbolEntry) base.getCurrentScope().getEntryWalk(n.i.s,TableEntry.LEAF_ENTRY)).getType();
+        SymbolEntry temp =((SymbolEntry) base.getCurrentScope().getEntryWalk(n.i.s,TableEntry.LEAF_ENTRY));
+        Type toCheck = null;
+        if (temp != null) {
+            toCheck = temp.getType();
+        }
+
+
         // If the type is not an instancce of int array
         if (!(toCheck instanceof IntArrayType)) {
             Errors.typeMismatch(n.lineNum(),n.charNum());
@@ -343,10 +383,8 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     // Exp e1,e2;
     public Type visit(ArrayLookup n) {
 
-
-        Type ret1 = n.e1.accept(this);
-        Type ret2 = n.e2.accept(this);
-
+        n.e1.accept(this);
+        n.e2.accept(this);
 
         return new IntegerType();
     }
@@ -369,10 +407,22 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
         Type callObject = n.e.accept(this);
 
-        if (callObject instanceof IdentifierType) {
+        if (callObject instanceof IdentifierType && !((IdentifierType) callObject).erroneous) {
             String callClass = ((IdentifierType) callObject).s;
             ClassTable toCheck = base.getClassTable(callClass);
-            if (toCheck != null && toCheck.hasEntry(n.i.s,TableEntry.METHOD_ENTRY)) {
+            ClassDecl actualNode = (ClassDecl) toCheck.getNode();
+            MethodTable toLookup;
+
+            // first try child
+            toLookup = (MethodTable) toCheck.getEntry(n.i.s,TableEntry.METHOD_ENTRY);
+            // Check if toCheck has a super class
+            if (toLookup == null && actualNode instanceof ClassDeclExtends) {
+                    TableEntry superTable = base.getEntry(((ClassDeclExtends)actualNode).j.s, TableEntry.CLASS_ENTRY);
+                    toLookup = (MethodTable) superTable.getEntry(n.i.s,TableEntry.METHOD_ENTRY);
+            }
+
+            // If we found a method
+            if (toLookup != null) {
                 MethodTable calling = (MethodTable) toCheck.getEntry(n.i.s,TableEntry.METHOD_ENTRY);
 
                 // Now we get the type associated with the methid
@@ -396,7 +446,6 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
                 }
             } else {
                 Errors.badCall(n.i.lineNum(),n.i.charNum());
-
             }
         } else  if (!base.hasEntryWalk(n.i.s, TableEntry.METHOD_ENTRY)) {
             Errors.badCall(n.i.lineNum(),n.i.charNum());
@@ -405,7 +454,6 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
             for (int i = 0; i < n.el.size(); i++) {
                 n.el.elementAt(i).accept(this);
             }
-
         }
 
         // Don't return null
@@ -469,6 +517,8 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         if (base.getCurrentScope().isEntry(TableEntry.CLASS_ENTRY)) {
 
             Errors.thisInMain(n.lineNum(),n.charNum());
+            toReturn = new IdentifierType("this",n.lineNum(),n.charNum());
+            toReturn.erroneous = true;
         // if it is a method then we know we are in the right place
         } else if (base.getCurrentScope().isEntry(TableEntry.METHOD_ENTRY)) {
             ASTNode classNode = base.getCurrentScope().parent.getNode();
@@ -497,17 +547,19 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
     // Identifier i;
     public Type visit(NewObject n) {
-
-        /// Check for class in this scope
-        if (base.getCurrentScope().hasEntry(n.i.s,TableEntry.CLASS_ENTRY)) {
-            /// Extract the class
-
-
-            // Check the nummber
-
-
-            // Get the identiffier type
-        }
+//
+//        /// Check for class in this scope
+//        if (base.hasEntry(n.i.s,TableEntry.CLASS_ENTRY)) {
+//            /// Extract the class
+//            ClassTable toCheck = base.getClassTable(n.i.s);
+//
+//
+//
+//            // Check the
+//
+//
+//            // Get the identiffier type
+//        }
 
         return new IdentifierType(n.i.s,n.lineNum(),n.charNum());
     }
@@ -521,7 +573,6 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         if (! (toCheck instanceof BooleanType)) {
             Errors.nonBooleanOperand(n.e.lineNum(),n.e.charNum(),"!");
         }
-
 
         return new BooleanType();
     }

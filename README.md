@@ -17,31 +17,34 @@ Implementation Details:
 ------------
  
  The compiler is built using JFlex as a lexer, JavaCUP as a parser generator. The AST Nodes are provided as part of
- the Modern Compiler Implemmentation in Java textbook. The nodes have been modified to include line and colummn information
+ the Modern Compiler Implementation in Java textbook. The nodes have been modified to include line and column information
  for purposes of error reporting.
+ 
+ In addition to this nodes that represent parse errors have been added. This allows name analysis and type checking to continue
+ in cases where pare errors were recovered from.
 
 Project Progress:
 -----------
 
-Parser Errors [ ]
-Name Analysis [ ]
-Type Checking [ ]
+Parser Errors [ x ]
+Name Analysis [ x ]
+Type Checking [ x ]
 
     Symbol Table Generation:
 
     Errors:
-    1.       Status:
-    2.       Status:
-    3.       Status:
-    4.       Status:
-    5.       Status:
-    6.       Status:
-    7.       Status:
-    8.       Status:
-    9.       Status:
+    1.       Status: Working
+    2.       Status: Working
+    3.       Status: Working
+    4.       Status: Working
+    5.       Status: Working
+    6.       Status: Working
+    7.       Status: Working
+    8.       Status: Working
+    9.       Status: Working
     
   
-IR Generation [ ]
+IR Generation [ WIP ]
 
 Building:
 ----------
@@ -76,4 +79,13 @@ make parser
 Running:
 -----------
 
-To run the compiler
+To run the front end do the following:
+
+~~~~
+java -cp java-cup-11a.jar:. FrontEnd FILENAME
+~~~~
+
+where filename is the name of the file to be lexed, parsed, and error checked.
+
+If no errors are encountered then the file will be printed out to an intermediate representation in the console.
+In addition the file will be printed to the "output" directory as FILENAME.IRs

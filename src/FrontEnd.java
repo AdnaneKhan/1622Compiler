@@ -1,13 +1,8 @@
 
-import SymTable.SymbolEntry;
 import SymTable.SymbolTable;
-import Visitor.NameAnalysisVisitor;
-import Visitor.TypeCheckingVisitor;
-import Visitor.TypeDepthFirstVisitor;
-import Visitor.IRGeneratorVisitor;
+import Visitor.*;
 import java_cup.runtime.Symbol;
 import SyntaxTree.*;
-import Visitor.PrettyPrintVisitor;
 
 import java.io.*;
 
@@ -36,27 +31,29 @@ public class FrontEnd {
             // that is what the parser will report
             Program minJProgram = (Program)parse_tree.value;
 
-
-            // Symbol table constructed
+            // Symbol table constructed, but its empty
             SymbolTable compilerTable = new SymbolTable(minJProgram);
 
+            // Start the name analyser visitor
             NameAnalysisVisitor visitor = new NameAnalysisVisitor(compilerTable);
             visitor.visit(minJProgram);
 
+            // Now we can use the same symbol table for type checking
             TypeCheckingVisitor typeVisir = new TypeCheckingVisitor(compilerTable);
             typeVisir.visit(minJProgram);
-            // now we can use our samme symbol table
 
-            IRGeneratorVisitor irVisitor = new IRGeneratorVisitor(compilerTable);
-            irVisitor.visit(minJProgram);
 
+            // Only move forward with IR generation if fthere are NO ERRORS
+            if (Errors.clear) {
+                IRGeneratorVisitor irGen = new IRGeneratorVisitor(compilerTable);
+                irGen.visit(minJProgram);
+            }
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         // Exit
     }
 }

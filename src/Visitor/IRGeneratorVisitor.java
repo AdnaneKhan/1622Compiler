@@ -7,9 +7,9 @@ import java.util.ArrayList;
 
 public class IRGeneratorVisitor implements Visitor {
 
-	SymbolTable base;
-	ArrayList<IRMethod> methods;
-	IRMethod currentMethod;
+    SymbolTable base;
+    ArrayList<IRMethod> methods;
+    IRMethod currentMethod;
     Quadruple currentQuad;
 
     ArrayList<Quadruple> quadstack;
@@ -17,11 +17,11 @@ public class IRGeneratorVisitor implements Visitor {
     int tempNum = 0;
 
 
-	public IRGeneratorVisitor(SymbolTable toUse) {
-		base = toUse;
-		methods = new ArrayList<IRMethod>();
+    public IRGeneratorVisitor(SymbolTable toUse) {
+        base = toUse;
+        methods = new ArrayList<IRMethod>();
         quadstack = new ArrayList<Quadruple>();
-	}
+    }
 
     public void pushStack(Quadruple q) {
         quadstack.add(q);
@@ -106,7 +106,7 @@ public class IRGeneratorVisitor implements Visitor {
     public void visit(MainClass n) {
         base.descendScope(n.i1.s, SymbolTable.CLASS_ENTRY);
 
-        currentMethod = new IRMethod("main"); 
+        currentMethod = new IRMethod("main");
         n.i1.accept(this);
         n.i2.accept(this);
         currentQuad = new Quadruple();
@@ -264,7 +264,7 @@ public class IRGeneratorVisitor implements Visitor {
         // Add statement 1
         currentQuad = new Quadruple();
         currentQuad.type = getType(n.s1);
-        pushStack(currentQuad);        
+        pushStack(currentQuad);
         n.s1.accept(this);
         tempQuad = popStack();
         if (tempQuad.type != Quadruple.CONDITIONAL_JUMP) {
@@ -282,7 +282,7 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad.type = Quadruple.LABEL;
         currentQuad.result = tempLabel;
         currentMethod.add(currentQuad);
-        
+
         //Add statement 2
         currentQuad = new Quadruple();
         currentQuad.type = getType(n.s2);
@@ -322,12 +322,12 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad.label = tempLabel;
         currentQuad.result = "iffalse";
         currentQuad = quadstack.set(top(), currentQuad);
-        currentMethod.add(currentQuad);last
+        currentMethod.add(currentQuad);
 
-        // Add statement
-        currentQuad = new Quadruple();
+                // Add statement
+                currentQuad = new Quadruple();
         currentQuad.type = getType(n.s);
-        pushStack(currentQuad);        
+        pushStack(currentQuad);
         n.s.accept(this);
         tempQuad = popStack();
         if (tempQuad.type != Quadruple.CONDITIONAL_JUMP) {

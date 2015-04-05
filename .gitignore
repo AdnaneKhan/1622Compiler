@@ -3,3 +3,4 @@
 1622Compiler.iml
 out
 *.class
+*.DS_Store

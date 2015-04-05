@@ -89,6 +89,7 @@ public class Quadruple {
 			ret += result + " " + arg1 + " goto " + arg2;
 		}
 
+
         return ret;
 	}
 

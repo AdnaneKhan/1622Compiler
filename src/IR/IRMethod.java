@@ -27,7 +27,7 @@ public class IRMethod {
      */
     @Override
     public String toString() {
-        String ret = "";
+        String ret = name + ": ";
         for (int i = 0; i < this.getLength(); i++) {
             ret += lines.get(i).toString() + "\n";
         }
