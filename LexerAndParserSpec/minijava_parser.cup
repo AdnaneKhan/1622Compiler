@@ -83,6 +83,8 @@ non terminal Statement Statement;
 non terminal Formal Formal;
 non terminal FormalList FormalSeparate;
 non terminal ExpList ExpSeparate;
+non terminal Identifier MainParams;
+non terminal Statement MainMethod;
 
 /*
 Mathematical Precedence
@@ -101,7 +103,16 @@ start with MiniJavaProgram;
 
 MiniJavaProgram ::= mainclass:m ClassDeclList:d {: RESULT = new Program(m, d,mleft,mright); :};
 
-mainclass ::= CLASS ID:name LEFT_CURLY PUBLIC STATIC VOID_MAIN LEFT_PAREN STRING LEFT_B RIGHT_B ID:args RIGHT_PAREN LEFT_CURLY Statement:s RIGHT_CURLY RIGHT_CURLY {: RESULT = new MainClass(name,args,s,nameleft,nameright); :};
+mainclass ::= CLASS ID:name LEFT_CURLY PUBLIC STATIC VOID_MAIN MainParams:args MainMethod:s RIGHT_CURLY {: RESULT = new MainClass(name,args,s,nameleft,nameright); :}
+        ;
+
+MainParams ::= LEFT_PAREN STRING LEFT_B RIGHT_B ID:args RIGHT_PAREN {: RESULT = args; :}
+        |      error:e RIGHT_PAREN {: parser.printError(eleft,eright); RESULT = new Identifier("ERROR",eleft,eright); :}
+        ;
+
+MainMethod ::= LEFT_CURLY Statement:s RIGHT_CURLY {: RESULT = s; :}
+        | error:e RIGHT_CURLY {: parser.printError(eleft,eright); RESULT = new ErroneousStatement(eleft,eright); :}
+        ;
 
 ClassDeclList ::=  ClassDeclList:cdl ClassDecl:cd {: cdl.addElement(cd); RESULT = cdl; :}
         | {: RESULT = new ClassDeclList(); :}
