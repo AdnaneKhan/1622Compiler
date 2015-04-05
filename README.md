@@ -23,6 +23,12 @@ Implementation Details:
  In addition to this nodes that represent parse errors have been added. This allows name analysis and type checking to continue
  in cases where pare errors were recovered from.
 
+Considerations:
+-----------------
+
+When repoting line numbers, the lexer starts at line 0, we add one to each line because it is standard for text editors and IDEs to start their
+line numbers at 1, so for a a programmer looking at errors, it makes more sense to start at 1.
+
 Project Progress:
 -----------
 
@@ -33,18 +39,21 @@ Type Checking [ x ]
     Symbol Table Generation:
 
     Errors:
-    1.       Status: Working
-    2.       Status: Working
-    3.       Status: Working
-    4.       Status: Working
-    5.       Status: Working
-    6.       Status: Working
-    7.       Status: Working
-    8.       Status: Working
-    9.       Status: Working
+    1.  Invalid L                       Status:
+    2.  Invalid R                       Status:
+    3.  Invalid Op                      Status:
+    4.  Non Method                      Status:
+    5.  Arg Count                       Status:
+    6.  Arg Type                        Status:
+    7.  Non Integer Op                  Status:
+    8.  Boolean on non bool             Status:
+    9.  Bad Length call                 Status:
+    10. Non Boolean in Condition        Status:
+    11. Type Mismatch During Assignment Status:
+    12. Illegal use of This             Status:
     
-  
-IR Generation [ WIP ]
+
+IR Generation [ X ]
 
 Building:
 ----------

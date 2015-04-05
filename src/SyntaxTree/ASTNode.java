@@ -12,8 +12,8 @@ public abstract class ASTNode {
     private int srcCol;
 
     protected void setValues(int srcLine, int srcCol) {
-        this.srcLine = srcLine;
-        this.srcCol = srcCol;
+        this.srcLine = srcLine +1;
+        this.srcCol = srcCol +1;
     }
     public int lineNum() {
         return this.srcLine;

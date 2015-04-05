@@ -20,12 +20,12 @@
 
   private Symbol symbol(int type, Object value) {
       //  System.out.println("We are outputting: " + type + " and " + value.toString());
-        return new Symbol(type,yyline+1,yycolumn ,value);
+        return new Symbol(type,yyline,yycolumn ,value);
   }
 
   private Symbol symbol(int type) {
        // System.out.println("We are outputting: " + type);
-        return new Symbol(type,yyline+1,yycolumn);
+        return new Symbol(type,yyline,yycolumn);
   }
 %}
 LineTerminator = \r|\n|\r\n
