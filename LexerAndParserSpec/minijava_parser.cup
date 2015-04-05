@@ -14,7 +14,7 @@ public parser(MiniJavaLexer lex) {
 }
 
 public void printError(int line, int column) {
-    System.out.println("There is a parse error at line " + line+1 + ", column " + column+1);
+    System.out.println("There is a parse error at line " + line + ", column " + column);
 }
 
 

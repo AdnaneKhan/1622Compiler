@@ -3,9 +3,6 @@ package Visitor;
 import SymTable.*;
 import SyntaxTree.*;
 
-
-
-
 public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
     SymbolTable base;
@@ -428,11 +425,9 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
             // If we found a method
             if (toLookup != null) {
-                MethodTable calling = (MethodTable) toCheck.getEntry(n.i.s,TableEntry.METHOD_ENTRY);
-
                 // Now we get the type associated with the methid
-                toReturn = ((MethodDecl)calling.getNode()).t;
-                FormalList called = ((MethodDecl) calling.getNode()).fl;
+                toReturn = ((MethodDecl)toLookup.getNode()).t;
+                FormalList called = ((MethodDecl) toLookup.getNode()).fl;
 
                 // If sizes of expression lists don't match print them
                 if (n.el.size() != called.size()) {
