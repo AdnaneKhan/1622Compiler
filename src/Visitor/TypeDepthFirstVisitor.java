@@ -266,8 +266,12 @@ public class TypeDepthFirstVisitor implements TypeVisitor {
         return null;
     }
 
-
     public Type visit(ErroneousClassDecl n) {
         Errors.clear = false;
         return null; }
+
+    public Type visit(ErroneousMethodDecl n) {
+        Errors.clear = false;
+        return null;
+    }
 }

@@ -10,6 +10,10 @@ public class MethodDecl extends ASTNode{
   public StatementList sl;
   public Exp e;
 
+
+    public MethodDecl() {
+
+    }
   public MethodDecl(Type at, Identifier ai, FormalList afl, VarDeclList avl, 
                     StatementList asl, Exp ae,int col,int line) {
     t=at; i=ai; fl=afl; vl=avl; sl=asl; e=ae;

@@ -73,4 +73,6 @@ public interface Visitor {
 
     public void visit(ErroneousStatement n);
     public void visit(ErroneousClassDecl n);
+
+    public void visit(ErroneousMethodDecl n);
 }

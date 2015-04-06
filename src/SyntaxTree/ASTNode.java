@@ -8,6 +8,7 @@ package SyntaxTree;
  * of error reporting.
  */
 public abstract class ASTNode {
+    public boolean erroneous = false;
     private int srcLine;
     private int srcCol;
 

@@ -795,4 +795,7 @@ public class IRGeneratorVisitor implements Visitor {
     }
     public void visit(ErroneousClassDecl n) {
     }
+    public void  visit(ErroneousMethodDecl n) {
+
+    }
 }

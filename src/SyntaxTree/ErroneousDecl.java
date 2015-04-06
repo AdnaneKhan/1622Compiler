@@ -6,6 +6,8 @@ package SyntaxTree;
 public class ErroneousDecl extends VarDecl {
 
     public ErroneousDecl( int col, int line) {
+
         super((new IdentifierType(col,line)), new Identifier("ERROR",col,line), col, line);
+    erroneous = true;
     }
 }

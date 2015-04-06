@@ -5,7 +5,7 @@ import Visitor.TypeVisitor;
 public class IdentifierType extends Type {
   public String s;
     public boolean methClass = false;
-    public boolean erroneous = false;
+
 
   public IdentifierType(String as,int col,int line) {
     s=as;

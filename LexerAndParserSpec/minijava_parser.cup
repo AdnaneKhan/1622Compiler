@@ -140,7 +140,7 @@ MethodDeclList ::= MethodDeclList:mdl MethodDecl:md  {: mdl.addElement(md); RESU
        ;
 
 MethodDecl ::= PUBLIC Type:t ID:i LEFT_PAREN FormalSeparate:fl LEFT_CURLY VarDeclList:v StatementList:sl RETURN Exp:e SEMI RIGHT_CURLY {: RESULT = new MethodDecl(t,i,fl,v,sl,e,ileft,iright); :}
-        | error:e RIGHT_CURLY {: parser.printError(eleft, eright);  :}
+        | error:e RIGHT_CURLY {: parser.printError(eleft, eright); RESULT = new ErroneousMethodDecl(eleft,eright); :}
         ;
 
 FormalSeparate ::=  FormalList:fl RIGHT_PAREN {: RESULT = fl; :}

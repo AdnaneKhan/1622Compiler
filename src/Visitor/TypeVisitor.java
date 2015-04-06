@@ -74,4 +74,6 @@ public interface TypeVisitor {
     public Type visit(ErroneousStatement n);
 
     public Type visit(ErroneousClassDecl n);
+
+    public Type visit(ErroneousMethodDecl n);
 }
