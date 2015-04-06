@@ -20,9 +20,40 @@ public class IRGeneratorVisitor implements Visitor {
     int varSubscriptNum = 0;
 
 
+
+    private String resolveVars(String theVar) {
+        String varReturn= null;
+        TableEntry toExtact = base.getCurrentScope().getEntryWalk(theVar, SymbolTable.LEAF_ENTRY);
+        if (toExtact.parent.isEntry(SymbolTable.CLASS_ENTRY)) {
+
+            ClassTable parent = (ClassTable) toExtact.parent;
+            ClassDecl tempClass = (ClassDecl) parent.getNode();
+            String className = tempClass.i.s;
+
+             varReturn = className + "_" + theVar;
+
+        } else if (toExtact.parent.isEntry(SymbolTable.METHOD_ENTRY)) {
+            MethodTable temp = (MethodTable) toExtact.parent;
+
+            MethodDecl methodTest = (MethodDecl) temp.getNode();
+            String methName = methodTest.i.s;
+
+            ClassTable parent = (ClassTable) temp.parent;
+            ClassDecl tempClass = (ClassDecl) parent.getNode();
+            String className = tempClass.i.s;
+
+             varReturn = className + "_" + methName + "_" + theVar;
+
+
+        }
+
+        return varReturn;
+    }
+
+
     public IRGeneratorVisitor(SymbolTable toUse) {
         base = toUse;
-        classes = new ArrayList<IRMethod>();
+        classes = new ArrayList<IRClass>();
         quadstack = new ArrayList<Quadruple>();
     }
 
@@ -93,13 +124,17 @@ public class IRGeneratorVisitor implements Visitor {
     // MainClass m;
     // ClassDeclList cl;
     public void visit(Program n) {
-        currentClass = new IRClass(m.i1.s);
+        currentClass = new IRClass(n.m.i1.s);
         n.m.accept(this);
         classes.add(currentClass);
-        methodSubscriptNum++;
         for (int i = 0; i < n.cl.size(); i++) {
             n.cl.elementAt(i).accept(this);
         }
+
+        for (int i = 0; i < classes.size(); i++) {
+            System.out.println(classes.get(i));
+        }
+
     }
 
     // Identifier i1,i2;
@@ -107,7 +142,7 @@ public class IRGeneratorVisitor implements Visitor {
     public void visit(MainClass n) {
         base.descendScope(n.i1.s, SymbolTable.CLASS_ENTRY);
 
-        currentMethod = new IRMethod("main_" + methodSubscriptNum);
+        currentMethod = new IRMethod("main");
         n.i1.accept(this);
         n.i2.accept(this);
         currentQuad = new Quadruple();
@@ -129,14 +164,15 @@ public class IRGeneratorVisitor implements Visitor {
     public void visit(ClassDeclSimple n) {
         currentClass = new IRClass(n.i.s);
 
-        base.descendScope(n.i.s,SymbolTable.CLASS_ENTRY);
+        base.descendScope(n.i.s, SymbolTable.CLASS_ENTRY);
 
         n.i.accept(this);
         for (int i = 0; i < n.vl.size(); i++) {
             n.vl.elementAt(i).accept(this);
         }
         for (int i = 0; i < n.ml.size(); i++) {
-            currentMethod = new IRMethod(n.ml.elementAt(i).i.toString() + "_" + methodSubscriptNum);
+            String methodLabel = n.i.s + "_" + n.ml.elementAt(i).i.toString();
+            currentMethod = new IRMethod(methodLabel);
             n.ml.elementAt(i).accept(this);
             currentClass.add(currentMethod);
         }
@@ -144,7 +180,6 @@ public class IRGeneratorVisitor implements Visitor {
         base.ascendScope();
 
         classes.add(currentClass);
-        methodSubscriptNum++;
     }
 
     // Identifier i;
@@ -154,7 +189,7 @@ public class IRGeneratorVisitor implements Visitor {
     public void visit(ClassDeclExtends n) {
         currentClass = new IRClass(n.i.s, n.j.s);
 
-        base.descendScope(n.i.s,SymbolTable.CLASS_ENTRY);
+        base.descendScope(n.i.s, SymbolTable.CLASS_ENTRY);
 
         n.i.accept(this);
         n.j.accept(this);
@@ -162,7 +197,9 @@ public class IRGeneratorVisitor implements Visitor {
             n.vl.elementAt(i).accept(this);
         }
         for (int i = 0; i < n.ml.size(); i++) {
-            currentMethod = new IRMethod(n.ml.elementAt(i).i.toString() + "_" + methodSubscriptNum);
+
+            String methodLabel = n.i.s + "_" + n.ml.elementAt(i).i.toString();
+            currentMethod = new IRMethod(methodLabel);
             n.ml.elementAt(i).accept(this);
             currentClass.add(currentMethod);
         }
@@ -170,7 +207,6 @@ public class IRGeneratorVisitor implements Visitor {
         base.ascendScope();
 
         classes.add(currentClass);
-        methodSubscriptNum++;
     }
 
     // Type t;
@@ -376,7 +412,9 @@ public class IRGeneratorVisitor implements Visitor {
     // Exp e;
     public void visit(Assign n) {
         currentQuad = quadstack.get(top());
-        currentQuad.result = n.i.s;
+
+
+        currentQuad.result = this.resolveVars(n.i.s);
         quadstack.set(top(), currentQuad);
 
         n.i.accept(this);
@@ -396,7 +434,7 @@ public class IRGeneratorVisitor implements Visitor {
     // Exp e1,e2;
     public void visit(ArrayAssign n) {
         currentQuad = quadstack.get(top());
-        currentQuad.result = n.i.s;
+        currentQuad.result = resolveVars(n.i.s);
         quadstack.set(top(), currentQuad);
 
         n.i.accept(this);
@@ -614,7 +652,22 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad = quadstack.get(top());
         currentQuad.result = "_t" + tempNum;
         tempNum++;
-        currentQuad.arg1 = n.i.s;
+
+
+        String toAdd = "";
+        if (n.e instanceof NewObject) {
+            String lookup = ((NewObject) n.e).i.s;
+
+            toAdd = lookup + "_";
+
+        } else if (n.e instanceof IdentifierExp) {
+            String lookup = ((IdentifierExp)n.e).s;
+            SymbolEntry temp = (SymbolEntry) base.getCurrentScope().getEntryWalk(lookup,TableEntry.LEAF_ENTRY);
+
+        }
+
+        currentQuad.arg1 = toAdd+ n.i.s;
+
         quadstack.set(top(), currentQuad);
 
         currentQuad = new Quadruple();
@@ -674,6 +727,7 @@ public class IRGeneratorVisitor implements Visitor {
     // String s;
     public void visit(IdentifierExp n) {
         currentQuad = quadstack.get(top());
+
         currentQuad.result = n.s;
         quadstack.set(top(), currentQuad);
     }

@@ -140,7 +140,6 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
             // Check for duplicate method names in class
             for (int i = 0; i < n.ml.size(); i++) {
                 if (current.hasEntry(n.ml.elementAt(i).i.toString(),SymbolTable.METHOD_ENTRY)) {
-
                     Errors.multiplyDefinedError(n.ml.elementAt(i).lineNum(), n.ml.elementAt(i).charNum(), n.ml.elementAt(i).i.s);
                 } else {
                     current.putMethod(n.ml.elementAt(i));
@@ -183,9 +182,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
                     if (current.hasEntry(n.vl.elementAt(i).i.toString(), SymbolTable.LEAF_ENTRY)) {
                         Errors.multiplyDefinedError(n.vl.elementAt(i).lineNum(), n.vl.elementAt(i).charNum(), n.vl.elementAt(i).i.s);
                     } else {
-                        if (base.getCurrentScope().isEntry(SymbolEntry.CLASS_ENTRY)) {
-                            current.putVariable(n.vl.elementAt(i));
-                        }
+                        current.putVariable(n.vl.elementAt(i));
                         n.vl.elementAt(i).accept(this);
                     }
                 }
@@ -195,7 +192,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
             for (int i = 0; i < n.ml.size(); i++) {
                 // Checks if there is a duplicate method in iether this class OR the suuper class because there is no overriding.
                 if (current.hasEntry(n.ml.elementAt(i).i.toString(), SymbolTable.METHOD_ENTRY) ||
-                        base.getClassTable(n.j.toString()).hasEntry(n.ml.elementAt(i).i.toString(), SymbolEntry.METHOD_ENTRY)) {
+                     base.getClassTable(n.j.toString()).hasEntry(n.ml.elementAt(i).i.toString(), SymbolEntry.METHOD_ENTRY)) {
 
 
                     Errors.multiplyDefinedError(n.ml.lineNum(), n.i.charNum(), n.i.s);
@@ -206,7 +203,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
 
             // Now actually accept them
             for (int i = 0; i < n.ml.size(); i++) {
-                if (!current.hasEntry(n.ml.elementAt(i).i.toString(), SymbolTable.METHOD_ENTRY)) {
+                if (current.hasEntry(n.ml.elementAt(i).i.toString(), SymbolTable.METHOD_ENTRY)) {
                     n.ml.elementAt(i).accept(this);
                 }
             }

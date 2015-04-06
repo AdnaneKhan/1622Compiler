@@ -26,12 +26,10 @@ public class IRMethod {
     }
 
     public Quadruple get(int i) {
-        line.get(i);
+        return lines.get(i);
+
     }
 
-    public String getName() {
-        return name;
-    }
 
     public void replace(Quadruple quad, int i) {
         lines.set(i, quad);
@@ -43,7 +41,7 @@ public class IRMethod {
      */
     @Override
     public String toString() {
-        String ret = name + ": ";
+        String ret = name + ": \n";
         for (int i = 0; i < this.getLength(); i++) {
             ret += lines.get(i).toString() + "\n";
         }

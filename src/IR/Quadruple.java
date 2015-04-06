@@ -1,5 +1,8 @@
 package IR;
 
+import SymTable.SymbolEntry;
+import SymTable.TableEntry;
+
 public class Quadruple {
 
 	public final static int ASSIGNMENT = 1;
@@ -19,7 +22,8 @@ public class Quadruple {
     public final static int LABEL = 15;
 
 	public String arg1;
-	public String arg2;
+    public String arg2;
+
 	public String op;
 	public String result;
 	public int type;

@@ -7,18 +7,18 @@ import java.lang.Override;
 public class IRClass {
     private ArrayList<IRMethod> lines;
     private String name;
-    private String extends;
+    private String extend;
 
     public IRClass(String s) {
         lines = new ArrayList<IRMethod>();
         name = s;
-        extends = "";
+        extend = "";
     }
 
     public IRClass(String s1, String s2) {
         lines = new ArrayList<IRMethod>();
         name = s1;
-        extends = s2;
+        extend = s2;
     }
 
     public int getLength() {
@@ -38,7 +38,7 @@ public class IRClass {
     }
 
     public String getExtends() {
-        return extends;
+        return extend;
     }
 
     public void replace(IRMethod method, int i) {
@@ -53,9 +53,9 @@ public class IRClass {
      */
     @Override
     public String toString() {
-        String ret = name + ": ";
+        String ret = "";
         for (int i = 0; i < this.getLength(); i++) {
-            ret += lines.get(i).toString() + "\n";
+            ret += lines.get(i).toString();
         }
         return ret;
     }

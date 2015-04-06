@@ -572,15 +572,36 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
     // String s;
     public Type visit(Identifier n) {
-        Type retV;
+        Type retV = null;
 
+        
         if (base.getCurrentScope().hasEntry(n.s, TableEntry.METHOD_ENTRY)) {
             MethodTable typeVar = (MethodTable) base.getCurrentScope().getEntry(n.s, TableEntry.METHOD_ENTRY);
             retV = typeVar.getRetType();
         } else if (base.getCurrentScope().hasEntryWalk(n.s,TableEntry.LEAF_ENTRY)) {
            SymbolEntry typeVar = (SymbolEntry) base.getCurrentScope().getEntryWalk(n.s,TableEntry.LEAF_ENTRY);
            retV = typeVar.getType();
-        } else {
+        } else if (base.getCurrentScope().parent.isEntry(TableEntry.METHOD_ENTRY)) {
+            ClassDecl tempDecl = (ClassDecl) base.getCurrentScope().parent.getNode();
+            if (tempDecl instanceof ClassDeclExtends) {
+                String superClass = ((ClassDeclExtends) tempDecl).j.s;
+
+                ClassTable tableToUse = base.getClassTable(superClass);
+                if (tableToUse.hasEntry(n.s, TableEntry.METHOD_ENTRY)) {
+                    MethodTable typeVar = (MethodTable) tableToUse.getEntry(n.s, TableEntry.METHOD_ENTRY);
+                    retV = typeVar.getRetType();
+                } else if (tableToUse.hasEntry(n.s,TableEntry.LEAF_ENTRY)) {
+                    SymbolEntry typeVar = (SymbolEntry) tableToUse.getEntry(n.s,TableEntry.LEAF_ENTRY);
+                    retV = typeVar.getType();
+                }
+            } else {
+                IdentifierType temp = new IdentifierType(":UNKNOWN_TYPE:",n.lineNum(),n.charNum() );
+                temp.erroneous = true;
+                retV = temp;
+            }
+        }
+            else
+        {
             // We don't know the type, so we lie and create fake ID
             // We use a string that can not be used as a valid type
             // as to avoid any conflicts
