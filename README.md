@@ -22,6 +22,8 @@ Implementation Details:
  
  In addition to this nodes that represent parse errors have been added. This allows name analysis and type checking to continue
  in cases where pare errors were recovered from.
+ 
+ IR generation is unable to handle scopes with extended classes.
 
 Considerations:
 -----------------

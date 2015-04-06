@@ -1,13 +1,16 @@
 package Visitor;
 
-import IR.Parameter3AC;
 import SymTable.*;
 import SyntaxTree.*;
+
+import java.util.LinkedList;
+import java.util.Stack;
 
 
 public class NameAnalysisVisitor extends DepthFirstVisitor {
 
     SymbolTable base;
+    String extendsClass= null;
 
     TableEntry swapper = null;
 
@@ -33,6 +36,20 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
         return className;
     }
 
+    private boolean checkSuper(String s,int type) {
+        boolean retValue =false;
+
+        if (extendsClass != null) {
+            ClassTable superClass = base.getClassTable(extendsClass);
+
+            if (superClass != null) {
+                retValue = superClass.hasEntry(s,type);
+            }
+        }
+        return retValue;
+    }
+
+
     // MainClass m;
     // ClassDeclList cl;
     public void visit(Program n) {
@@ -54,6 +71,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
             }
         }
 
+        Stack<ClassDecl> supers = new Stack<ClassDecl>();
         // Checks that super classes exist where 'extends' called
         for (int i = 0; i < n.cl.size(); i++) {
 
@@ -65,11 +83,9 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
                 if (cursor instanceof ClassDeclExtends) {
                     String extendsName = ((ClassDeclExtends) cursor).j.toString();
                     if (!(base.hasEntry(extendsName, SymbolTable.CLASS_ENTRY))) {
-
                         Errors.identifierError(cursor.lineNum(), cursor.charNum(), className);
-
                     } else {
-                        cursor.accept(this);
+                        supers.push(cursor);
                     }
                 } else {
                     cursor.accept(this);
@@ -77,6 +93,11 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
             } else {
                 Errors.clear = false;
             }
+        }
+
+        // Go and Actually accept the classes that extend
+        for (ClassDecl extendClass : supers) {
+            extendClass.accept(this);
         }
 
 
@@ -166,13 +187,14 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
     // MethodDeclList ml;
     public void visit(ClassDeclExtends n) {
         base.descendScope(n.i.s,SymbolTable.CLASS_ENTRY);
+        extendsClass = n.j.s;
+
 
         ClassTable current;
         if (base.getCurrentScope().isEntry(SymbolEntry.CLASS_ENTRY)) {
             current = (ClassTable) base.getCurrentScope();
 
             // Check the parent class
-
             n.i.accept(this);
             n.j.accept(this);
 
@@ -190,12 +212,8 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
 
             // Check for duplicate method names in class
             for (int i = 0; i < n.ml.size(); i++) {
-                // Checks if there is a duplicate method in iether this class OR the suuper class because there is no overriding.
-                if (current.hasEntry(n.ml.elementAt(i).i.toString(), SymbolTable.METHOD_ENTRY) ||
-                     base.getClassTable(n.j.toString()).hasEntry(n.ml.elementAt(i).i.toString(), SymbolEntry.METHOD_ENTRY)) {
-
-
-                    Errors.multiplyDefinedError(n.ml.lineNum(), n.i.charNum(), n.i.s);
+                if (current.hasEntry(n.ml.elementAt(i).i.toString(), SymbolTable.METHOD_ENTRY)) {
+                    Errors.multiplyDefinedError(n.ml.elementAt(i).i.lineNum(), n.ml.elementAt(i).i.charNum(), n.ml.elementAt(i).i.s);
                 } else {
                     current.putMethod(n.ml.elementAt(i));
                 }
@@ -213,6 +231,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
             // FUNCTIONALITY
         }
 
+        extendsClass = null;
         base.ascendScope();
 
     }
@@ -269,7 +288,6 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
     public void visit(IdentifierType n) {
         boolean identifierFound = false;
 
-
         // Check the base scope for the existence of a class with
         // The same identifier
         if (base.hasEntry(n.s, SymbolTable.CLASS_ENTRY)) {
@@ -277,13 +295,13 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
         }
 
         if (!identifierFound && !n.erroneous) {
+
             Errors.identifierError(n.lineNum(), n.charNum(), n.s);
         }
 
         if (n.erroneous) {
             Errors.clear = false;
         }
-
     }
 
     // Identifier i;
@@ -291,6 +309,16 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
     public void visit(Assign n) {
         boolean identifierFound = false;
 
+
+        if (extendsClass != null) {
+            ClassTable superClass = base.getClassTable(extendsClass);
+
+            if (superClass != null) {
+                if (superClass.hasEntry(n.i.s,SymbolTable.LEAF_ENTRY)) {
+                    identifierFound = true;
+                }
+            }
+        }
 
         if (base.getCurrentScope().hasEntryWalk(n.i.s,SymbolTable.LEAF_ENTRY)) {
             identifierFound = true;
@@ -305,21 +333,16 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
 
     }
 
+
+
     // Identifier i;
     // Exp e1,e2;
     public void visit(ArrayAssign n) {
+        boolean identifierFound;
 
-        boolean identifierFound = false;
-        TableEntry cursorScope = base.getCurrentScope();
-        // While the parent isn't null and the identifier is not found
-        while (!cursorScope.isEntry(SymbolTable.ROOT_ENTRY) && !identifierFound) {
-
-            // Check the keys for the identifier, if found set to true, else ascend scope
-            if (cursorScope.hasEntry(n.i.toString(), SymbolTable.LEAF_ENTRY)) {
-                identifierFound = true;
-            } else {
-                cursorScope = cursorScope.parent;
-            }
+        identifierFound = checkSuper(n.i.s,SymbolTable.LEAF_ENTRY);
+        if (!identifierFound) {
+            identifierFound = base.getCurrentScope().hasEntryWalk(n.i.s, SymbolTable.LEAF_ENTRY);
         }
 
         if (!identifierFound) {
@@ -327,6 +350,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
         } else {
             n.i.accept(this);
         }
+
         n.e1.accept(this);
         n.e2.accept(this);
     }
@@ -337,36 +361,8 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
     // ExpList el;
     public void visit(Call n) {
         n.e.accept(this);
-        boolean identifierFound = false;
+        n.i.accept(this);
 
-        TableEntry scopeCursor = base.getCurrentScope();
-
-        // While the parent isn't null and the identifier is not found
-        while (scopeCursor != null && !identifierFound) {
-            // f
-
-
-            if (swapper != null && swapper.hasEntry(n.i.toString(), SymbolTable.METHOD_ENTRY)) {
-                identifierFound = true;
-                break;
-            }
-
-            swapper = null;
-
-
-            // Check the keys for the identifier, if found set to true, else ascend scope
-            if (scopeCursor.hasEntry(n.i.toString(), SymbolEntry.METHOD_ENTRY)) {
-                identifierFound = true;
-            } else {
-                scopeCursor = scopeCursor.parent;
-            }
-        }
-
-        if (!identifierFound) {
-            Errors.identifierError(n.i.lineNum(), n.i.charNum(), n.i.s);
-        } else {
-            n.i.accept(this);
-        }
 
         for (int i = 0; i < n.el.size(); i++) {
             n.el.elementAt(i).accept(this);
@@ -377,14 +373,17 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
     public void visit(IdentifierExp n) {
         boolean identifierFound = false;
 
-        // While the parent isn't null and the identifier is not found
+        identifierFound = checkSuper(n.s,SymbolTable.LEAF_ENTRY);
+        if (!identifierFound) {
+            checkSuper( n.s,SymbolTable.LEAF_ENTRY);
+        }
 
-            // Check the keys for the identifier, if found set to true, else ascend scope
-            if (base.getCurrentScope().hasEntryWalk(n.s, SymbolTable.LEAF_ENTRY) ||
-                    base.getCurrentScope().hasEntryWalk(n.s,SymbolTable.METHOD_ENTRY) ||
-                    base.getCurrentScope().hasEntryWalk(n.s,SymbolTable.CLASS_ENTRY)) {
+        // Check the keys for the identifier, if found set to true, else ascend scope
+        if (base.getCurrentScope().hasEntryWalk(n.s, SymbolTable.LEAF_ENTRY) ||
+            base.getCurrentScope().hasEntryWalk(n.s,SymbolTable.METHOD_ENTRY) ||
+            base.getCurrentScope().hasEntryWalk(n.s,SymbolTable.CLASS_ENTRY)) {
                 identifierFound = true;
-            }
+        }
 
         if (!identifierFound) {
             Errors.identifierError(n.lineNum(), n.charNum(), n.s);
@@ -398,12 +397,12 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
         // Check if keys contain class name of new object
         if (base.hasEntry(n.i.toString(), SymbolTable.CLASS_ENTRY)) {
             identifierFound = true;
-
             // Set flag
             swapper = base.getClassTable(n.i.toString());
         }
 
         if (!identifierFound) {
+
             Errors.identifierError(n.i.lineNum(), n.i.charNum(), n.i.s);
         }
     }

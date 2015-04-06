@@ -100,7 +100,7 @@ precedence left AND;
 precedence left LESS;
 precedence left PLUS, MINUS;
 precedence left TIMES;
-precedence right NOT;
+
 
 start with MiniJavaProgram;
 

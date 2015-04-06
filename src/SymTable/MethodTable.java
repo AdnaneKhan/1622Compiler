@@ -18,7 +18,7 @@ public class MethodTable extends TableEntry {
 
     }
 
-    public Type getRetType() {
+    public Type getType() {
         return retType;
     }
 

@@ -14,7 +14,7 @@ public abstract class Errors {
 
     public static void multiplyDefinedError(int line, int column, String name) {
         clear = false;
-        System.out.println("Multiply defined identifier " + name + " at line " + line + " character" + column);
+        System.out.println("Multiply defined identifier " + name + " at line " + line + " character " + column);
     }
 
     public static void classMethodAssign(int line, int column, String id1, String id2) {
