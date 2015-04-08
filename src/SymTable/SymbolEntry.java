@@ -17,7 +17,7 @@ public class SymbolEntry extends TableEntry{
      * will represent.
      *
      */
-    public SymbolEntry(String symbolName,Type t, ASTNode constructFrom) {
+    public SymbolEntry(String symbolName, Type t, ASTNode constructFrom) {
         super(constructFrom);
 
         symType = t;

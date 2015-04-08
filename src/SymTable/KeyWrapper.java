@@ -5,9 +5,6 @@ package SymTable;
  */
 public class KeyWrapper {
 
-    public static final int DEFAULT = 0;
-
-
     public String toHash;
     public int type;
 

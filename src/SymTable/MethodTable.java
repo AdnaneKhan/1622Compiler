@@ -14,6 +14,7 @@ public class MethodTable extends TableEntry {
 
         if (makeFrom instanceof MethodDecl) {
             retType = ((MethodDecl) makeFrom).t;
+            this.symbolName = ((MethodDecl) makeFrom).i.s;
         }
 
     }

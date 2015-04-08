@@ -88,26 +88,22 @@ public class SymbolTable extends TableEntry{
 
     }
 
-
     public void putClass(ClassDeclExtends classNode) {
-        ClassTable tableEntry = new ClassTable(classNode);
-        // Set parent of the table entry to this class
-        tableEntry.parent = this;
+        ClassTable tableEntry = new ClassTable(classNode,this);
+
         put( classNode.i.toString(),tableEntry);
     }
 
     public void putClass(ClassDeclSimple classNode) {
-        ClassTable tableEntry = new ClassTable(classNode);
-           // Set parent of the table entry to this class
-        tableEntry.parent = this;
+        ClassTable tableEntry = new ClassTable(classNode,this);
+
         put(classNode.i.toString(),tableEntry);
 
     }
 
     public void putClass(MainClass classNode) {
 
-        ClassTable tableEntry = new ClassTable(classNode);
-        tableEntry.parent = this;
+        ClassTable tableEntry = new ClassTable(classNode,this);
         put(classNode.i1.toString(),tableEntry);
     }
 

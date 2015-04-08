@@ -80,6 +80,7 @@ public abstract  class TableEntry {
         return null;
     }
 
+
     /**
      *
      * @param key
@@ -90,10 +91,22 @@ public abstract  class TableEntry {
         TableEntry retV = null;
 
         TableEntry cursor =this;
+        KeyWrapper checkKey = new KeyWrapper(key,entry_type);
 
         do {
             if (cursor.entryType() != LEAF_ENTRY) {
-                retV = cursor.hash.get(new KeyWrapper(key,entry_type));
+                if (cursor.isEntry(CLASS_ENTRY)) {
+
+                    if (entry_type == METHOD_ENTRY) {
+                        retV = ((ClassTable) cursor).getMethod(key);
+
+                    } else if (entry_type == LEAF_ENTRY) {
+                        retV= ((ClassTable) cursor).getVariable(key);
+                    }
+                } else {
+                    retV = cursor.hash.get(checkKey);
+                }
+
                 if (retV != null) {
                     break;
                 }
@@ -114,19 +127,17 @@ public abstract  class TableEntry {
 
         boolean found = false;
         TableEntry cursor =this;
+        KeyWrapper checkKey = new KeyWrapper(key,entry_type);
 
         do {
-
            if (cursor.entryType() != LEAF_ENTRY) {
-                TableEntry val = cursor.hash.get(new KeyWrapper(key,entry_type));
-               if (val != null) {
-                   found = true;
+                found = cursor.hash.containsKey(checkKey);
+               if (found) {
                    break;
                }
            }
                 cursor = cursor.parent;
         } while (cursor != null);
-
 
        return found;
     }

@@ -54,6 +54,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
     // ClassDeclList cl;
     public void visit(Program n) {
 
+        Stack<ClassDecl> supers = new Stack<ClassDecl>();
         // Checks that classes do not have the same name while adding them to symbol table
         for (int i = 0; i < n.cl.size(); i++) {
             ClassDecl cursor = n.cl.elementAt(i);
@@ -61,17 +62,25 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
             if (!cursor.erroneous) {
                 String className = extractClassName(cursor);
 
-                if (!(base.hasEntry(className,SymbolTable.CLASS_ENTRY))) {
-                    base.putClass(cursor);
-                } else {
+                if (base.hasEntry(className,SymbolTable.CLASS_ENTRY)) {
                     Errors.multiplyDefinedError(cursor.lineNum(), cursor.charNum(), className);
+                } else {
+                    if (cursor instanceof ClassDeclExtends) {
+                        supers.push(cursor);
+                    } else {
+                        base.putClass(cursor);
+                    }
                 }
             } else {
                 Errors.clear = false;
             }
         }
 
-        Stack<ClassDecl> supers = new Stack<ClassDecl>();
+        for (ClassDecl defLast : supers) {
+            base.putClass(defLast);
+        }
+
+
         // Checks that super classes exist where 'extends' called
         for (int i = 0; i < n.cl.size(); i++) {
 
@@ -84,8 +93,6 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
                     String extendsName = ((ClassDeclExtends) cursor).j.toString();
                     if (!(base.hasEntry(extendsName, SymbolTable.CLASS_ENTRY))) {
                         Errors.identifierError(cursor.lineNum(), cursor.charNum(), className);
-                    } else {
-                        supers.push(cursor);
                     }
                 } else {
                     cursor.accept(this);
@@ -95,9 +102,9 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
             }
         }
 
-        // Go and Actually accept the classes that extend
-        for (ClassDecl extendClass : supers) {
-            extendClass.accept(this);
+        // Now actually accept hte ones that hav esuper calsses
+        for (ClassDecl defLast : supers) {
+            defLast.accept(this);
         }
 
 
