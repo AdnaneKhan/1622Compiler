@@ -5,8 +5,8 @@ import SyntaxTree.*;
 
 public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
+
     SymbolTable base;
-    ClassTable extendsClass = null;
     public TypeCheckingVisitor(SymbolTable toUse) {
 
         // This symbol table has already been populated with appropriate values
@@ -77,7 +77,6 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     public Type visit(ClassDeclExtends n) {
 
         base.descendScope(n.i.s,SymbolTable.CLASS_ENTRY);
-        extendsClass = base.getClassTable(n.i.s);
 
         n.i.accept(this);
         n.j.accept(this);
@@ -87,8 +86,6 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         for (int i = 0; i < n.ml.size(); i++) {
             n.ml.elementAt(i).accept(this);
         }
-        extendsClass = null;
-
         base.ascendScope();
         return null;
     }
@@ -501,11 +498,6 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
         if (entry instanceof SymbolEntry) {
             returnVal = ((SymbolEntry) entry).getType();
-        } else if (extendsClass != null ) {
-           SymbolEntry superV = (SymbolEntry)extendsClass.getEntry(n.s,TableEntry.LEAF_ENTRY);
-            if (   superV != null) {
-                returnVal = superV.getType();
-            }
         }
 
         if (returnVal == null ) {
