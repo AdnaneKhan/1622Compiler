@@ -3,6 +3,8 @@ package Visitor;
 import SymTable.*;
 import SyntaxTree.*;
 import IR.*;
+import com.sun.tools.javac.util.Name;
+
 import java.util.ArrayList;
 
 public class IRGeneratorVisitor implements Visitor {
@@ -20,35 +22,16 @@ public class IRGeneratorVisitor implements Visitor {
     int varSubscriptNum = 0;
 
 
+    private TableEntry getSymbol(String theVar) {
+        TableEntry toExtract = base.getCurrentScope().getEntryWalk(theVar,SymbolTable.LEAF_ENTRY);
 
-    private String resolveVars(String theVar) {
-        String varReturn= null;
-        TableEntry toExtact = base.getCurrentScope().getEntryWalk(theVar, SymbolTable.LEAF_ENTRY);
-        if (toExtact.parent.isEntry(SymbolTable.CLASS_ENTRY)) {
-
-            ClassTable parent = (ClassTable) toExtact.parent;
-            ClassDecl tempClass = (ClassDecl) parent.getNode();
-            String className = tempClass.i.s;
-
-             varReturn = className + "_" + theVar;
-
-        } else if (toExtact.parent.isEntry(SymbolTable.METHOD_ENTRY)) {
-            MethodTable temp = (MethodTable) toExtact.parent;
-
-            MethodDecl methodTest = (MethodDecl) temp.getNode();
-            String methName = methodTest.i.s;
-
-            ClassTable parent = (ClassTable) temp.parent;
-            ClassDecl tempClass = (ClassDecl) parent.getNode();
-            String className = tempClass.i.s;
-
-             varReturn = className + "_" + methName + "_" + theVar;
-
-
+        if (toExtract == null) {
+            System.err.println("WAARNING, RETURNING NULL FROM GET SYMBOL IN IR!!");
         }
 
-        return varReturn;
+        return toExtract;
     }
+
 
 
     public IRGeneratorVisitor(SymbolTable toUse) {
@@ -414,7 +397,8 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad = quadstack.get(top());
 
 
-        currentQuad.result = this.resolveVars(n.i.s);
+        currentQuad.setResEntry( getSymbol(n.i.s));
+
         quadstack.set(top(), currentQuad);
 
         n.i.accept(this);
@@ -434,7 +418,7 @@ public class IRGeneratorVisitor implements Visitor {
     // Exp e1,e2;
     public void visit(ArrayAssign n) {
         currentQuad = quadstack.get(top());
-        currentQuad.result = resolveVars(n.i.s);
+
         quadstack.set(top(), currentQuad);
 
         n.i.accept(this);
@@ -567,6 +551,7 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad = quadstack.get(top());
         currentQuad.arg2 = tempQuad.result;
         quadstack.set(top(), currentQuad);
+
         currentMethod.add(currentQuad);
     }
 
@@ -657,7 +642,6 @@ public class IRGeneratorVisitor implements Visitor {
         String toAdd = "";
         if (n.e instanceof NewObject) {
             String lookup = ((NewObject) n.e).i.s;
-
             toAdd = lookup + "_";
 
         } else if (n.e instanceof IdentifierExp) {
@@ -763,7 +747,11 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad.result = "_t" + tempNum;
         tempNum++;
         currentQuad.op = "new";
+
+        // Get the actual object
         currentQuad.arg1 = n.i.s;
+        currentQuad.setArg1(base.getCurrentScope().getEntryWalk(n.i.s, TableEntry.CLASS_ENTRY));
+
         quadstack.set(top(), currentQuad);
         currentMethod.add(currentQuad);
     }

@@ -44,7 +44,10 @@ public class MethodTable extends TableEntry {
         hash.put(new KeyWrapper(toAdd.i.s, LEAF_ENTRY), newLeaf);
     }
 
-
+    /**
+     *
+     * @param toAdd parameter list variable to add to this mmethod
+     */
     public void putVariable(Formal toAdd) {
         SymbolEntry newLeaf = new SymbolEntry(toAdd.i.s,toAdd.t, toAdd);
         newLeaf.parent = this;

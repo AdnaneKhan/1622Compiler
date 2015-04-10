@@ -10,6 +10,12 @@ import java.util.HashMap;
 public class ClassTable extends TableEntry {
     private ClassTable parentClass;
 
+
+    /**
+     *
+     * @param makeFrom AST node that represents this class
+     * @param parent parent of this class (the root node normally)
+     */
     public ClassTable(ASTNode makeFrom, TableEntry parent) {
         super(makeFrom);
 
@@ -22,9 +28,13 @@ public class ClassTable extends TableEntry {
             // Get the root class and link it in
             ClassDeclExtends actualNode = (ClassDeclExtends) makeFrom;
             Identifier parentId = actualNode.j;
-
+            this.symbolName = actualNode.i.s;
             parentClass = (ClassTable) parent.getEntry(parentId.s,CLASS_ENTRY);
+        } else if (makeFrom instanceof ClassDeclSimple) {
+            this.symbolName = ((ClassDeclSimple)makeFrom).i.s;
         }
+
+
 
     }
 
@@ -37,6 +47,11 @@ public class ClassTable extends TableEntry {
         return entryType == CLASS_ENTRY;
     }
 
+    /**
+     *
+     * @param key namme of varaible
+     * @return symbol entry for that variable
+     */
     public SymbolEntry getVariable(String key) {
         SymbolEntry returnV = null;
 
@@ -52,6 +67,11 @@ public class ClassTable extends TableEntry {
         return returnV;
     }
 
+    /**
+     *
+     * @param key string id of method belonging to this class
+     * @return symbol table for that method, null if not found
+     */
     public MethodTable getMethod(String key) {
         MethodTable returnV = null;
 
@@ -73,12 +93,20 @@ public class ClassTable extends TableEntry {
         hash.put(keyWrap,value);
     }
 
+    /**
+     * Adds a method as a child of this class
+     * @param methodNode the mmethod to add
+     */
     public void putMethod( MethodDecl methodNode) {
             MethodTable methTable = new MethodTable(methodNode);
             methTable.parent = this;
             put ( methodNode.i.toString(),methTable, METHOD_ENTRY);
     }
 
+    /**
+     * Adds a variable declaration to this class
+     * @param newVar the variable to add
+     */
     public void putVariable( VarDecl newVar ) {
         SymbolEntry var = new SymbolEntry(newVar.i.s,newVar.t, newVar);
         var.parent = this;
