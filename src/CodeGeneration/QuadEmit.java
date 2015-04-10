@@ -58,7 +58,19 @@ public class QuadEmit {
             instruction.append(getAReg());
             instruction.append(", ");
             instruction.append(quad.getResult());
+        } else {
+            String paramVar = regMap.get(quad.getResult());
+
+
+            instruction.append("move ");
+            instruction.append(getAReg());
+            instruction.append(", ");
+            instruction.append(paramVar);
+
+
         }
+
+
         return instruction.toString();
     }
 
@@ -90,7 +102,7 @@ public class QuadEmit {
         String var = quad.getResult();
         String reg;
         if (regMap.containsKey(var)) {
-         reg = regMap.get(var);
+             reg = regMap.get(var);
 
         } else {
              reg = getTReg();
@@ -101,7 +113,20 @@ public class QuadEmit {
 
         // If the lhs and rhs are literals then we need to get them and
         // first li to the reg, then add the second one to the reg
+        if (quad.arg1Literal() && quad.arg2Literal()) {
 
+            String resRegister= getTReg();
+            regMap.put(quad.getResult(),resRegister);
+
+            instruction.append("li").append(" ");
+            instruction.append(resRegister).append(", ");
+            instruction.append(quad.getArg1()).append("\n");
+
+
+            instruction.append("addi").append(" ");
+            instruction.append(resRegister).append(", ").append(resRegister);
+            instruction.append(", ").append(quad.getArg2());
+        }
 
 
         return instruction.toString();

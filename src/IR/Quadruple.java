@@ -101,7 +101,7 @@ public class Quadruple {
         arg1 = toSet;
     }
 
-    private String getArg1()  {
+    public String getArg1()  {
         if (arg1Literal) {
             return Integer.toString(arg1Int);
         } else {
@@ -110,7 +110,7 @@ public class Quadruple {
     }
 
 
-    private String getArg2()  {
+    public String getArg2()  {
         if (arg2Literal) {
             return Integer.toString(arg2Int);
         } else {
