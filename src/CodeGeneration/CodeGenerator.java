@@ -37,7 +37,7 @@ public class CodeGenerator {
         if (fRegC == 4) {
             // Limit Reached
         } else {
-            tempReg = "$t" + fRegC;
+            tempReg = "$a" + fRegC;
             fRegC++;
         }
         return tempReg;
@@ -69,7 +69,7 @@ public class CodeGenerator {
         if ( quad.isLiteral() ) {
             instruction.append("addi ");
             instruction.append(getAReg());
-            instruction.append(",");
+            instruction.append(", ");
             instruction.append(quad.getResult());
         }
         return instruction.toString();
