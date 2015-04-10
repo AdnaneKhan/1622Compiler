@@ -381,6 +381,7 @@ public class IRGeneratorVisitor implements Visitor {
     public void visit(Print n) {
         currentQuad = new Quadruple();
         currentQuad.type = getType(n.e);
+        currentQuad.arg1 = "_system_out_print";
         pushStack(currentQuad);
         n.e.accept(this);
         currentQuad = popStack();

@@ -14,6 +14,36 @@ public class CodeGenerator {
     List<Quadruple> programIR;
     SymbolTable programTable;
 
+    int tRegC;
+    int sRegC;
+    int fRegC;
+
+    private String getTReg() {
+        String tempReg = null;
+
+        if (tRegC == 9) {
+            // Limit Reached
+        } else {
+            tempReg = "$t" + tRegC;
+            tRegC++;
+        }
+        return tempReg;
+    }
+
+
+    private String getAReg() {
+        String tempReg = null;
+
+        if (fRegC == 4) {
+            // Limit Reached
+        } else {
+            tempReg = "$t" + fRegC;
+            fRegC++;
+        }
+        return tempReg;
+    }
+
+
 
     public CodeGenerator ( List<Quadruple> interMediateRep, SymbolTable symTable) {
         programIR = interMediateRep;
@@ -27,16 +57,28 @@ public class CodeGenerator {
             System.out.println(" -------------- END INTERMEDIATE REPRESENTATION -----------------");
         }
     }
-//
-//    /**
-//     *  This method takes in a quadruple and
-//     *
-//     */
-//    private void handleQuadruple(QuadR) {
-//        if
-//    }
 
 
+    public void output() {
+        System.out.println(".text");
+        for (Quadruple quad : programIR) {
+            if (quad.type == Quadruple.LABEL) {
+                System.out.println(quad);
+            }
+
+            if (quad.type == Quadruple.PARAMETER) {
+                System.out.println( "addi" + getTReg() + quad.result );
+            }
+
+            if (quad.type == Quadruple.CALL) {
+                System.out.print("jal " + quad.arg1);
+            }
+
+
+        }
+
+
+    }
 
     /**
      * Prints the standard library at the end of the program.
@@ -44,9 +86,4 @@ public class CodeGenerator {
     private void printLibrary() {
 
     }
-
-
-
-
-
 }
