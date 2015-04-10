@@ -1,6 +1,9 @@
 package CodeGeneration;
 
 import IR.Quadruple;
+import SymTable.ClassTable;
+import SyntaxTree.ClassDecl;
+import sun.security.pkcs11.wrapper.CK_AES_CTR_PARAMS;
 
 import java.util.HashMap;
 
@@ -152,9 +155,6 @@ public class QuadEmit {
         StringBuilder instruction = new StringBuilder();
 
 
-
-
-
         // Move return value into first return register
         if (quad.isLiteral()) {
             instruction.append("li").append(" ").append("$v0").append(',').append(quad.getResult()).append('\n');
@@ -196,6 +196,25 @@ public class QuadEmit {
     public String handleNew(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
+        // Steps:
+        String classString = quad.getArg1();
+
+////        ClassTable classTable = (ClassTable) quad.getNode();
+
+//        ClassDecl classNode = (ClassDecl) classTable.getNode();
+
+        // Using size we can get our allocation count for new
+  ///      int varCount = classNode.vl.size();
+
+        // But right now since we aren't doing classes -- curr time Fri, April 10 7PM
+        // we just make a variable and shove zero in it
+
+        String tempVar = quad.getResult();
+        String tempReg = getTReg();
+
+        regMap.put(tempVar,tempReg);
+
+        instruction.append("li").append(' ').append(tempReg).append(", ").append("0");
 
         return instruction.toString();
     }

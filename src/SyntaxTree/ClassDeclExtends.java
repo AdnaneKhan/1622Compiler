@@ -5,7 +5,7 @@ import Visitor.TypeVisitor;
 public class ClassDeclExtends extends ClassDecl {
 
   public Identifier j;
-  public VarDeclList vl;  
+
   public MethodDeclList ml;
  
   public ClassDeclExtends(Identifier ai, Identifier aj, 

@@ -152,6 +152,17 @@ public class Quadruple {
         }
     }
 
+    /**
+     * IF THIS quadruple is associated with a node, like a class or method, then
+     * return the node associated.
+     *
+     * Otherwise returns null
+     * @return
+     */
+    public TableEntry getNode() {
+        return resVar;
+    }
+
 
     /**
      * Transfers result from one quad to antoher, retaining the type iff it is an int
