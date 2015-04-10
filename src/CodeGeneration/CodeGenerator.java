@@ -13,41 +13,16 @@ public class CodeGenerator {
 
     List<Quadruple> programIR;
     SymbolTable programTable;
+    QuadEmit instPrinter;
 
-    int tRegC;
-    int sRegC;
-    int fRegC;
-
-    private String getTReg() {
-        String tempReg = null;
-
-        if (tRegC == 9) {
-            // Limit Reached
-        } else {
-            tempReg = "$t" + tRegC;
-            tRegC++;
-        }
-        return tempReg;
-    }
-
-
-    private String getAReg() {
-        String tempReg = null;
-
-        if (fRegC == 4) {
-            // Limit Reached
-        } else {
-            tempReg = "$a" + fRegC;
-            fRegC++;
-        }
-        return tempReg;
-    }
 
 
 
     public CodeGenerator ( List<Quadruple> interMediateRep, SymbolTable symTable) {
         programIR = interMediateRep;
         programTable = symTable;
+
+        instPrinter = new QuadEmit();
 
         if(DEBUG) {
             System.out.println(" -------------- SOURCE INTERMEDIATE REPRESENTATION --------------");
@@ -58,30 +33,19 @@ public class CodeGenerator {
         }
     }
 
-    /**
-     *
-     * @return mips instruction loading the parameter into appropriate variable
-     */
-    private String handleParameter(Quadruple quad) {
-         StringBuilder instruction = new StringBuilder();
 
+    public String output() {
+        StringBuilder fileOut = new StringBuilder();
 
-        if ( quad.isLiteral() ) {
-            instruction.append("addi ");
-            instruction.append(getAReg());
-            instruction.append(", ");
-            instruction.append(quad.getResult());
-        }
-        return instruction.toString();
-    }
-
-    public void output() {
-        System.out.println(".text");
+      fileOut.append(".text\n");
         for (Quadruple quad : programIR) {
 
             switch (quad.type) {
 
-                case (Quadruple.ASSIGNMENT): break;
+                case (Quadruple.ASSIGNMENT):
+
+                    fileOut.append(instPrinter.handleAssignment(quad)).append('\n');
+                    break;
                 case (Quadruple.CALL): break;
                 case (Quadruple.CONDITIONAL_JUMP): break;
                 case (Quadruple.COPY): break;
@@ -92,10 +56,10 @@ public class CodeGenerator {
                 case (Quadruple.NEW_3AC): break;
                 case (Quadruple.NEW_ARRAY): break;
                 case (Quadruple.PARAMETER):
-                    System.out.println(handleParameter(quad));
+                    fileOut.append(instPrinter.handleParameter(quad)).append('\n');
                     break;
                 case (Quadruple.PRINT):
-                    System.out.println("jal _system_out_println");
+                    fileOut.append(instPrinter.handlePrint(quad)).append('\n');
                     break;
                 case (Quadruple.RETURN_3AC): break;
                 case (Quadruple.UNARY_ASSIGNMENT): break;
@@ -107,6 +71,10 @@ public class CodeGenerator {
         }
 
 
+        fileOut.append(getLibrary());
+
+
+        return fileOut.toString();
     }
 
 
@@ -114,7 +82,81 @@ public class CodeGenerator {
     /**
      * Prints the standard library at the end of the program.
      */
-    private void printLibrary() {
+    private static String getLibrary() {
+        String library = "# main is testing the functions I've provided. You will include this code at the end\n" +
+        "# of your output file so that you may call these system services.\n" +
+        "\n" +
+        "#main:\n" +
+        "#\tli $a0, 100\n" +
+        "#\tjal _new_array\n" +
+        "#\tmove $s0, $v0\n" +
+        "#\tmove $a0, $v0\n" +
+        "#\tjal _system_out_println\n" +
+        "#\tlw $a0, 0($s0)\n" +
+        "#\tjal _system_out_println\n" +
+        "#\tjal _system_exit\n" +
+        "\n" +
+        "_system_exit:\n" +
+        "\tli $v0, 10 #exit\n" +
+        "\tsyscall\n" +
+        "\t\n" +
+        "# Integer to print is in $a0. \n" +
+        "# Kills $v0 and $a0\n" +
+        "_system_out_println:\n" +
+        "\t# print integer\n" +
+        "\tli  $v0, 1 \n" +
+        "\tsyscall\n" +
+        "\t# print a newline\n" +
+        "\tli $a0, 10\n" +
+        "\tli $v0, 11\n" +
+        "\tsyscall\n" +
+        "\tjr $ra\n" +
+        "\t\n" +
+        "# $a0 = number of bytes to allocate\n" +
+        "# $v0 contains address of allocated memory\n" +
+        "_new_object:\n" +
+        "\t# sbrk\n" +
+        "\tli $v0, 9 \n" +
+        "\tsyscall\n" +
+        "\t\n" +
+        "\t#initialize with zeros\n" +
+        "\tmove $t0, $a0\n" +
+        "\tmove $t1, $v0\n" +
+        "_new_object_loop:\n" +
+        "\tbeq $t0, $zero, _new_object_exit\n" +
+        "\tsb $zero, 0($t1)\n" +
+        "\taddi $t1, $t1, 1\n" +
+        "\taddi $t0, $t0, -1\n" +
+        "\tj _new_object_loop\n" +
+        "_new_object_exit:\n" +
+        "\tjr $ra\n" +
+        "\t\n" +
+        "# $a0 = number of bytes to allocate \n" +
+        "# $v0 contains address of allocated memory (with offset 0 being the size)\t\n" +
+        "_new_array:\n" +
+        "\t# add space for the size (1 integer)\n" +
+        "\taddi $a0, $a0, 4\n" +
+        "\t# sbrk\n" +
+        "\tli $v0, 9\n" +
+        "\tsyscall\n" +
+        "#initialize to zeros\n" +
+        "\tmove $t0, $a0\n" +
+        "\tmove $t1, $v0\n" +
+        "_new_array_loop:\n" +
+        "\tbeq $t0, $zero, _new_array_exit\n" +
+        "\tsb $zero, 0($t1)\n" +
+        "\taddi $t1, $t1, 1\n" +
+        "\taddi $t0, $t0, -1\n" +
+        "\tj _new_array_loop\n" +
+        "_new_array_exit:\n" +
+        "\t#store the size (number of ints) in offset 0\n" +
+        "\taddi $t0, $a0, -4\n" +
+        "\tsra $t0, $t0, 2\n" +
+        "\tsw $t0, 0($v0)\n" +
+        "\tjr $ra";
 
+       // System.out.println(library);
+
+        return library;
     }
 }

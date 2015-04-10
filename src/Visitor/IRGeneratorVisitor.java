@@ -130,11 +130,6 @@ public class IRGeneratorVisitor implements Visitor {
         for (int i = 0; i < n.cl.size(); i++) {
             n.cl.elementAt(i).accept(this);
         }
-
-        for (int i = 0; i < classes.size(); i++) {
-            System.out.println(classes.get(i));
-        }
-
     }
 
     // Identifier i1,i2;
@@ -302,8 +297,13 @@ public class IRGeneratorVisitor implements Visitor {
 
         // Set up if, add if
         currentQuad = quadstack.get(top());
-        currentQuad.arg1 = tempQuad.result;
-        currentQuad.arg2 = tempLabel;
+
+        currentQuad.resToArg1(tempQuad);
+       // currentQuad.arg1 = tempQuad.getResult();
+
+
+        currentQuad.setArg2(tempLabel);
+        ///currentQuad.arg2 = tempLabel;
         currentQuad.result = "iffalse";
         currentQuad = quadstack.set(top(), currentQuad);
         currentMethod.add(currentQuad);
@@ -363,9 +363,15 @@ public class IRGeneratorVisitor implements Visitor {
 
 
         // Set up while, add while
+
         currentQuad = quadstack.get(top());
-        currentQuad.arg1 = tempQuad.result;
-        currentQuad.arg2 = tempLabel2;
+
+        currentQuad.resToArg1(tempQuad);
+        //currentQuad.arg1 = tempQuad.getResult();
+
+      //  currentQuad.arg2 = tempLabel2;
+
+        currentQuad.setArg2(tempLabel2);
         currentQuad.label = tempLabel;
         currentQuad.result = "iffalse";
         currentQuad = quadstack.set(top(), currentQuad);
@@ -398,7 +404,9 @@ public class IRGeneratorVisitor implements Visitor {
     public void visit(Print n) {
         currentQuad = new Quadruple();
         currentQuad.type = getType(n.e);
-        currentQuad.arg1 = "_system_out_print";
+
+        currentQuad.setArg1("_system_out_print");
+      //  currentQuad.arg1 = "_system_out_print";
         pushStack(currentQuad);
         n.e.accept(this);
         currentQuad = popStack();
@@ -429,7 +437,9 @@ public class IRGeneratorVisitor implements Visitor {
 
         Quadruple tempQuad = popStack();
         currentQuad = quadstack.get(top());
-        currentQuad.arg1 = tempQuad.result;
+
+        currentQuad.resToArg1(tempQuad);
+        //currentQuad.arg1 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
     }
 
@@ -448,7 +458,9 @@ public class IRGeneratorVisitor implements Visitor {
         n.e1.accept(this);
         Quadruple tempQuad = popStack();
         currentQuad = quadstack.get(top());
-        currentQuad.arg2 = tempQuad.result;
+
+        currentQuad.resToArg2(tempQuad);
+      ///  currentQuad.arg2 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
 
         currentQuad = new Quadruple();
@@ -457,7 +469,9 @@ public class IRGeneratorVisitor implements Visitor {
         n.e2.accept(this);
         tempQuad = popStack();
         currentQuad = quadstack.get(top());
-        currentQuad.arg1 = tempQuad.result;
+
+        currentQuad.resToArg1(tempQuad);
+    //    currentQuad.arg1 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
     }
 
@@ -475,7 +489,9 @@ public class IRGeneratorVisitor implements Visitor {
         n.e1.accept(this);
         Quadruple tempQuad = popStack();
         currentQuad = quadstack.get(top());
-        currentQuad.arg1 = tempQuad.result;
+
+        currentQuad.resToArg1(tempQuad);
+    //    currentQuad.arg1 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
 
         currentQuad = new Quadruple();
@@ -484,7 +500,9 @@ public class IRGeneratorVisitor implements Visitor {
         n.e2.accept(this);
         tempQuad = popStack();
         currentQuad = quadstack.get(top());
-        currentQuad.arg2 = tempQuad.result;
+
+        currentQuad.resToArg2(tempQuad);
+       // currentQuad.arg2 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
         currentMethod.add(currentQuad);
     }
@@ -503,7 +521,9 @@ public class IRGeneratorVisitor implements Visitor {
         n.e1.accept(this);
         Quadruple tempQuad = popStack();
         currentQuad = quadstack.get(top());
-        currentQuad.arg1 = tempQuad.result;
+
+        currentQuad.resToArg1(tempQuad);
+       //currentQuad.arg1 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
 
         currentQuad = new Quadruple();
@@ -512,7 +532,9 @@ public class IRGeneratorVisitor implements Visitor {
         n.e2.accept(this);
         tempQuad = popStack();
         currentQuad = quadstack.get(top());
-        currentQuad.arg2 = tempQuad.result;
+
+        currentQuad.resToArg2(tempQuad);
+     //   currentQuad.arg2 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
         currentMethod.add(currentQuad);
     }
@@ -531,7 +553,9 @@ public class IRGeneratorVisitor implements Visitor {
         n.e1.accept(this);
         Quadruple tempQuad = popStack();
         currentQuad = quadstack.get(top());
-        currentQuad.arg1 = tempQuad.result;
+
+        currentQuad.resToArg1(tempQuad);
+        //currentQuad.arg1 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
 
         currentQuad = new Quadruple();
@@ -540,7 +564,9 @@ public class IRGeneratorVisitor implements Visitor {
         n.e2.accept(this);
         tempQuad = popStack();
         currentQuad = quadstack.get(top());
-        currentQuad.arg2 = tempQuad.result;
+
+        currentQuad.resToArg2(tempQuad);
+     ///   currentQuad.arg2 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
         currentMethod.add(currentQuad);
     }
@@ -559,7 +585,9 @@ public class IRGeneratorVisitor implements Visitor {
         n.e1.accept(this);
         Quadruple tempQuad = popStack();
         currentQuad = quadstack.get(top());
-        currentQuad.arg1 = tempQuad.result;
+
+        currentQuad.resToArg1(tempQuad);
+     //   currentQuad.arg1 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
 
         currentQuad = new Quadruple();
@@ -568,7 +596,9 @@ public class IRGeneratorVisitor implements Visitor {
         n.e2.accept(this);
         tempQuad = popStack();
         currentQuad = quadstack.get(top());
-        currentQuad.arg2 = tempQuad.result;
+
+        currentQuad.resToArg2(tempQuad);
+       /// currentQuad.arg2 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
 
         currentMethod.add(currentQuad);
@@ -588,7 +618,9 @@ public class IRGeneratorVisitor implements Visitor {
         n.e1.accept(this);
         Quadruple tempQuad = popStack();
         currentQuad = quadstack.get(top());
-        currentQuad.arg1 = tempQuad.result;
+
+        currentQuad.resToArg1(tempQuad);
+     //   currentQuad.arg1 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
 
         currentQuad = new Quadruple();
@@ -597,7 +629,9 @@ public class IRGeneratorVisitor implements Visitor {
         n.e2.accept(this);
         tempQuad = popStack();
         currentQuad = quadstack.get(top());
-        currentQuad.arg2 = tempQuad.result;
+
+        currentQuad.resToArg2(tempQuad);
+     //   currentQuad.arg2 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
         currentMethod.add(currentQuad);
     }
@@ -615,7 +649,9 @@ public class IRGeneratorVisitor implements Visitor {
         n.e1.accept(this);
         Quadruple tempQuad = popStack();
         currentQuad = quadstack.get(top());
-        currentQuad.arg1 = tempQuad.result;
+
+        currentQuad.resToArg1(tempQuad);
+       // currentQuad.arg1 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
 
         currentQuad = new Quadruple();
@@ -624,7 +660,9 @@ public class IRGeneratorVisitor implements Visitor {
         n.e2.accept(this);
         tempQuad = popStack();
         currentQuad = quadstack.get(top());
-        currentQuad.arg2 = tempQuad.result;
+
+        currentQuad.resToArg2(tempQuad);
+    //    currentQuad.arg2 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
         currentMethod.add(currentQuad);
     }
@@ -642,7 +680,10 @@ public class IRGeneratorVisitor implements Visitor {
         n.e.accept(this);
         Quadruple tempQuad = popStack();
         currentQuad = quadstack.get(top());
-        currentQuad.arg1 = tempQuad.result;
+
+
+        currentQuad.resToArg1(tempQuad);
+     //   currentQuad.arg1 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
         currentMethod.add(currentQuad);
     }
@@ -679,7 +720,10 @@ public class IRGeneratorVisitor implements Visitor {
 
 
         }
-        currentQuad.arg1 = toAdd+ n.i.s;
+
+
+        currentQuad.setArg1(n.i.s);
+       // currentQuad.arg1 = toAdd+ n.i.s;
 
         quadstack.set(top(), currentQuad);
 
@@ -690,7 +734,7 @@ public class IRGeneratorVisitor implements Visitor {
         Quadruple tempQuad = popStack();
         currentQuad = new Quadruple();
         currentQuad.type = Quadruple.PARAMETER;
-        currentQuad.result = tempQuad.result;
+        currentQuad.result = tempQuad.getResult();
         params.add(currentQuad);
 
         n.i.accept(this);
@@ -703,7 +747,7 @@ public class IRGeneratorVisitor implements Visitor {
             tempQuad = popStack();
             currentQuad = new Quadruple();
             currentQuad.type = Quadruple.PARAMETER;
-            currentQuad.result = tempQuad.result;
+            currentQuad.result = tempQuad.getResult();
             params.add(currentQuad);
         }
 
@@ -712,7 +756,9 @@ public class IRGeneratorVisitor implements Visitor {
         }
 
         currentQuad = quadstack.get(top());
-        currentQuad.arg2 = Integer.toString(n.el.size()+1);
+
+        currentQuad.setArg2(n.el.size() +1);
+       /// currentQuad.arg2 = Integer.toString(n.el.size()+1);
         quadstack.set(top(), currentQuad);
         currentMethod.add(currentQuad);
     }
@@ -765,7 +811,9 @@ public class IRGeneratorVisitor implements Visitor {
         n.e.accept(this);
         Quadruple tempQuad = popStack();
         currentQuad = quadstack.get(top());
-        currentQuad.arg1 = tempQuad.result;
+
+        currentQuad.resToArg1(tempQuad);
+       // currentQuad.arg1 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
         currentMethod.add(currentQuad);
     }
@@ -778,7 +826,9 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad.op = "new";
 
         // Get the actual object
-        currentQuad.arg1 = n.i.s;
+
+        currentQuad.setArg1(n.i.s);
+       // currentQuad.arg1 = n.i.s;
         currentQuad.setArg1(base.getCurrentScope().getEntryWalk(n.i.s, TableEntry.CLASS_ENTRY));
 
         quadstack.set(top(), currentQuad);
@@ -799,7 +849,7 @@ public class IRGeneratorVisitor implements Visitor {
         n.e.accept(this);
         Quadruple tempQuad = popStack();
         currentQuad = quadstack.get(top());
-        currentQuad.arg1 = tempQuad.result;
+        currentQuad.resToArg1(tempQuad);
         quadstack.set(top(), currentQuad);
         currentMethod.add(currentQuad);
     }

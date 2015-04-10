@@ -51,7 +51,11 @@ public class Compiler {
 
                 CodeGenerator codeGen = new CodeGenerator(irGen.getQuadList(),compilerTable);
 
-                codeGen.output();
+                String output = codeGen.output();
+                System.out.println(output);
+                FileWriter fileOut = new FileWriter(fileName+".asm");
+                fileOut.write(output);
+                fileOut.flush();
 
 
 

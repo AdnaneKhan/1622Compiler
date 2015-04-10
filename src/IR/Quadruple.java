@@ -57,7 +57,11 @@ public class Quadruple {
     public String result;
 
     private boolean resultLiteral;
-    public int intResult;
+    private boolean arg1Literal;
+    private  boolean arg2Literal;
+    private int intResult;
+    private int arg1Int;
+    private int arg2Int;
 
     public int type;
     public String label;
@@ -79,15 +83,67 @@ public class Quadruple {
         label = "";
     }
 
+    /**
+     *
+     * @param toSet integer literal to place in the result field
+     */
     public void setIntResult(int toSet) {
         intResult = toSet;
         this.resultLiteral = true;
     }
 
+    public void setArg1(int toSet) {
+        arg1Literal = true;
+        arg1Int = toSet;
+    }
+
+    public void setArg1(String toSet) {
+        arg1 = toSet;
+    }
+
+    private String getArg1()  {
+        if (arg1Literal) {
+            return Integer.toString(arg1Int);
+        } else {
+            return arg1;
+        }
+    }
+
+
+    private String getArg2()  {
+        if (arg2Literal) {
+            return Integer.toString(arg2Int);
+        } else {
+            return arg2;
+        }
+    }
+
+    public void setArg2(int toSet) {
+        arg2Literal = true;
+        arg2Int = toSet;
+    }
+    public void setArg2(String toSet) {
+        arg2 = toSet;
+    }
+
+
+    /**
+     *
+     * @return true if this quadruple represents an integer literal
+     */
     public boolean isLiteral() {
         return resultLiteral;
     }
 
+    public boolean arg1Literal() { return arg1Literal; }
+
+    public boolean arg2Literal() { return arg2Literal; }
+
+
+    /**
+     *
+     * @return string representation off the result
+     */
     public String getResult() {
         if (resultLiteral) {
             return Integer.toString(this.intResult);
@@ -97,6 +153,10 @@ public class Quadruple {
     }
 
 
+    /**
+     * Transfers result from one quad to antoher, retaining the type iff it is an int
+     * @param origin
+     */
     public void transferResult(Quadruple origin) {
         if (origin.isLiteral()) {
             this.resultLiteral = true;
@@ -105,6 +165,23 @@ public class Quadruple {
             this.result = origin.getResult();
         }
     }
+
+    public void resToArg1(Quadruple origin) {
+        if (origin.isLiteral()) {
+            this.setArg1(origin.intResult);
+        } else {
+            this.arg1 = origin.getResult();
+        }
+    }
+
+    public void resToArg2(Quadruple origin) {
+        if (origin.isLiteral()) {
+            this.setArg2(origin.intResult);
+        } else {
+            this.arg2 = origin.getResult();
+        }
+    }
+
 
     public void setResEntry(TableEntry res) {
         resVar = res;
@@ -131,40 +208,40 @@ public class Quadruple {
         }
 
 		if (type == ASSIGNMENT) {
-			ret += result + " := " + arg1 + " " + op + " " + arg2;
+			ret += result + " := " + getArg1() + " " + op + " " + getArg2();
 		}
 		else if (type == UNARY_ASSIGNMENT) {
-			ret += result + " := " + op + arg1;
+			ret += result + " := " + op + getArg1();
 		}
 		else if (type == COPY) {
-			ret += result + " := " + arg1;
+			ret += result + " := " + getArg1();
 		}
 		else if (type == PARAMETER) {
 			ret += "param " + result;
 		}
 		else if (type == CALL) {
-			ret += result + " := call " + arg1 + ", " + arg2;
+			ret += result + " := call " + getArg1() + ", " + getArg2();
 		}
 		else if (type == RETURN_3AC) {
 			ret += "return " + result;
 		}
 		else if (type == INDEXED_ASSIGNMENT) {
-			ret += result + "[" + arg2 + "]" + " := " + arg1;
+			ret += result + "[" + getArg2() + "]" + " := " + getArg1();
 		}
 		else if (type == NEW_3AC) {
-			ret += result + " := " + op + " " + arg1;
+			ret += result + " := " + op + " " + getArg1();
 		}
 		else if (type == NEW_ARRAY) {
-			ret += result + " := " + op + "[" + arg1 + "]";
+			ret += result + " := " + op + "[" + getArg1() + "]";
 		}
 		else if (type == LENGTH_3AC) {
-			ret += result + " := length " + arg1;
+			ret += result + " := length " + getArg1();
 		}
 		else if (type == PRINT) {
 			ret += "call print, 1";
 		}
 		else if (type == INDEXED_LOOKUP) {
-			ret += result + " := " + arg1 + "[" + arg2 + "]";
+			ret += result + " := " + getArg1() + "[" + getArg2() + "]";
 		}
 		else if (type == LABEL) {
 			ret += result + ": ";
@@ -173,7 +250,7 @@ public class Quadruple {
 			ret += "goto " + result;
 		}
 		else if (type == CONDITIONAL_JUMP) {
-			ret += result + " " + arg1 + " goto " + arg2;
+			ret += result + " " + getArg1() + " goto " + getArg2();
 		}
 
 
