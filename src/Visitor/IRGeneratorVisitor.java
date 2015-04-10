@@ -6,6 +6,8 @@ import IR.*;
 import com.sun.tools.javac.util.Name;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class IRGeneratorVisitor implements Visitor {
 
@@ -21,6 +23,21 @@ public class IRGeneratorVisitor implements Visitor {
     int methodSubscriptNum = 0;
     int varSubscriptNum = 0;
 
+
+
+    public List getQuadList() {
+        LinkedList<Quadruple> retArray = new LinkedList<Quadruple>();
+
+        for (IRClass iterClass : classes) {
+            for (IRMethod irMethod : iterClass.lines) {
+                for (Quadruple quad : irMethod.lines) {
+                    retArray.add(quad);
+                }
+            }
+        }
+
+        return retArray;
+    }
 
     private TableEntry getSymbol(String theVar) {
         TableEntry toExtract = base.getCurrentScope().getEntryWalk(theVar,SymbolTable.LEAF_ENTRY);
@@ -385,10 +402,11 @@ public class IRGeneratorVisitor implements Visitor {
         pushStack(currentQuad);
         n.e.accept(this);
         currentQuad = popStack();
-        String temp = currentQuad.result;
-        currentQuad = new Quadruple();
-        currentQuad.type = Quadruple.PARAMETER;
-        currentQuad.result = temp;
+
+        Quadruple tempCurr = new Quadruple(Quadruple.PARAMETER);
+        tempCurr.transferResult(currentQuad);
+
+        currentQuad = tempCurr;
         currentMethod.add(currentQuad);
     }
 
@@ -703,7 +721,7 @@ public class IRGeneratorVisitor implements Visitor {
     // int i;
     public void visit(IntegerLiteral n) {
         currentQuad = quadstack.get(top());
-        currentQuad.result = Integer.toString(n.i);
+        currentQuad.setIntResult(n.i);
         quadstack.set(top(), currentQuad);
     }
 

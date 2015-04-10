@@ -4,6 +4,15 @@ import SymTable.*;
 
 public class Quadruple {
 
+    public Quadruple(int type) {
+        arg1 = "";
+        arg2 = "";
+        op = "";
+        result = "";
+
+        label = "";
+        this.type = type;
+    }
 
     private String resolveVars(TableEntry theVar) {
 
@@ -47,6 +56,9 @@ public class Quadruple {
     public String op;
     public String result;
 
+    private boolean resultLiteral;
+    public int intResult;
+
     public int type;
     public String label;
 
@@ -65,6 +77,33 @@ public class Quadruple {
         result = "";
         type = 0;
         label = "";
+    }
+
+    public void setIntResult(int toSet) {
+        intResult = toSet;
+        this.resultLiteral = true;
+    }
+
+    public boolean isLiteral() {
+        return resultLiteral;
+    }
+
+    public String getResult() {
+        if (resultLiteral) {
+            return Integer.toString(this.intResult);
+        } else {
+            return result;
+        }
+    }
+
+
+    public void transferResult(Quadruple origin) {
+        if (origin.isLiteral()) {
+            this.resultLiteral = true;
+            this.setIntResult(origin.intResult);
+        } else {
+            this.result = origin.getResult();
+        }
     }
 
     public void setResEntry(TableEntry res) {

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.lang.Override;
 
 public class IRMethod {
-    private ArrayList<Quadruple> lines;
+    public ArrayList<Quadruple> lines;
     private String name;
 
     public IRMethod(String s) {

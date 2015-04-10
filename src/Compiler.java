@@ -1,4 +1,5 @@
 
+import CodeGeneration.CodeGenerator;
 import SymTable.SymbolTable;
 import Visitor.*;
 import java_cup.runtime.Symbol;
@@ -7,7 +8,7 @@ import SyntaxTree.*;
 import java.io.*;
 
 
-public class FrontEnd {
+public class Compiler {
     public static void main(String[] args) {
         if (args.length < 1) {
             System.out.println("Please entire a file as the argument!");
@@ -47,8 +48,15 @@ public class FrontEnd {
             if (Errors.clear) {
                 IRGeneratorVisitor irGen = new IRGeneratorVisitor(compilerTable);
                 irGen.visit(minJProgram);
-            }
 
+                CodeGenerator codeGen = new CodeGenerator(irGen.getQuadList(),compilerTable);
+
+                codeGen.output();
+
+
+
+
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (Exception e) {

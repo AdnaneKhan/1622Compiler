@@ -58,20 +58,49 @@ public class CodeGenerator {
         }
     }
 
+    /**
+     *
+     * @return mips instruction loading the parameter into appropriate variable
+     */
+    private String handleParameter(Quadruple quad) {
+         StringBuilder instruction = new StringBuilder();
+
+
+        if ( quad.isLiteral() ) {
+            instruction.append("addi ");
+            instruction.append(getAReg());
+            instruction.append(",");
+            instruction.append(quad.getResult());
+        }
+        return instruction.toString();
+    }
 
     public void output() {
         System.out.println(".text");
         for (Quadruple quad : programIR) {
-            if (quad.type == Quadruple.LABEL) {
-                System.out.println(quad);
-            }
 
-            if (quad.type == Quadruple.PARAMETER) {
-                System.out.println( "addi" + getTReg() + quad.result );
-            }
+            switch (quad.type) {
 
-            if (quad.type == Quadruple.CALL) {
-                System.out.print("jal " + quad.arg1);
+                case (Quadruple.ASSIGNMENT): break;
+                case (Quadruple.CALL): break;
+                case (Quadruple.CONDITIONAL_JUMP): break;
+                case (Quadruple.COPY): break;
+                case (Quadruple.INDEXED_ASSIGNMENT): break;
+                case (Quadruple.INDEXED_LOOKUP): break;
+                case (Quadruple.LABEL): break;
+                case (Quadruple.LENGTH_3AC): break;
+                case (Quadruple.NEW_3AC): break;
+                case (Quadruple.NEW_ARRAY): break;
+                case (Quadruple.PARAMETER):
+                    System.out.println(handleParameter(quad));
+                    break;
+                case (Quadruple.PRINT):
+                    System.out.println("jal _system_out_println");
+                    break;
+                case (Quadruple.RETURN_3AC): break;
+                case (Quadruple.UNARY_ASSIGNMENT): break;
+                case (Quadruple.UNCONDITIONAL_JUMP): break;
+
             }
 
 
@@ -79,6 +108,8 @@ public class CodeGenerator {
 
 
     }
+
+
 
     /**
      * Prints the standard library at the end of the program.
