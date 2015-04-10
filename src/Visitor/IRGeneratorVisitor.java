@@ -397,7 +397,7 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad = quadstack.get(top());
 
 
-        currentQuad.setResEntry( getSymbol(n.i.s));
+        currentQuad.setResEntry(getSymbol(n.i.s));
 
         quadstack.set(top(), currentQuad);
 
@@ -647,9 +647,19 @@ public class IRGeneratorVisitor implements Visitor {
         } else if (n.e instanceof IdentifierExp) {
             String lookup = ((IdentifierExp)n.e).s;
             SymbolEntry temp = (SymbolEntry) base.getCurrentScope().getEntryWalk(lookup,TableEntry.LEAF_ENTRY);
+            String classParam;
+
+
+            /// Get the name of the current class to act as the this paramemter
+            if (temp.parent.isEntry(TableEntry.CLASS_ENTRY)) {
+                classParam = temp.parent.getSymbolName();
+            } else if(temp.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+                classParam = temp.parent.parent.getSymbolName();
+            }
+
+
 
         }
-
         currentQuad.arg1 = toAdd+ n.i.s;
 
         quadstack.set(top(), currentQuad);
