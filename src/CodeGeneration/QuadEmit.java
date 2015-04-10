@@ -59,6 +59,8 @@ public class QuadEmit {
             instruction.append(", ");
             instruction.append(quad.getResult());
         } else {
+
+
             String paramVar = regMap.get(quad.getResult());
 
 
@@ -81,6 +83,7 @@ public class QuadEmit {
         StringBuilder instruction = new StringBuilder();
 
         instruction.append("jal _system_out_println");
+        fRegC = 0;
 
         return instruction.toString();
     }
@@ -89,7 +92,13 @@ public class QuadEmit {
     public String handleCall(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
+        // Add reference to method for calls
 
+
+        // Now for moving the return value
+
+
+        fRegC = 0;
 
         return instruction.toString();
     }
@@ -144,6 +153,22 @@ public class QuadEmit {
 
 
 
+
+
+        // Move return value into first return register
+        if (quad.isLiteral()) {
+            instruction.append("li").append(" ").append("$v0").append(',').append(quad.getResult()).append('\n');
+        } else {
+            String varLookup = quad.getResult();
+            String resRegister = regMap.get(varLookup);
+
+            instruction.append("move").append(' ').append("$v0").append(',').append(" ").append(resRegister).append('\n');
+        }
+
+        // Print out the default jr $r
+        instruction.append("jr").append(' ').append("$ra").append('\n');
+
+
         return instruction.toString();
     }
     public String handleUnaryAssignment(Quadruple quad) {
@@ -158,6 +183,7 @@ public class QuadEmit {
 
 
 
+
         return instruction.toString();
     }
     public String handleCondJump(Quadruple quad) {
@@ -169,7 +195,6 @@ public class QuadEmit {
     }
     public String handleNew(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
-
 
 
         return instruction.toString();

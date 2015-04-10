@@ -1,5 +1,6 @@
 package Visitor;
 
+import CodeGeneration.QuadEmit;
 import SymTable.*;
 import SyntaxTree.*;
 import IR.*;
@@ -29,7 +30,12 @@ public class IRGeneratorVisitor implements Visitor {
         LinkedList<Quadruple> retArray = new LinkedList<Quadruple>();
 
         for (IRClass iterClass : classes) {
+            // Create class label
+
             for (IRMethod irMethod : iterClass.lines) {
+               Quadruple labelQuad = new Quadruple(Quadruple.LABEL);
+                labelQuad.result = irMethod.getName();
+                retArray.add(labelQuad);
                 for (Quadruple quad : irMethod.lines) {
                     retArray.add(quad);
                 }
@@ -747,7 +753,7 @@ public class IRGeneratorVisitor implements Visitor {
             tempQuad = popStack();
             currentQuad = new Quadruple();
             currentQuad.type = Quadruple.PARAMETER;
-            currentQuad.result = tempQuad.getResult();
+            currentQuad.transferResult(tempQuad);
             params.add(currentQuad);
         }
 

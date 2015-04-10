@@ -40,28 +40,45 @@ public class CodeGenerator {
       fileOut.append(".text\n");
         for (Quadruple quad : programIR) {
 
+            // Switch based on the type of quadtruple
             switch (quad.type) {
 
                 case (Quadruple.ASSIGNMENT):
 
                     fileOut.append(instPrinter.handleAssignment(quad)).append('\n');
                     break;
-                case (Quadruple.CALL): break;
-                case (Quadruple.CONDITIONAL_JUMP): break;
-                case (Quadruple.COPY): break;
-                case (Quadruple.INDEXED_ASSIGNMENT): break;
-                case (Quadruple.INDEXED_LOOKUP): break;
-                case (Quadruple.LABEL): break;
-                case (Quadruple.LENGTH_3AC): break;
-                case (Quadruple.NEW_3AC): break;
-                case (Quadruple.NEW_ARRAY): break;
+                case (Quadruple.CALL):
+                    fileOut.append(instPrinter.handleCall(quad)).append('\n');
+                    break;
+                case (Quadruple.CONDITIONAL_JUMP):
+                    break;
+                case (Quadruple.COPY):
+                    break;
+                case (Quadruple.INDEXED_ASSIGNMENT):
+                    break;
+                case (Quadruple.INDEXED_LOOKUP):
+                    break;
+                case (Quadruple.LABEL):
+                    fileOut.append(quad.getResult()).append(':').append('\n');
+                    break;
+                case (Quadruple.LENGTH_3AC):
+
+                    break;
+                case (Quadruple.NEW_3AC):
+                    fileOut.append(instPrinter.handleNew(quad)).append('\n');
+                    break;
+                case (Quadruple.NEW_ARRAY):
+                    break;
                 case (Quadruple.PARAMETER):
                     fileOut.append(instPrinter.handleParameter(quad)).append('\n');
                     break;
                 case (Quadruple.PRINT):
                     fileOut.append(instPrinter.handlePrint(quad)).append('\n');
                     break;
-                case (Quadruple.RETURN_3AC): break;
+                case (Quadruple.RETURN_3AC):
+                    fileOut.append(instPrinter.handleReturn(quad)).append('\n');
+
+                    break;
                 case (Quadruple.UNARY_ASSIGNMENT): break;
                 case (Quadruple.UNCONDITIONAL_JUMP): break;
 
