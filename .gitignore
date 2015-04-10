@@ -5,3 +5,6 @@ out
 *.class
 *.DS_Store
 src/MiniJavaLexer.java~
+src/parser.java
+src/sym.java
+
