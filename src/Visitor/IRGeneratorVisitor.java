@@ -177,7 +177,10 @@ public class IRGeneratorVisitor implements Visitor {
         }
         for (int i = 0; i < n.ml.size(); i++) {
             String methodLabel = n.i.s + "_" + n.ml.elementAt(i).i.toString();
-            currentMethod = new IRMethod(methodLabel);
+
+
+            currentMethod = new IRMethod(methodLabel,
+                    (MethodTable)base.getCurrentScope().getEntry(n.ml.elementAt(i).i.s,TableEntry.METHOD_ENTRY));
             n.ml.elementAt(i).accept(this);
             currentClass.add(currentMethod);
         }
@@ -204,7 +207,8 @@ public class IRGeneratorVisitor implements Visitor {
         for (int i = 0; i < n.ml.size(); i++) {
 
             String methodLabel = n.i.s + "_" + n.ml.elementAt(i).i.toString();
-            currentMethod = new IRMethod(methodLabel);
+            currentMethod =new IRMethod(methodLabel,
+                    (MethodTable)base.getCurrentScope().getEntry(n.ml.elementAt(i).i.s,TableEntry.METHOD_ENTRY));
             n.ml.elementAt(i).accept(this);
             currentClass.add(currentMethod);
         }

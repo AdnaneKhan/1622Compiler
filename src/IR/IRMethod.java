@@ -1,5 +1,7 @@
 package IR;
 
+import SymTable.MethodTable;
+
 import java.util.ArrayList;
 
 import java.lang.Override;
@@ -7,10 +9,17 @@ import java.lang.Override;
 public class IRMethod {
     public ArrayList<Quadruple> lines;
     private String name;
+    private MethodTable lookupTable;
 
     public IRMethod(String s) {
         lines = new ArrayList<Quadruple>();
         name = s;
+    }
+
+    public IRMethod(String s, MethodTable methodTable) {
+        lines = new ArrayList<Quadruple>();
+        name = s;
+        this.lookupTable = methodTable;
     }
 
     public int getLength() {
