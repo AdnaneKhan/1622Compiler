@@ -69,8 +69,8 @@ public class Quadruple {
     public String arg1;
     public String arg2;
 
-    private TableEntry arg1_entry;
-    private TableEntry arg2_entry;
+    public TableEntry arg1_entry;
+    public  TableEntry arg2_entry;
     private TableEntry resVar;
 
 
@@ -149,6 +149,8 @@ public class Quadruple {
     public String getResult() {
         if (resultLiteral) {
             return Integer.toString(this.intResult);
+        } else if (resVar != null) {
+            return resVar.getSymbolName();
         } else {
             return result;
         }
@@ -230,7 +232,7 @@ public class Quadruple {
 			ret += result + " := " + getArg1();
 		}
 		else if (type == PARAMETER) {
-			ret += "param " + result;
+			ret += "param " + getResult();
 		}
 		else if (type == CALL) {
 			ret += result + " := call " + this.arg1_entry.getSymbolName() + ", " + getArg2();

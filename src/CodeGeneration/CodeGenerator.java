@@ -1,8 +1,11 @@
 package CodeGeneration;
 
+import IR.IRClass;
+import IR.IRMethod;
 import IR.Quadruple;
 import SymTable.SymbolTable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,22 +14,27 @@ import java.util.List;
 public class CodeGenerator {
     private static final boolean DEBUG = true;
 
-    List<Quadruple> programIR;
+
+    ArrayList<IRClass> ir;
+   // List<Quadruple> programIR;
     SymbolTable programTable;
     QuadEmit instPrinter;
 
 
 
 
-    public CodeGenerator ( List<Quadruple> interMediateRep, SymbolTable symTable) {
-        programIR = interMediateRep;
+    public CodeGenerator (   ArrayList<IRClass> classes, SymbolTable symTable) {
+      ///  programIR = interMediateRep;
         programTable = symTable;
-
+        ir = classes;
         instPrinter = new QuadEmit();
 
         if(DEBUG) {
             System.out.println(" -------------- SOURCE INTERMEDIATE REPRESENTATION --------------");
-            for (Quadruple quadCode : this.programIR) {
+
+
+
+            for (IRClass quadCode : this.ir)  {
                 System.out.println(quadCode);
             }
             System.out.println(" -------------- END INTERMEDIATE REPRESENTATION -----------------");
@@ -38,52 +46,69 @@ public class CodeGenerator {
         StringBuilder fileOut = new StringBuilder();
 
       fileOut.append(".text\n");
-        for (Quadruple quad : programIR) {
+        for (IRClass irClass : ir) {
+            for (IRMethod irMethod : irClass.lines) {
 
-            // Switch based on the type of quadtruple
-            switch (quad.type) {
+                // We need to do some operations for each method,
+                // in particular we need to look at the formal list and associate the variables names with the
+                // parameter list going in.
+                // this way if they are referenced we can know which $a0, $a1, $a2, $a3 to access
+                // if there end up being more then we know that arguments were spilled and we must properly retrieve them
+                
 
-                case (Quadruple.ASSIGNMENT):
+                Quadruple labelQuad = new Quadruple(Quadruple.LABEL);
+                labelQuad.result = irMethod.getName();
+                fileOut.append(labelQuad.getResult()).append(':').append('\n');
 
-                    fileOut.append(instPrinter.handleAssignment(quad)).append('\n');
-                    break;
-                case (Quadruple.CALL):
-                    fileOut.append(instPrinter.handleCall(quad)).append('\n');
-                    break;
-                case (Quadruple.CONDITIONAL_JUMP):
-                    break;
-                case (Quadruple.COPY):
-                    break;
-                case (Quadruple.INDEXED_ASSIGNMENT):
-                    break;
-                case (Quadruple.INDEXED_LOOKUP):
-                    break;
-                case (Quadruple.LABEL):
-                    fileOut.append(quad.getResult()).append(':').append('\n');
-                    break;
-                case (Quadruple.LENGTH_3AC):
 
-                    break;
-                case (Quadruple.NEW_3AC):
-                    fileOut.append(instPrinter.handleNew(quad)).append('\n');
-                    break;
-                case (Quadruple.NEW_ARRAY):
-                    break;
-                case (Quadruple.PARAMETER):
-                    fileOut.append(instPrinter.handleParameter(quad)).append('\n');
-                    break;
-                case (Quadruple.PRINT):
-                    fileOut.append(instPrinter.handlePrint(quad)).append('\n');
-                    break;
-                case (Quadruple.RETURN_3AC):
-                    fileOut.append(instPrinter.handleReturn(quad)).append('\n');
+                for (Quadruple quad : irMethod.lines) {
+                    // Switch based on the type of quadtruple
 
-                    break;
-                case (Quadruple.UNARY_ASSIGNMENT): break;
-                case (Quadruple.UNCONDITIONAL_JUMP): break;
 
+                    switch (quad.type) {
+
+                        case (Quadruple.ASSIGNMENT):
+
+                            fileOut.append(instPrinter.handleAssignment(quad)).append('\n');
+                            break;
+                        case (Quadruple.CALL):
+                            fileOut.append(instPrinter.handleCall(quad)).append('\n');
+                            break;
+                        case (Quadruple.CONDITIONAL_JUMP):
+                            break;
+                        case (Quadruple.COPY):
+                            break;
+                        case (Quadruple.INDEXED_ASSIGNMENT):
+                            break;
+                        case (Quadruple.INDEXED_LOOKUP):
+                            break;
+                        case (Quadruple.LABEL):
+                            fileOut.append(quad.getResult()).append(':').append('\n');
+                            break;
+                        case (Quadruple.LENGTH_3AC):
+
+                            break;
+                        case (Quadruple.NEW_3AC):
+                            fileOut.append(instPrinter.handleNew(quad)).append('\n');
+                            break;
+                        case (Quadruple.NEW_ARRAY):
+                            break;
+                        case (Quadruple.PARAMETER):
+                            fileOut.append(instPrinter.handleParameter(quad)).append('\n');
+                            break;
+                        case (Quadruple.PRINT):
+                            fileOut.append(instPrinter.handlePrint(quad)).append('\n');
+                            break;
+                        case (Quadruple.RETURN_3AC):
+                            fileOut.append(instPrinter.handleReturn(quad)).append('\n');
+
+                            break;
+                        case (Quadruple.UNARY_ASSIGNMENT): break;
+                        case (Quadruple.UNCONDITIONAL_JUMP): break;
+
+                    }
+                }
             }
-
 
         }
 

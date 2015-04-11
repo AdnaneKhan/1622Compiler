@@ -1,6 +1,10 @@
 package CodeGeneration;
 
 import IR.Quadruple;
+import SymTable.MethodTable;
+import SyntaxTree.ASTNode;
+import SyntaxTree.Formal;
+import SyntaxTree.MethodDecl;
 
 import java.util.HashMap;
 
@@ -71,7 +75,7 @@ public class QuadEmit {
         StringBuilder instruction = new StringBuilder();
 
         instruction.append("jal _system_out_println");
-        fRegC = 0;
+
 
         return instruction.toString();
     }
@@ -105,6 +109,23 @@ public class QuadEmit {
         }
 
         instruction.append("move").append(' ').append(defRegister).append(", ").append("$v0");
+
+
+        // reset the count since we are dealing with arguments within the function
+        // Note we start with reg count at 1 since $a0 is for the this
+        fRegC = 1;
+
+        //  get the method and add any params to args
+        MethodTable callTable = (MethodTable) quad.arg1_entry;
+        MethodDecl methodNode = (MethodDecl) callTable.getNode();
+
+        for (int i = 0; i < methodNode.fl.size(); i++) {
+            regMap.put(methodNode.fl.elementAt(i).i.s,getAReg());
+            if (fRegC == 4) {
+                break;
+            }
+        }
+
 
         fRegC = 0;
 

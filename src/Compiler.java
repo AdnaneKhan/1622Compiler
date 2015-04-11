@@ -1,11 +1,13 @@
 
 import CodeGeneration.CodeGenerator;
+import IR.IRClass;
 import SymTable.SymbolTable;
 import Visitor.*;
 import java_cup.runtime.Symbol;
 import SyntaxTree.*;
 
 import java.io.*;
+import java.util.ArrayList;
 
 
 public class Compiler {
@@ -49,7 +51,9 @@ public class Compiler {
                 IRGeneratorVisitor irGen = new IRGeneratorVisitor(compilerTable);
                 irGen.visit(minJProgram);
 
-                CodeGenerator codeGen = new CodeGenerator(irGen.getQuadList(),compilerTable);
+                ArrayList<IRClass> ir = irGen.getClasses();
+
+                CodeGenerator codeGen = new CodeGenerator(ir,compilerTable);
 
                 String output = codeGen.output();
                 System.out.println(output);

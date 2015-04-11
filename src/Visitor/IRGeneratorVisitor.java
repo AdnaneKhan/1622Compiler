@@ -45,6 +45,10 @@ public class IRGeneratorVisitor implements Visitor {
         return retArray;
     }
 
+    public ArrayList<IRClass> getClasses() {
+        return this.classes;
+    }
+
     private TableEntry getSymbol(String theVar) {
         TableEntry toExtract = base.getCurrentScope().getEntryWalk(theVar,SymbolTable.LEAF_ENTRY);
 
@@ -707,6 +711,10 @@ public class IRGeneratorVisitor implements Visitor {
 
         String toAdd = "";
         if (n.e instanceof NewObject) {
+
+
+
+
             String lookup = ((NewObject) n.e).i.s;
             toAdd = lookup;
 
@@ -723,8 +731,12 @@ public class IRGeneratorVisitor implements Visitor {
                 classParam = temp.parent.parent.getSymbolName();
             }
 
-
-
+        } else {
+            if (n.e instanceof This) {
+                if(base.getCurrentScope().isEntry(TableEntry.METHOD_ENTRY)) {
+                    toAdd = base.getCurrentScope().parent.getSymbolName();
+                }
+            }
         }
         currentQuad.setArg1(base.getClassTable(toAdd).getMethod(n.i.s));
 
