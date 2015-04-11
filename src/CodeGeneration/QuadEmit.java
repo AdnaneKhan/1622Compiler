@@ -1,9 +1,6 @@
 package CodeGeneration;
 
 import IR.Quadruple;
-import SymTable.ClassTable;
-import SyntaxTree.ClassDecl;
-import sun.security.pkcs11.wrapper.CK_AES_CTR_PARAMS;
 
 import java.util.HashMap;
 
@@ -34,7 +31,6 @@ public class QuadEmit {
         return tempReg;
     }
 
-
     private String getAReg() {
         String tempReg = null;
 
@@ -46,8 +42,6 @@ public class QuadEmit {
         }
         return tempReg;
     }
-
-
 
     /**
      *
@@ -62,25 +56,16 @@ public class QuadEmit {
             instruction.append(", ");
             instruction.append(quad.getResult());
         } else {
-
-
             String paramVar = regMap.get(quad.getResult());
-
 
             instruction.append("move ");
             instruction.append(getAReg());
             instruction.append(", ");
             instruction.append(paramVar);
-
-
         }
-
 
         return instruction.toString();
     }
-
-
-
 
     public String handlePrint(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
@@ -91,15 +76,35 @@ public class QuadEmit {
         return instruction.toString();
     }
 
-
     public String handleCall(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
         // Add reference to method for calls
 
+        // Get class name
+        ///String className = quad.arg1_entry.parent.getSymbolName();
+
+
+        instruction.append("jal").append(' ').append(quad.getArg1()).append("\n");
 
         // Now for moving the return value
 
+        // Now we need to output instruction to get the value that returns
+        // Later when we are doing liveness analysis we need to be able to identify in the method
+        // whether there is a return value at all (meaning that there is a def into $v0, otherwise we do
+        // not need to pull the return value out
+
+
+        String defRegister;
+        if (regMap.containsKey(quad.getResult())) {
+            defRegister = regMap.get(quad.getResult());
+        } else {
+
+            defRegister = getTReg();
+            regMap.put(quad.getResult(),defRegister);
+        }
+
+        instruction.append("move").append(' ').append(defRegister).append(", ").append("$v0");
 
         fRegC = 0;
 
@@ -140,14 +145,11 @@ public class QuadEmit {
             instruction.append(", ").append(quad.getArg2());
         }
 
-
         return instruction.toString();
     }
 
     public String handleCopy(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
-
-
 
         return instruction.toString();
     }
@@ -168,28 +170,20 @@ public class QuadEmit {
         // Print out the default jr $r
         instruction.append("jr").append(' ').append("$ra").append('\n');
 
-
         return instruction.toString();
     }
     public String handleUnaryAssignment(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
-
-
 
         return instruction.toString();
     }
     public String handleUncondJump(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
-
-
-
         return instruction.toString();
     }
     public String handleCondJump(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
-
-
 
         return instruction.toString();
     }
@@ -199,12 +193,12 @@ public class QuadEmit {
         // Steps:
         String classString = quad.getArg1();
 
-////        ClassTable classTable = (ClassTable) quad.getNode();
+        // ClassTable classTable = (ClassTable) quad.getNode();
 
-//        ClassDecl classNode = (ClassDecl) classTable.getNode();
+        // ClassDecl classNode = (ClassDecl) classTable.getNode();
 
         // Using size we can get our allocation count for new
-  ///      int varCount = classNode.vl.size();
+        // int varCount = classNode.vl.size();
 
         // But right now since we aren't doing classes -- curr time Fri, April 10 7PM
         // we just make a variable and shove zero in it
@@ -221,15 +215,11 @@ public class QuadEmit {
     public String handleNewArray(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
-
-
         return instruction.toString();
     }
 
     public String handleIndexedAssignment(Quadruple quad){
         StringBuilder instruction = new StringBuilder();
-
-
 
         return instruction.toString();
     }
@@ -237,10 +227,7 @@ public class QuadEmit {
     public String handleIndexedLookup(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
-
-
         return instruction.toString();
 
     }
-
 }

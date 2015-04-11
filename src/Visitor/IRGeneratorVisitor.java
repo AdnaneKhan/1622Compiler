@@ -708,7 +708,7 @@ public class IRGeneratorVisitor implements Visitor {
         String toAdd = "";
         if (n.e instanceof NewObject) {
             String lookup = ((NewObject) n.e).i.s;
-            toAdd = lookup + "_";
+            toAdd = lookup;
 
         } else if (n.e instanceof IdentifierExp) {
             String lookup = ((IdentifierExp)n.e).s;
@@ -726,9 +726,8 @@ public class IRGeneratorVisitor implements Visitor {
 
 
         }
+        currentQuad.setArg1(base.getClassTable(toAdd).getMethod(n.i.s));
 
-
-        currentQuad.setArg1(n.i.s);
 
         quadstack.set(top(), currentQuad);
 

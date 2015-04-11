@@ -21,14 +21,14 @@ public class Quadruple {
         if (theVar.parent.isEntry(SymbolTable.CLASS_ENTRY)) {
 
             String className = theVar.parent.getSymbolName();
-            varReturn = className + "_" + theVar.getSymbolName();
+            varReturn = className + "_" + varReturn;
 
         } else if (theVar.parent.isEntry(SymbolTable.METHOD_ENTRY)) {
 
             String methName = theVar.parent.getSymbolName();
             String className = theVar.parent.parent.getSymbolName();
 
-            varReturn = className + "_" + methName + "_" + theVar.getSymbolName();
+            varReturn = className + "_" + methName + "_" + varReturn;
         }
 
         return varReturn;
@@ -108,6 +108,8 @@ public class Quadruple {
             return arg1;
         }
     }
+
+
 
 
     public String getArg2()  {
@@ -231,7 +233,7 @@ public class Quadruple {
 			ret += "param " + result;
 		}
 		else if (type == CALL) {
-			ret += result + " := call " + getArg1() + ", " + getArg2();
+			ret += result + " := call " + this.arg1_entry.getSymbolName() + ", " + getArg2();
 		}
 		else if (type == RETURN_3AC) {
 			ret += "return " + result;
