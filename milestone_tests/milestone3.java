@@ -5,11 +5,7 @@ class Test {
 }
 class Test2 {
     public int Start(int y) {
-
-
-        y = this.More(y);
-
-        return y;
+        return this.More(y);
     }
 
     public int More(int b) {
