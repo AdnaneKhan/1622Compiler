@@ -19,6 +19,9 @@ public class QuadEmit {
     int sRegC;
     int fRegC;
 
+
+    // a very simple register map that works
+    // its purposes prior to true regisster allocation
     private HashMap<String,String> regMap;
 
 
@@ -360,17 +363,40 @@ public class QuadEmit {
     public String handleNewArray(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
+        // This will function in a manner that is similar to the new object instantiation
+
+        // Get the size of the array from the node in the quadruple (may have to augment in the IR visitor)
+
+        // then set up the instructions to call the new array function
+
+        // and then we take the valueu that came fromm $v0 and assign it into whichever register is holding the array
+        // pointer
+
+
         return instruction.toString();
     }
 
     public String handleIndexedAssignment(Quadruple quad){
         StringBuilder instruction = new StringBuilder();
 
+        // In indexed assignment since we are saving a value to an index of an array what we have to do
+        // is use the register that is holding the value and pull the pointer out of it
+        /// if the value has been spilled to the stack (we need to use soem sort of spill table to hold variables
+        // that have had their values spilled to the stack ex: the combination of a varaible and the register it was
+        // last in should return either that register or will allow us to do the appropriate memory reference to get that
+        // value
+
+
+
         return instruction.toString();
     }
 
     public String handleIndexedLookup(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
+
+        // very simiilar to indexed assignment in how we have to get the pointer ,but then we make a lookup from mmeory
+
+        // and save it into its destination register
 
         return instruction.toString();
 
