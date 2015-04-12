@@ -74,13 +74,13 @@ public class CodeGenerator {
                     switch (quad.type) {
 
                         case (Quadruple.ASSIGNMENT):
-
                             fileOut.append(instPrinter.handleAssignment(quad)).append('\n');
                             break;
                         case (Quadruple.CALL):
                             fileOut.append(instPrinter.handleCall(quad)).append('\n');
                             break;
                         case (Quadruple.CONDITIONAL_JUMP):
+                            fileOut.append(instPrinter.handleCondJump(quad)).append('\n');
                             break;
                         case (Quadruple.COPY):
                             fileOut.append(instPrinter.handleCopy(quad)).append('\n');
@@ -93,7 +93,6 @@ public class CodeGenerator {
                             fileOut.append(quad.getResult()).append(':').append('\n');
                             break;
                         case (Quadruple.LENGTH_3AC):
-
                             break;
                         case (Quadruple.NEW_3AC):
                             fileOut.append(instPrinter.handleNew(quad)).append('\n');
@@ -108,11 +107,12 @@ public class CodeGenerator {
                             break;
                         case (Quadruple.RETURN_3AC):
                             fileOut.append(instPrinter.handleReturn(quad)).append('\n');
-
                             break;
-                        case (Quadruple.UNARY_ASSIGNMENT): break;
-                        case (Quadruple.UNCONDITIONAL_JUMP): break;
-
+                        case (Quadruple.UNARY_ASSIGNMENT): 
+                            break;
+                        case (Quadruple.UNCONDITIONAL_JUMP): 
+                            fileOut.append(instPrinter.handleUncondJump(quad)).append('\n');
+                            break;
                     }
                 }
 

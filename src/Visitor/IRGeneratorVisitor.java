@@ -391,6 +391,11 @@ public class IRGeneratorVisitor implements Visitor {
         String tempLabel2 = "_t" + tempNum;
         tempNum++;
 
+        Quadruple tempQuad2 = new Quadruple();
+        tempQuad2.type = Quadruple.LABEL;
+        tempQuad2.result = tempLabel;
+        currentMethod.add(tempQuad2);
+
         currentQuad = new Quadruple();
         currentQuad.type = getType(n.e);
         pushStack(currentQuad);
@@ -404,7 +409,6 @@ public class IRGeneratorVisitor implements Visitor {
 
         currentQuad.resToArg1(tempQuad);
         currentQuad.setArg2(tempLabel2);
-        currentQuad.label = tempLabel;
         currentQuad.result = "iffalse";
         currentQuad = quadstack.set(top(), currentQuad);
         currentMethod.add(currentQuad);
@@ -811,12 +815,16 @@ public class IRGeneratorVisitor implements Visitor {
     public void visit(True n) {
         currentQuad = quadstack.get(top());
         currentQuad.result = "$TRUE";
+        currentQuad.setIntResult(1);
+        currentQuad.setIsBoolean();
         quadstack.set(top(), currentQuad);
     }
 
     public void visit(False n) {
         currentQuad = quadstack.get(top());
         currentQuad.result = "$FALSE";
+        currentQuad.setIntResult(0);
+        currentQuad.setIsBoolean();
         quadstack.set(top(), currentQuad);
     }
 

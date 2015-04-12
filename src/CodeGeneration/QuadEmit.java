@@ -163,8 +163,18 @@ public class QuadEmit {
             instruction.append(getAReg());
             instruction.append(", ");
             instruction.append(quad.getResult());
-        } else {
-
+        }
+        else if ( quad.isBoolean() ) {
+            instruction.append("li ");
+            instruction.append(getAReg());
+            instruction.append(", ");
+            if (quad.getResult().equals("$TRUE")) {
+                instruction.append("1");
+            } else {
+                instruction.append("0");
+            }
+        }
+        else {
             String paramVar;
             if (!quad.getResult().equals("this")) {
                  paramVar = regMap.get(quad.getResult());
@@ -450,12 +460,14 @@ public class QuadEmit {
     }
     public String handleUncondJump(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
-
+        instruction.append("j " + quad.getResult());
         return instruction.toString();
     }
     public String handleCondJump(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
-
+        String varLookup = quad.getArg1();
+        String resRegister = regMap.get(varLookup);
+        instruction.append("beq ").append(resRegister).append(COMMA_SPACE).append("$zero").append(COMMA_SPACE).append(quad.getArg2());
         return instruction.toString();
     }
     public String handleNew(Quadruple quad) {

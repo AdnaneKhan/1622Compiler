@@ -57,6 +57,7 @@ public class Quadruple {
     public String result;
 
     private boolean resultLiteral;
+    private boolean resultBoolean;
     private boolean arg1Literal;
     private  boolean arg2Literal;
     private int intResult;
@@ -90,6 +91,10 @@ public class Quadruple {
     public void setIntResult(int toSet) {
         intResult = toSet;
         this.resultLiteral = true;
+    }
+
+    public void setIsBoolean() {
+        this.resultBoolean = true;
     }
 
     public void setArg1(int toSet) {
@@ -148,6 +153,10 @@ public class Quadruple {
      */
     public boolean isLiteral() {
         return resultLiteral;
+    }
+
+    public boolean isBoolean() {
+        return resultBoolean;
     }
 
     public boolean arg1Literal() { return arg1Literal; }
