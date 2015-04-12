@@ -415,10 +415,14 @@ public class QuadEmit {
         String lhsCheck = quad.getResult();
         String lhsReg = getSide(lhsCheck);
 
-        String rhsCheck = quad.getArg1();
-        String rhsReg = getSide(rhsCheck);
+        if (quad.arg1Literal()) {
+            instruction.append("li").append(' ').append(lhsReg).append(COMMA_SPACE).append(quad.getArg1());
+        } else {
+            String rhsCheck = quad.getArg1();
+            String rhsReg = getSide(rhsCheck);
+            instruction.append("move").append(" ").append(lhsReg).append(COMMA_SPACE).append(rhsReg);
+        }
 
-        instruction.append("move").append(" ").append(lhsReg).append(COMMA_SPACE).append(rhsReg);
 
         return instruction.toString();
     }
