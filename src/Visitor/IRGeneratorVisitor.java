@@ -811,12 +811,16 @@ public class IRGeneratorVisitor implements Visitor {
     public void visit(True n) {
         currentQuad = quadstack.get(top());
         currentQuad.result = "$TRUE";
+        currentQuad.setIntResult(1);
+        currentQuad.setIsBoolean();
         quadstack.set(top(), currentQuad);
     }
 
     public void visit(False n) {
         currentQuad = quadstack.get(top());
         currentQuad.result = "$FALSE";
+        currentQuad.setIntResult(0);
+        currentQuad.setIsBoolean();
         quadstack.set(top(), currentQuad);
     }
 

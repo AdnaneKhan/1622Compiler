@@ -57,6 +57,7 @@ public class Quadruple {
     public String result;
 
     private boolean resultLiteral;
+    private boolean resultBoolean;
     private boolean arg1Literal;
     private  boolean arg2Literal;
     private int intResult;
@@ -90,6 +91,10 @@ public class Quadruple {
     public void setIntResult(int toSet) {
         intResult = toSet;
         this.resultLiteral = true;
+    }
+
+    public void setIsBoolean() {
+        this.resultBoolean = true;
     }
 
     public void setArg1(int toSet) {
@@ -153,6 +158,10 @@ public class Quadruple {
         return resultLiteral;
     }
 
+    public boolean isBoolean() {
+        return resultBoolean;
+    }
+
     public boolean arg1Literal() { return arg1Literal; }
 
     public boolean arg2Literal() { return arg2Literal; }
@@ -163,7 +172,9 @@ public class Quadruple {
      * @return string representation off the result
      */
     public String getResult() {
-        if (resultLiteral) {
+        if (resultBoolean) {
+            return result;
+        } else if (resultLiteral) {
             return Integer.toString(this.intResult);
         } else if (resVar != null) {
             return resVar.getSymbolName();
@@ -189,7 +200,12 @@ public class Quadruple {
      * @param origin
      */
     public void transferResult(Quadruple origin) {
-        if (origin.isLiteral()) {
+        if (origin.isBoolean()) {
+            this.resultBoolean = true;
+            this.result = origin.getResult();
+            this.resVar = origin.resVar;
+        }
+        else if (origin.isLiteral()) {
             this.resultLiteral = true;
             this.setIntResult(origin.intResult);
         } else {
@@ -199,7 +215,12 @@ public class Quadruple {
     }
 
     public void resToArg1(Quadruple origin) {
-        if (origin.isLiteral()) {
+        if (origin.isBoolean()) {
+            this.resultBoolean = true;
+            this.result = origin.getResult();
+            this.resVar = origin.resVar;
+        }
+        else if (origin.isLiteral()) {
             this.setArg1(origin.intResult);
         } else {
             this.arg1 = origin.getResult();
@@ -208,7 +229,12 @@ public class Quadruple {
     }
 
     public void resToArg2(Quadruple origin) {
-        if (origin.isLiteral()) {
+        if (origin.isBoolean()) {
+            this.resultBoolean = true;
+            this.result = origin.getResult();
+            this.resVar = origin.resVar;
+        }
+        else if (origin.isLiteral()) {
             this.setArg2(origin.intResult);
         } else {
             this.arg2 = origin.getResult();
@@ -251,7 +277,7 @@ public class Quadruple {
 			ret += result + " := " + getArg1();
 		}
 		else if (type == PARAMETER) {
-			ret += "param " + getResult();
+			ret += "param " + result;
 		}
 		else if (type == CALL) {
 			ret += result + " := call " + this.arg1_entry.getSymbolName() + ", " + getArg2();

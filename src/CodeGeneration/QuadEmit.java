@@ -163,8 +163,18 @@ public class QuadEmit {
             instruction.append(getAReg());
             instruction.append(", ");
             instruction.append(quad.getResult());
-        } else {
-
+        }
+        else if ( quad.isBoolean() ) {
+            instruction.append("li ");
+            instruction.append(getAReg());
+            instruction.append(", ");
+            if (quad.getResult().equals("$TRUE")) {
+                instruction.append("1");
+            } else {
+                instruction.append("0");
+            }
+        }
+        else {
             String paramVar;
             if (!quad.getResult().equals("this")) {
                  paramVar = regMap.get(quad.getResult());
