@@ -1,8 +1,10 @@
 package CodeGeneration;
 
 import IR.Quadruple;
+import SymTable.ClassTable;
 import SymTable.MethodTable;
 import SyntaxTree.ASTNode;
+import SyntaxTree.ClassDecl;
 import SyntaxTree.Formal;
 import SyntaxTree.MethodDecl;
 
@@ -12,6 +14,7 @@ import java.util.HashMap;
  * Created by adnankhan on 4/10/15.
  */
 public class QuadEmit {
+    private static final int GP_REG_COUNT = 22;
     int tRegC;
     int sRegC;
     int fRegC;
@@ -47,6 +50,107 @@ public class QuadEmit {
         return tempReg;
     }
 
+    // This function prints code to naively save
+    // all registers
+    private String printSaveAll() {
+        StringBuilder instruction = new StringBuilder();
+        int regCount = GP_REG_COUNT;
+        // get the original position of the heap
+        instruction.append("addi $sp, $sp,").append(regCount * -4).append('\n');
+
+        // First grow the heap to accommodate all the new instructions
+        int offSet = GP_REG_COUNT-1;
+        // Save all temporaries
+        for (int i = 0; i < 10; i++) {
+            instruction.append("sw").append(' ').append("$t").append(i).append(',').append(' ').append(offSet*4);
+            // note here we use the return value straight from the original syscall we did because
+            // nothing changed in it
+            instruction.append("($v0)").append('\n');
+
+            offSet--;
+        }
+
+        // Save all s registers
+
+        for (int i =0; i < 8; i++) {
+            instruction.append("sw").append(' ').append("$s").append(i).append(',').append(' ').append(offSet*4);
+            // note here we use the return value straight from the original syscall we did because
+            // nothing changed in it
+            instruction.append("($sp)").append('\n');
+
+            offSet--;
+        }
+
+        // save everything else
+
+        instruction.append("sw").append(' ').append("$at").append(',').append(' ').append(offSet*4);
+        instruction.append("($sp)").append('\n');
+        offSet--;
+
+        instruction.append("sw").append(' ').append("$k0").append(',').append(' ').append(offSet*4);
+        instruction.append("($sp)").append('\n');
+        offSet--;
+
+
+        instruction.append("sw").append(' ').append("$k1").append(',').append(' ').append(offSet*4);
+        instruction.append("($sp)").append('\n');
+        offSet--;
+
+        instruction.append("sw").append(' ').append("$ra").append(',').append(' ').append(offSet*4);
+        instruction.append("($sp)").append('\n');
+        offSet--;
+
+
+        return instruction.toString();
+    }
+
+
+    private String printRestoreAll() {
+        StringBuilder instruction = new StringBuilder();
+        int regCount = GP_REG_COUNT;
+        int startPoint = 0;
+
+        instruction.append("lw").append(' ').append("$ra").append(',').append(' ').append(startPoint*4);
+        instruction.append("($sp)").append('\n');
+        startPoint++;
+
+        instruction.append("lw").append(' ').append("$k1").append(',').append(' ').append(startPoint*4);
+        instruction.append("($sp)").append('\n');
+        startPoint++;
+
+        instruction.append("lw").append(' ').append("$k0").append(',').append(' ').append(startPoint*4);
+        instruction.append("($sp)").append('\n');
+        startPoint++;
+
+        instruction.append("lw").append(' ').append("$at").append(',').append(' ').append(startPoint*4);
+        instruction.append("($sp)").append('\n');
+        startPoint++;
+
+        for (int i = 0; i < 8; i ++) {
+            instruction.append("lw").append(' ').append("$s").append(i).append(',').append(' ').append(startPoint*4);
+            // note here we use the return value straight from the original syscall we did because
+            // nothing changed in it
+            instruction.append("($sp)").append('\n');
+
+            startPoint++;
+        }
+
+        // Save all temporaries
+        for (int i = 0; i < 10; i++) {
+            instruction.append("lw").append(' ').append("$t").append(i).append(',').append(' ').append(startPoint*4);
+            // note here we use the return value straight from the original syscall we did because
+            // nothing changed in it
+            instruction.append("($sp)").append('\n');
+
+            startPoint++;
+        }
+
+        // Shrink the stack by passing a negative offffset
+        instruction.append("addi $sp, $sp, ").append(regCount * 4).append('\n');
+
+        return instruction.toString();
+    }
+
     /**
      *
      * @return mips instruction loading the parameter into appropriate variable
@@ -60,7 +164,14 @@ public class QuadEmit {
             instruction.append(", ");
             instruction.append(quad.getResult());
         } else {
-            String paramVar = regMap.get(quad.getResult());
+
+            String paramVar;
+            if (!quad.getResult().equals("this")) {
+                 paramVar = regMap.get(quad.getResult());
+            } else {
+                // if its this then we know we are in a class and the first argument will be the class location
+               paramVar = "$a0";
+            }
 
             instruction.append("move ");
             instruction.append(getAReg());
@@ -75,7 +186,7 @@ public class QuadEmit {
         StringBuilder instruction = new StringBuilder();
 
         instruction.append("jal _system_out_println");
-
+        fRegC = 0;
 
         return instruction.toString();
     }
@@ -88,9 +199,10 @@ public class QuadEmit {
         // Get class name
         ///String className = quad.arg1_entry.parent.getSymbolName();
 
-
+        instruction.append(printSaveAll());
         instruction.append("jal").append(' ').append(quad.getArg1()).append("\n");
-
+        instruction.append(printRestoreAll());
+        printRestoreAll();
         // Now for moving the return value
 
         // Now we need to output instruction to get the value that returns
@@ -166,11 +278,16 @@ public class QuadEmit {
             instruction.append(", ").append(quad.getArg2());
         }
 
+
+
         return instruction.toString();
     }
 
     public String handleCopy(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
+
+        // For copy we need to figure out which registers each respective value was in
+
 
         return instruction.toString();
     }
@@ -212,14 +329,21 @@ public class QuadEmit {
         StringBuilder instruction = new StringBuilder();
 
         // Steps:
-        String classString = quad.getArg1();
+         ClassTable classTable = (ClassTable) quad.arg1_entry;
 
-        // ClassTable classTable = (ClassTable) quad.getNode();
-
-        // ClassDecl classNode = (ClassDecl) classTable.getNode();
+         ClassDecl classNode = (ClassDecl) classTable.getNode();
 
         // Using size we can get our allocation count for new
-        // int varCount = classNode.vl.size();
+        int varCount = classNode.vl.size();
+
+        // Now we have to make the object itself
+
+        // Load the size into the argument zero register
+        // yes, our max class size is the size of 16 bit immediate, god help us if that is tested...
+        instruction.append("li").append(' ').append("$a0").append(',').append( varCount * 4 ).append('\n');
+        // now we call the object maker
+        instruction.append("jal").append(" _new_object").append('\n');
+
 
         // But right now since we aren't doing classes -- curr time Fri, April 10 7PM
         // we just make a variable and shove zero in it
@@ -228,8 +352,8 @@ public class QuadEmit {
         String tempReg = getTReg();
 
         regMap.put(tempVar,tempReg);
-
-        instruction.append("li").append(' ').append(tempReg).append(", ").append("0");
+        // Now we move the address into the temporary, this is our new object address.
+        instruction.append("move").append(' ').append(tempReg).append(", ").append("$v0");
 
         return instruction.toString();
     }
