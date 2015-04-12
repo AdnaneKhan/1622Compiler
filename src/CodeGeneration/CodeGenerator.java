@@ -64,7 +64,6 @@ public class CodeGenerator {
                 // this way if they are referenced we can know which $a0, $a1, $a2, $a3 to access
                 // if there end up being more then we know that arguments were spilled and we must properly retrieve them
 
-
                 Quadruple labelQuad = new Quadruple(Quadruple.LABEL);
                 labelQuad.result = irMethod.getName();
                 fileOut.append(labelQuad.getResult()).append(':').append('\n');
@@ -72,8 +71,6 @@ public class CodeGenerator {
 
                 for (Quadruple quad : irMethod.lines) {
                     // Switch based on the type of quadtruple
-
-
                     switch (quad.type) {
 
                         case (Quadruple.ASSIGNMENT):

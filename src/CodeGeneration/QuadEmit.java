@@ -85,7 +85,6 @@ public class QuadEmit {
         }
 
         // save everything else
-
         instruction.append("sw").append(' ').append("$at").append(',').append(' ').append(offSet*4);
         instruction.append("($sp)").append('\n');
         offSet--;
@@ -404,18 +403,12 @@ public class QuadEmit {
         StringBuilder instruction = new StringBuilder();
 
         String lhsCheck = quad.getResult();
-
         String lhsReg = getSide(lhsCheck);
-
 
         String rhsCheck = quad.getArg1();
         String rhsReg = getSide(rhsCheck);
 
-
         instruction.append("move").append(" ").append(lhsReg).append(COMMA_SPACE).append(rhsReg);
-
-
-        // For copy we need to figure out which registers each respective value was in
 
         return instruction.toString();
     }
@@ -509,7 +502,6 @@ public class QuadEmit {
         // and then we take the valueu that came fromm $v0 and assign it into whichever register is holding the array
         // pointer
 
-
         return instruction.toString();
     }
 
@@ -522,8 +514,6 @@ public class QuadEmit {
         // that have had their values spilled to the stack ex: the combination of a varaible and the register it was
         // last in should return either that register or will allow us to do the appropriate memory reference to get that
         // value
-
-
 
         return instruction.toString();
     }
