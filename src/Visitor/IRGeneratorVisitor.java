@@ -4,7 +4,6 @@ import CodeGeneration.QuadEmit;
 import SymTable.*;
 import SyntaxTree.*;
 import IR.*;
-import com.sun.tools.javac.util.Name;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
