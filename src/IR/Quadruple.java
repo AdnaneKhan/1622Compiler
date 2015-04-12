@@ -114,9 +114,6 @@ public class Quadruple {
         }
     }
 
-
-
-
     public String getArg2()  {
         if (arg2Literal) {
             return Integer.toString(arg2Int);
@@ -177,7 +174,7 @@ public class Quadruple {
         } else if (resultLiteral) {
             return Integer.toString(this.intResult);
         } else if (resVar != null) {
-            return resVar.getSymbolName();
+            return resVar.getHierarchyName();
         } else {
             return result;
         }
