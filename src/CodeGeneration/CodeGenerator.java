@@ -86,6 +86,7 @@ public class CodeGenerator {
                         case (Quadruple.CONDITIONAL_JUMP):
                             break;
                         case (Quadruple.COPY):
+                            fileOut.append(instPrinter.handleCopy(quad)).append('\n');
                             break;
                         case (Quadruple.INDEXED_ASSIGNMENT):
                             break;
