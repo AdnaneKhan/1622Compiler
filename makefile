@@ -5,7 +5,8 @@ sources = $(wildcard src/*.java) \
           $(wildcard src/SyntaxTree/*.java) \
 	  $(wildcard src/Visitor/*.java) \
 	  $(wildcard src/SymTable/*.java) \
-	  $(wildcard src/IR/*.java)
+	  $(wildcard src/IR/*.java) \
+	  $(wildcard src/CodeGenerator)
 
 classes = $(sources:.java=.class)
 
@@ -22,7 +23,8 @@ clean:
 	rm -f src/SyntaxTree/*.class \
 	rm -f src/Visitor/*.class \
 	rm -f src/IR/*.class \
-	rm -f src/SymTable/*.class
+	rm -f src/SymTable/*.class \
+	rm -f src/CodeGenerator/*.class
 
 %.class : %.java
 	$(JAVAC) -classpath ${CLASSPATH} $(sources)
