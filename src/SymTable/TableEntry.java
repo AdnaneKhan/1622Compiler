@@ -151,6 +151,23 @@ public abstract  class TableEntry {
         return symbolName;
     }
 
+    public String getHierarchyName() {
+       StringBuilder hierarchy = new StringBuilder();
+
+        if (this.isEntry(ROOT_ENTRY)) {
+            // no op
+        } else if (this.isEntry(CLASS_ENTRY)) {
+            hierarchy.append(this.getSymbolName()).append('_');
+        } else if (this.isEntry(METHOD_ENTRY)) {
+            hierarchy.append(this.parent.getHierarchyName()).append(this.getSymbolName()).append('_');
+        } else if (this.isEntry(LEAF_ENTRY)) {
+            hierarchy.append(this.parent.getHierarchyName()).append(this.getSymbolName());
+        }
+
+
+        return hierarchy.toString();
+    }
+
     /**
      *
      * @return the actual AST node wrapped by this entry
