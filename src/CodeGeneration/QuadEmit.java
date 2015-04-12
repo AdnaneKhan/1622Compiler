@@ -3,6 +3,7 @@ package CodeGeneration;
 import IR.Quadruple;
 import SymTable.ClassTable;
 import SymTable.MethodTable;
+import SymTable.TableEntry;
 import SyntaxTree.ASTNode;
 import SyntaxTree.ClassDecl;
 import SyntaxTree.Formal;
@@ -19,12 +20,9 @@ public class QuadEmit {
     int sRegC;
     int fRegC;
 
-
     // a very simple register map that works
     // its purposes prior to true regisster allocation
     private HashMap<String,String> regMap;
-
-
 
     public QuadEmit() {
         regMap = new HashMap<String,String>();
@@ -95,7 +93,6 @@ public class QuadEmit {
         instruction.append("($sp)").append('\n');
         offSet--;
 
-
         instruction.append("sw").append(' ').append("$k1").append(',').append(' ').append(offSet*4);
         instruction.append("($sp)").append('\n');
         offSet--;
@@ -103,7 +100,6 @@ public class QuadEmit {
         instruction.append("sw").append(' ').append("$ra").append(',').append(' ').append(offSet*4);
         instruction.append("($sp)").append('\n');
         offSet--;
-
 
         return instruction.toString();
     }
@@ -276,20 +272,109 @@ public class QuadEmit {
             instruction.append(resRegister).append(", ");
             instruction.append(quad.getArg1()).append("\n");
 
-
             instruction.append("addi").append(" ");
             instruction.append(resRegister).append(", ").append(resRegister);
             instruction.append(", ").append(quad.getArg2());
+        } else if (!quad.arg2Literal() && !quad.isTempArg1() && !quad.isTempArg2() && !quad.arg1Literal()) {
+                if (quad.arg1_entry.parent.isEntry(TableEntry.METHOD_ENTRY) && quad.arg2_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+                    MethodDecl arg1Table = (MethodDecl) quad.arg1_entry.parent.getNode();
+
+                    int arg1Pos = -1;
+                    int arg2Pos = -1;
+                    int i;
+
+                    for ( i = 0; i < arg1Table.fl.size(); i++) {
+                        if ( arg1Table.fl.elementAt(i).i.s.equals(quad.arg1)) {
+                            arg1Pos = i + 1;
+                        }
+
+                        if ( arg1Table.fl.elementAt(i).i.s.equals(quad.arg2)) {
+                            arg2Pos = i + 1;
+                        }
+                    }
+
+                    instruction.append(generateOpInst(quad.op, quad.getResult(),"$a" +arg1Pos,"$a" +arg2Pos));
+
+                } else if (quad.arg1_entry.parent.isEntry(TableEntry.CLASS_ENTRY)) {
+                    // TODO
+                    System.err.println(" We have class scoope variable we tried to reference!");
+                }
+        } else if (quad.isTempArg1() &&  quad.arg2_entry != null) {
+
+            String arg1Reg = regMap.get(quad.getArg1());
+
+            if (quad.arg2_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+                MethodDecl arg2Table = (MethodDecl) quad.arg2_entry.parent.getNode();
+
+                int arg2Pos = -1;
+                int i;
+
+                for ( i = 0; i < arg2Table.fl.size(); i++) {
+                    if ( arg2Table.fl.elementAt(i).i.s.equals(quad.getArg2())) {
+                        arg2Pos = i + 1;
+                    }
+                }
+
+                instruction.append(generateOpInst(quad.op, quad.getResult(), arg1Reg, "$a" + arg2Pos));
+
+            } else {
+                // TODO
+                System.err.println(" We have class scoope variable we tried to reference!");
+            }
+
+        } else if (quad.isTempArg2() && quad.arg1_entry != null) {
+            String arg2Reg = regMap.get(quad.getArg2());
+
+            if (quad.arg1_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+                MethodDecl arg1Table = (MethodDecl) quad.arg1_entry.parent.getNode();
+
+                int arg1Pos = -1;
+                int i;
+
+                for ( i = 0; i < arg1Table.fl.size(); i++) {
+                    if ( arg1Table.fl.elementAt(i).i.s.equals(quad.arg1)) {
+                        arg1Pos = i + 1;
+                    }
+                }
+
+                instruction.append(generateOpInst(quad.op, quad.getResult(),arg2Reg, "$a"+arg1Pos));
+
+            } else {
+                // TODO
+                System.err.println(" We have class scoope variable we tried to reference!");
+            }
         }
 
-        if (!quad.arg2Literal() || !quad.arg1Literal()) {
+        return instruction.toString();
+    }
 
+    private String generateOpInst(String op, String res, String reg1, String reg2) {
+        StringBuilder instruction = new StringBuilder();
+        String opCode = "";
+
+        if (op.equals("+")) {
+            opCode = "add";
+        } else if (op.equals("-")) {
+            opCode = "sub";
+        } else if (op.equals("&&")) {
+            opCode = "and";
+        } else if (op.equals("<")) {
+            opCode = "slt";
         }
 
+        if (op.equals("*")) {
+            opCode = "mult";
+        } else{
+            String tempReg;
+            if (regMap.containsKey(res)) {
+                tempReg = regMap.get(res);
+            } else {
+                tempReg = getTReg();
+                regMap.put(res,tempReg);
+            }
 
-
-
-
+            instruction.append(opCode).append(' ').append(tempReg).append(", ").append(reg1).append(',').append(reg2);
+        }
 
         return instruction.toString();
     }

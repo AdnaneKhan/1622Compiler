@@ -129,6 +129,22 @@ public class Quadruple {
     }
 
 
+    public boolean isTempArg1() {
+        if (!arg1Literal() && arg1.charAt(0) == '_') {
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean isTempArg2() {
+        if (!arg2Literal() && arg2.charAt(0) == '_') {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      *
      * @return true if this quadruple represents an integer literal
