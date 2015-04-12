@@ -80,6 +80,7 @@ public class CodeGenerator {
                             fileOut.append(instPrinter.handleCall(quad)).append('\n');
                             break;
                         case (Quadruple.CONDITIONAL_JUMP):
+                            fileOut.append(instPrinter.handleCondJump(quad)).append('\n');
                             break;
                         case (Quadruple.COPY):
                             fileOut.append(instPrinter.handleCopy(quad)).append('\n');

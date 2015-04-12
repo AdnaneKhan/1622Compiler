@@ -465,7 +465,9 @@ public class QuadEmit {
     }
     public String handleCondJump(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
-        instruction.append("BEQ ");
+        String varLookup = quad.getArg1();
+        String resRegister = regMap.get(varLookup);
+        instruction.append("beq ").append(resRegister).append(COMMA_SPACE).append("$zero").append(COMMA_SPACE).append(quad.getArg2());
         return instruction.toString();
     }
     public String handleNew(Quadruple quad) {
