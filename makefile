@@ -6,7 +6,7 @@ sources = $(wildcard src/*.java) \
 	  $(wildcard src/Visitor/*.java) \
 	  $(wildcard src/SymTable/*.java) \
 	  $(wildcard src/IR/*.java) \
-	  $(wildcard src/CodeGenerator)
+	  $(wildcard src/CodeGenerationg/*.java)
 
 classes = $(sources:.java=.class)
 
