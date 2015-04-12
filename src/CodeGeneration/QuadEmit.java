@@ -25,6 +25,7 @@ public class QuadEmit {
     private HashMap<String,String> regMap;
 
 
+
     public QuadEmit() {
         regMap = new HashMap<String,String>();
     }
@@ -280,6 +281,13 @@ public class QuadEmit {
             instruction.append(resRegister).append(", ").append(resRegister);
             instruction.append(", ").append(quad.getArg2());
         }
+
+        if (!quad.arg2Literal() || !quad.arg1Literal()) {
+
+        }
+
+
+
 
 
 

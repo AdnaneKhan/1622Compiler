@@ -251,6 +251,8 @@ public class IRGeneratorVisitor implements Visitor {
                 currentMethod.add(tempQuad);
             }
         }
+
+
         currentQuad = new Quadruple();
 
         // First check if the expression
@@ -825,7 +827,17 @@ public class IRGeneratorVisitor implements Visitor {
     public void visit(IdentifierExp n) {
         currentQuad = quadstack.get(top());
 
-        currentQuad.result = n.s;
+        TableEntry lookupRes = base.getCurrentScope().getEntryWalk(n.s,TableEntry.LEAF_ENTRY);
+        if (lookupRes == null) {
+
+        lookupRes = base.getCurrentScope().getEntryWalk(n.s,TableEntry.CLASS_ENTRY);
+        }
+        if (lookupRes == null) {
+        lookupRes = base.getCurrentScope().getEntryWalk(n.s,TableEntry.METHOD_ENTRY);
+        }
+        
+        currentQuad.setResEntry(lookupRes);
+
         quadstack.set(top(), currentQuad);
     }
 
