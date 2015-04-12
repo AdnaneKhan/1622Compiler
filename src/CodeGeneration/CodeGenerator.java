@@ -6,7 +6,7 @@ import IR.Quadruple;
 import SymTable.SymbolTable;
 
 import java.util.ArrayList;
-import java.util.List;
+
 
 /**
  * Created by adnankhan on 4/9/15.
@@ -16,7 +16,6 @@ public class CodeGenerator {
 
 
     ArrayList<IRClass> ir;
-   // List<Quadruple> programIR;
     SymbolTable programTable;
     QuadEmit instPrinter;
 
@@ -52,9 +51,19 @@ public class CodeGenerator {
                 // We need to do some operations for each method,
                 // in particular we need to look at the formal list and associate the variables names with the
                 // parameter list going in.
+
+                // every time we go over a method the formal list needs to be checked in the following manner
+
+                // start with first index and bind that to argument $a1, remember because we intend to
+                // support "newing" things we need to reserve $a0 for the either the object reference or this.
+
+                // if we have exhausted four parameters, then we need to start spilling to the stack, this means saving
+                // exisiting argument registers and then restoring them upon the return
+
+
                 // this way if they are referenced we can know which $a0, $a1, $a2, $a3 to access
                 // if there end up being more then we know that arguments were spilled and we must properly retrieve them
-                
+
 
                 Quadruple labelQuad = new Quadruple(Quadruple.LABEL);
                 labelQuad.result = irMethod.getName();

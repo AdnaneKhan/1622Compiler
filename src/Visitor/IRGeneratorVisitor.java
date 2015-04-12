@@ -717,8 +717,6 @@ public class IRGeneratorVisitor implements Visitor {
         if (n.e instanceof NewObject) {
 
 
-
-
             String lookup = ((NewObject) n.e).i.s;
             toAdd = lookup;
 
@@ -735,13 +733,12 @@ public class IRGeneratorVisitor implements Visitor {
                 classParam = temp.parent.parent.getSymbolName();
             }
 
-        } else {
-            if (n.e instanceof This) {
+        } else if (n.e instanceof This) {
                 if(base.getCurrentScope().isEntry(TableEntry.METHOD_ENTRY)) {
                     toAdd = base.getCurrentScope().parent.getSymbolName();
                 }
             }
-        }
+
         currentQuad.setArg1(base.getClassTable(toAdd).getMethod(n.i.s));
 
 
@@ -776,6 +773,7 @@ public class IRGeneratorVisitor implements Visitor {
         }
 
         currentQuad = quadstack.get(top());
+
 
         currentQuad.setArg2(n.el.size() +1);
 
