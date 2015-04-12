@@ -253,10 +253,31 @@ public class IRGeneratorVisitor implements Visitor {
             }
         }
         currentQuad = new Quadruple();
-        currentQuad.type = Quadruple.RETURN_3AC;
-        pushStack(currentQuad);
-        n.e.accept(this);
-        currentMethod.add(popStack());
+
+        // First check if the expression
+        int tempType = getType(n.e);
+        if (tempType != -2) {
+            currentQuad.type = tempType;
+            pushStack(currentQuad);
+            n.e.accept(this);
+            Quadruple tempQuad = popStack();
+
+            // now mmake a return quad
+            Quadruple retQuad = new Quadruple();
+            retQuad.transferResult(tempQuad);
+            retQuad.type = Quadruple.RETURN_3AC;
+            currentMethod.add(retQuad);
+        } else {
+            pushStack(currentQuad);
+            n.e.accept(this);
+            currentMethod.add(popStack());
+            currentQuad.type = Quadruple.RETURN_3AC;
+
+        }
+
+
+
+
 
         base.ascendScope();
     }
