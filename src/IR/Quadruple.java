@@ -178,6 +178,7 @@ public class Quadruple {
             this.setIntResult(origin.intResult);
         } else {
             this.result = origin.getResult();
+            this.resVar = origin.resVar;
         }
     }
 
@@ -186,6 +187,7 @@ public class Quadruple {
             this.setArg1(origin.intResult);
         } else {
             this.arg1 = origin.getResult();
+            this.arg1_entry = origin.resVar;
         }
     }
 
@@ -194,6 +196,7 @@ public class Quadruple {
             this.setArg2(origin.intResult);
         } else {
             this.arg2 = origin.getResult();
+            this.arg2_entry = origin.resVar;
         }
     }
 

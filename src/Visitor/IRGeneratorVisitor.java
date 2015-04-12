@@ -471,7 +471,6 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad = quadstack.get(top());
 
         currentQuad.resToArg1(tempQuad);
-        //currentQuad.arg1 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
     }
 
@@ -492,7 +491,6 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad = quadstack.get(top());
 
         currentQuad.resToArg2(tempQuad);
-      ///  currentQuad.arg2 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
 
         currentQuad = new Quadruple();
@@ -503,7 +501,6 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad = quadstack.get(top());
 
         currentQuad.resToArg1(tempQuad);
-    //    currentQuad.arg1 = tempQuad.getResult();
         quadstack.set(top(), currentQuad);
     }
 
@@ -835,7 +832,7 @@ public class IRGeneratorVisitor implements Visitor {
         if (lookupRes == null) {
         lookupRes = base.getCurrentScope().getEntryWalk(n.s,TableEntry.METHOD_ENTRY);
         }
-        
+
         currentQuad.setResEntry(lookupRes);
 
         quadstack.set(top(), currentQuad);
