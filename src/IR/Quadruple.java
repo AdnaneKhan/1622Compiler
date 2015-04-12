@@ -172,9 +172,7 @@ public class Quadruple {
      * @return string representation off the result
      */
     public String getResult() {
-        if (resultBoolean) {
-            return result;
-        } else if (resultLiteral) {
+        if (resultLiteral) {
             return Integer.toString(this.intResult);
         } else if (resVar != null) {
             return resVar.getSymbolName();
@@ -200,12 +198,7 @@ public class Quadruple {
      * @param origin
      */
     public void transferResult(Quadruple origin) {
-        if (origin.isBoolean()) {
-            this.resultBoolean = true;
-            this.result = origin.getResult();
-            this.resVar = origin.resVar;
-        }
-        else if (origin.isLiteral()) {
+        if (origin.isLiteral()) {
             this.resultLiteral = true;
             this.setIntResult(origin.intResult);
         } else {
@@ -215,12 +208,7 @@ public class Quadruple {
     }
 
     public void resToArg1(Quadruple origin) {
-        if (origin.isBoolean()) {
-            this.resultBoolean = true;
-            this.result = origin.getResult();
-            this.resVar = origin.resVar;
-        }
-        else if (origin.isLiteral()) {
+        if (origin.isLiteral()) {
             this.setArg1(origin.intResult);
         } else {
             this.arg1 = origin.getResult();
@@ -229,12 +217,7 @@ public class Quadruple {
     }
 
     public void resToArg2(Quadruple origin) {
-        if (origin.isBoolean()) {
-            this.resultBoolean = true;
-            this.result = origin.getResult();
-            this.resVar = origin.resVar;
-        }
-        else if (origin.isLiteral()) {
+        if (origin.isLiteral()) {
             this.setArg2(origin.intResult);
         } else {
             this.arg2 = origin.getResult();
@@ -277,7 +260,7 @@ public class Quadruple {
 			ret += result + " := " + getArg1();
 		}
 		else if (type == PARAMETER) {
-			ret += "param " + result;
+			ret += "param " + getResult();
 		}
 		else if (type == CALL) {
 			ret += result + " := call " + this.arg1_entry.getSymbolName() + ", " + getArg2();

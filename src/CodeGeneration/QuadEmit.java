@@ -423,12 +423,12 @@ public class QuadEmit {
     }
     public String handleUncondJump(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
-
+        instruction.append("j " + quad.getResult());
         return instruction.toString();
     }
     public String handleCondJump(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
-
+        instruction.append("BEQ ");
         return instruction.toString();
     }
     public String handleNew(Quadruple quad) {
