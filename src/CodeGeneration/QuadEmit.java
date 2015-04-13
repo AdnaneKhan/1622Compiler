@@ -303,7 +303,7 @@ public class QuadEmit {
 
         // Load the size into the argument zero register
         // yes, our max class size is the size of 16 bit immediate, god help us if that is tested...
-        instruction.append("li").append(' ').append("$s0").append(',').append( varCount * 4 ).append('\n');
+        instruction.append("li").append(' ').append("$a0").append(',').append( varCount * 4 ).append('\n');
         // now we call the object maker
         instruction.append("jal").append(" _new_object").append('\n');
 
@@ -530,7 +530,7 @@ public class QuadEmit {
         instruction.append("($sp)").append('\n');
         startPoint++;
 
-        for (int i = 0; i < 8; i ++) {
+        for (int i =7; i >= 0; i--) {
             instruction.append("lw").append(' ').append("$s").append(i).append(COMMA_SPACE).append(startPoint*4);
             // note here we use the return value straight from the original syscall we did because
             // nothing changed in it
@@ -540,7 +540,7 @@ public class QuadEmit {
         }
 
         // Save all temporaries
-        for (int i = 0; i < 10; i++) {
+        for (int i = 9; i >= 0; i--) {
             instruction.append("lw").append(' ').append("$t").append(i).append(COMMA_SPACE).append(startPoint*4);
             // note here we use the return value straight from the original syscall we did because
             // nothing changed in it
