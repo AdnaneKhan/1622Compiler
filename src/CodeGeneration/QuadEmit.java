@@ -59,7 +59,7 @@ public class QuadEmit {
                  paramVar = regMap.get(quad.getResult());
             } else {
                 // if its this then we know we are in a class and the first argument will be the class location
-               paramVar = "$a0";
+               paramVar = "$s0";
             }
 
             instruction.append("move ");
@@ -173,7 +173,7 @@ public class QuadEmit {
 
                     int arg1Pos = getArgPos(quad.arg1_entry);
                     int arg2Pos = getArgPos(quad.arg2_entry);
-                    instruction.append(generateOpInst(quad.op, quad.getResult(), "$a" + arg1Pos, "$a" + arg2Pos));
+                    instruction.append(generateOpInst(quad.op, quad.getResult(), "$s" + arg1Pos, "$s" + arg2Pos));
 
                 } else if (quad.arg1_entry.parent.isEntry(TableEntry.CLASS_ENTRY)) {
                     // TODO
@@ -303,7 +303,7 @@ public class QuadEmit {
 
         // Load the size into the argument zero register
         // yes, our max class size is the size of 16 bit immediate, god help us if that is tested...
-        instruction.append("li").append(' ').append("$a0").append(',').append( varCount * 4 ).append('\n');
+        instruction.append("li").append(' ').append("$s0").append(',').append( varCount * 4 ).append('\n');
         // now we call the object maker
         instruction.append("jal").append(" _new_object").append('\n');
 
@@ -398,7 +398,7 @@ public class QuadEmit {
     private String argRegStr(String arg, int argPos) {
         String argReg;
         if (argPos >= 0) {
-            argReg = "$a"+argPos;
+            argReg = "$s"+argPos;
         } else {
             argReg = regMap.get(arg);
         }

@@ -67,7 +67,9 @@ public class CodeGenerator {
                 Quadruple labelQuad = new Quadruple(Quadruple.LABEL);
                 labelQuad.result = irMethod.getName();
                 fileOut.append(labelQuad.getResult()).append(':').append('\n');
-
+                for (int i = 0; i < 4; i++) {
+                    fileOut.append("move").append(' ').append("$s").append(i).append(", ").append("$a").append(i).append('\n');
+                }
 
                 for (Quadruple quad : irMethod.lines) {
                     // Switch based on the type of quadtruple
