@@ -110,7 +110,8 @@ public class CodeGenerator {
                         case (Quadruple.RETURN_3AC):
                             fileOut.append(instPrinter.handleReturn(quad)).append('\n');
                             break;
-                        case (Quadruple.UNARY_ASSIGNMENT): 
+                        case (Quadruple.UNARY_ASSIGNMENT):
+                            fileOut.append(instPrinter.handleUnaryAssignment(quad)).append('\n');
                             break;
                         case (Quadruple.UNCONDITIONAL_JUMP): 
                             fileOut.append(instPrinter.handleUncondJump(quad)).append('\n');
@@ -120,14 +121,10 @@ public class CodeGenerator {
 
                 if (labelQuad.getResult().equals("main"));
                 fileOut.append("jal _system_exit\n");
-
             }
-
         }
 
-
         fileOut.append(getLibrary());
-
 
         return fileOut.toString();
     }

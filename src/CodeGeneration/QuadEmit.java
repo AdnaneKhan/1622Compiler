@@ -273,6 +273,26 @@ public class QuadEmit {
     }
     public String handleUnaryAssignment(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
+        String varLookup = quad.getResult();
+        String resRegister = regMap.get(varLookup);
+        if (quad.arg1Literal()) {
+          int res = 0;
+          if ( 0 == quad.arg1Int) {
+              res = 1;
+          }
+
+            instruction.append("li").append(' ').append(resRegister).append(COMMA_SPACE).append(res).append('\n');
+            instruction.append("slti").append(' ').append(resRegister).append(COMMA_SPACE).append(resRegister).append(COMMA_SPACE).append("1");
+        } else if (quad.arg1_entry != null && quad.arg1_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+            int arg1Pos = getArgPos(quad.arg1_entry);
+            String arg1Reg = argRegStr(quad.getArg1(), arg1Pos);
+
+            instruction.append("slti").append(' ').append(resRegister).append(COMMA_SPACE).append(arg1Reg).append(COMMA_SPACE).append("1");
+
+        } else {
+            // TODO
+            System.err.println(" We have class scope variable we tried to reference!");
+        }
 
         return instruction.toString();
     }
