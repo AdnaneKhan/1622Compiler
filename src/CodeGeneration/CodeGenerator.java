@@ -121,6 +121,7 @@ public class CodeGenerator {
 
                 if (labelQuad.getResult().equals("main"));
                 fileOut.append("jal _system_exit\n");
+
             }
         }
 

@@ -20,7 +20,7 @@ public class QuadEmit {
     // its purposes prior to true regisster allocation
     private HashMap<String,String> regMap;
 
-    int tRegC;
+    public int tRegC;
     int sRegC;
     int fRegC;
 
@@ -397,7 +397,7 @@ public class QuadEmit {
 
     private String getSide(String sideCheck) {
         String regReturn;
-        if ( regMap.containsKey(sideCheck) && !regMap.get(sideCheck).substring(0,1).equals("$a")) {
+        if ( regMap.containsKey(sideCheck) && regMap.get(sideCheck) != null && !regMap.get(sideCheck).substring(0,1).equals("$a")) {
             regReturn = regMap.get(sideCheck);
         } else {
             regReturn = getTReg();
