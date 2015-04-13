@@ -4,9 +4,7 @@ import IR.Quadruple;
 import SymTable.ClassTable;
 import SymTable.MethodTable;
 import SymTable.TableEntry;
-import SyntaxTree.ASTNode;
 import SyntaxTree.ClassDecl;
-import SyntaxTree.Formal;
 import SyntaxTree.MethodDecl;
 
 import java.util.HashMap;
@@ -17,139 +15,20 @@ import java.util.HashMap;
 public class QuadEmit {
     private static final int GP_REG_COUNT = 22;
     private static final String COMMA_SPACE = ", ";
-    int tRegC;
-    int sRegC;
-    int fRegC;
 
     // a very simple register map that works
     // its purposes prior to true regisster allocation
     private HashMap<String,String> regMap;
 
+    int tRegC;
+    int sRegC;
+    int fRegC;
+
+
     public QuadEmit() {
         regMap = new HashMap<String,String>();
     }
 
-    private String getTReg() {
-        String tempReg = null;
-
-        if (tRegC == 9) {
-            // Limit Reached
-        } else {
-            tempReg = "$t" + tRegC;
-            tRegC++;
-        }
-        return tempReg;
-    }
-
-    private String getAReg() {
-        String tempReg = null;
-
-        if (fRegC == 4) {
-            // Limit Reached
-        } else {
-            tempReg = "$a" + fRegC;
-            fRegC++;
-        }
-        return tempReg;
-    }
-
-    // This function prints code to naively save
-    // all registers
-    private String printSaveAll() {
-        StringBuilder instruction = new StringBuilder();
-        int regCount = GP_REG_COUNT;
-        // get the original position of the heap
-        instruction.append("addi $sp, $sp,").append(regCount * -4).append('\n');
-
-        // First grow the heap to accommodate all the new instructions
-        int offSet = GP_REG_COUNT-1;
-        // Save all temporaries
-        for (int i = 0; i < 10; i++) {
-            instruction.append("sw").append(' ').append("$t").append(i).append(',').append(' ').append(offSet*4);
-            // note here we use the return value straight from the original syscall we did because
-            // nothing changed in it
-            instruction.append("($v0)").append('\n');
-
-            offSet--;
-        }
-
-        // Save all s registers
-
-        for (int i =0; i < 8; i++) {
-            instruction.append("sw").append(' ').append("$s").append(i).append(',').append(' ').append(offSet*4);
-            // note here we use the return value straight from the original syscall we did because
-            // nothing changed in it
-            instruction.append("($sp)").append('\n');
-
-            offSet--;
-        }
-
-        // save everything else
-        instruction.append("sw").append(' ').append("$at").append(',').append(' ').append(offSet*4);
-        instruction.append("($sp)").append('\n');
-        offSet--;
-
-        instruction.append("sw").append(' ').append("$k0").append(',').append(' ').append(offSet*4);
-        instruction.append("($sp)").append('\n');
-        offSet--;
-
-        instruction.append("sw").append(' ').append("$k1").append(',').append(' ').append(offSet*4);
-        instruction.append("($sp)").append('\n');
-        offSet--;
-
-        instruction.append("sw").append(' ').append("$ra").append(',').append(' ').append(offSet*4);
-        instruction.append("($sp)").append('\n');
-        offSet--;
-
-        return instruction.toString();
-    }
-
-
-    private String printRestoreAll() {
-        StringBuilder instruction = new StringBuilder();
-        int regCount = GP_REG_COUNT;
-        int startPoint = 0;
-
-        instruction.append("lw").append(' ').append("$ra").append(COMMA_SPACE).append(startPoint*4);
-        instruction.append("($sp)").append('\n');
-        startPoint++;
-
-        instruction.append("lw").append(' ').append("$k1").append(COMMA_SPACE).append(startPoint*4);
-        instruction.append("($sp)").append('\n');
-        startPoint++;
-
-        instruction.append("lw").append(' ').append("$k0").append(COMMA_SPACE).append(startPoint*4);
-        instruction.append("($sp)").append('\n');
-        startPoint++;
-
-        instruction.append("lw").append(' ').append("$at").append(COMMA_SPACE).append(startPoint*4);
-        instruction.append("($sp)").append('\n');
-        startPoint++;
-
-        for (int i = 0; i < 8; i ++) {
-            instruction.append("lw").append(' ').append("$s").append(i).append(COMMA_SPACE).append(startPoint*4);
-            // note here we use the return value straight from the original syscall we did because
-            // nothing changed in it
-            instruction.append("($sp)").append('\n');
-
-            startPoint++;
-        }
-
-        // Save all temporaries
-        for (int i = 0; i < 10; i++) {
-            instruction.append("lw").append(' ').append("$t").append(i).append(COMMA_SPACE).append(startPoint*4);
-            // note here we use the return value straight from the original syscall we did because
-            // nothing changed in it
-            instruction.append("($sp)").append('\n');
-
-            startPoint++;
-        }
-
-        // Shrink the stack by passing a negative offffset
-        instruction.append("addi $sp, $sp, ").append(regCount * 4).append('\n');
-
-        return instruction.toString();
-    }
 
     /**
      *
@@ -191,7 +70,6 @@ public class QuadEmit {
 
         return instruction.toString();
     }
-
     public String handlePrint(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
@@ -200,7 +78,6 @@ public class QuadEmit {
 
         return instruction.toString();
     }
-
     public String handleCall(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
@@ -248,7 +125,6 @@ public class QuadEmit {
 
         return instruction.toString();
     }
-
     public String handleAssignment(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
@@ -359,75 +235,6 @@ public class QuadEmit {
 
         return instruction.toString();
     }
-
-    private String getImmediateRegister(String key, String arg, StringBuilder instruction) {
-        String resRegister= getTReg();
-        regMap.put(key,resRegister);
-
-        instruction.append("li").append(" ");
-        instruction.append(resRegister).append(COMMA_SPACE);
-        instruction.append(arg).append("\n");
-        return resRegister;
-    }
-
-    private int getArgPos(TableEntry quad_entry) {
-        MethodDecl arg1Table = (MethodDecl) quad_entry.parent.getNode();
-
-        int argPos = -1;
-        int i;
-
-        for ( i = 0; i < arg1Table.fl.size(); i++) {
-            if ( arg1Table.fl.elementAt(i).i.s.equals(quad_entry.getSymbolName())) {
-                argPos = i + 1;
-            }
-        }
-        return argPos;
-    }
-
-    private String argRegStr(String arg, int argPos) {
-        String argReg;
-        if (argPos >= 0) {
-            argReg = "$a"+argPos;
-        } else {
-            argReg = regMap.get(arg);
-        }
-        return argReg;
-    }
-
-    private String generateOpInst(String op, String res, String reg1, String reg2) {
-        StringBuilder instruction = new StringBuilder();
-        String opCode = "";
-
-        if (op.equals("+")) {
-            opCode = "add";
-        } else if (op.equals("-")) {
-            opCode = "sub";
-        } else if (op.equals("&&")) {
-            opCode = "and";
-        } else if (op.equals("<")) {
-            opCode = "slt";
-        }
-
-        String tempReg;
-        if (regMap.containsKey(res)) {
-            tempReg = regMap.get(res);
-        } else {
-            tempReg = getTReg();
-            regMap.put(res,tempReg);
-        }
-
-        if (op.equals("*")) {
-            opCode = "mult";
-
-            instruction.append(opCode).append(' ').append(reg1).append(COMMA_SPACE).append(reg2).append('\n');
-            instruction.append("mflo").append(' ').append(tempReg);
-        } else{
-            instruction.append(opCode).append(' ').append(tempReg).append(COMMA_SPACE).append(reg1).append(COMMA_SPACE).append(reg2);
-        }
-
-        return instruction.toString();
-    }
-
     public String handleCopy(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
@@ -445,18 +252,6 @@ public class QuadEmit {
 
         return instruction.toString();
     }
-
-    private String getSide(String sideCheck) {
-        String regReturn;
-        if ( regMap.containsKey(sideCheck) && !regMap.get(sideCheck).substring(0,1).equals("$a")) {
-            regReturn = regMap.get(sideCheck);
-        } else {
-            regReturn = getTReg();
-            regMap.put(sideCheck,regReturn);
-        }
-        return regReturn;
-    }
-
     public String handleReturn(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
@@ -539,7 +334,6 @@ public class QuadEmit {
 
         return instruction.toString();
     }
-
     public String handleIndexedAssignment(Quadruple quad){
         StringBuilder instruction = new StringBuilder();
 
@@ -552,7 +346,6 @@ public class QuadEmit {
 
         return instruction.toString();
     }
-
     public String handleIndexedLookup(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
@@ -563,4 +356,203 @@ public class QuadEmit {
         return instruction.toString();
 
     }
+
+    /*
+     * ******************************************************************************************
+     *   Begin Private Methods
+     * ******************************************************************************************
+     */
+
+    private String getSide(String sideCheck) {
+        String regReturn;
+        if ( regMap.containsKey(sideCheck) && !regMap.get(sideCheck).substring(0,1).equals("$a")) {
+            regReturn = regMap.get(sideCheck);
+        } else {
+            regReturn = getTReg();
+            regMap.put(sideCheck,regReturn);
+        }
+        return regReturn;
+    }
+    private String getImmediateRegister(String key, String arg, StringBuilder instruction) {
+        String resRegister= getTReg();
+        regMap.put(key,resRegister);
+
+        instruction.append("li").append(" ");
+        instruction.append(resRegister).append(COMMA_SPACE);
+        instruction.append(arg).append("\n");
+        return resRegister;
+    }
+    private int getArgPos(TableEntry quad_entry) {
+        MethodDecl arg1Table = (MethodDecl) quad_entry.parent.getNode();
+
+        int argPos = -1;
+        int i;
+
+        for ( i = 0; i < arg1Table.fl.size(); i++) {
+            if ( arg1Table.fl.elementAt(i).i.s.equals(quad_entry.getSymbolName())) {
+                argPos = i + 1;
+            }
+        }
+        return argPos;
+    }
+    private String argRegStr(String arg, int argPos) {
+        String argReg;
+        if (argPos >= 0) {
+            argReg = "$a"+argPos;
+        } else {
+            argReg = regMap.get(arg);
+        }
+        return argReg;
+    }
+    private String generateOpInst(String op, String res, String reg1, String reg2) {
+        StringBuilder instruction = new StringBuilder();
+        String opCode = "";
+
+        if (op.equals("+")) {
+            opCode = "add";
+        } else if (op.equals("-")) {
+            opCode = "sub";
+        } else if (op.equals("&&")) {
+            opCode = "and";
+        } else if (op.equals("<")) {
+            opCode = "slt";
+        }
+
+        String tempReg;
+        if (regMap.containsKey(res)) {
+            tempReg = regMap.get(res);
+        } else {
+            tempReg = getTReg();
+            regMap.put(res,tempReg);
+        }
+
+        if (op.equals("*")) {
+            opCode = "mult";
+
+            instruction.append(opCode).append(' ').append(reg1).append(COMMA_SPACE).append(reg2).append('\n');
+            instruction.append("mflo").append(' ').append(tempReg);
+        } else{
+            instruction.append(opCode).append(' ').append(tempReg).append(COMMA_SPACE).append(reg1).append(COMMA_SPACE).append(reg2);
+        }
+
+        return instruction.toString();
+    }
+    private String getTReg() {
+        String tempReg = null;
+
+        if (tRegC == 9) {
+            // Limit Reached
+        } else {
+            tempReg = "$t" + tRegC;
+            tRegC++;
+        }
+        return tempReg;
+    }
+    private String getAReg() {
+        String tempReg = null;
+
+        if (fRegC == 4) {
+            // Limit Reached
+        } else {
+            tempReg = "$a" + fRegC;
+            fRegC++;
+        }
+        return tempReg;
+    }
+    // This function prints code to naively save
+    // all registers
+    private String printSaveAll() {
+        StringBuilder instruction = new StringBuilder();
+        int regCount = GP_REG_COUNT;
+        // get the original position of the heap
+        instruction.append("addi $sp, $sp,").append(regCount * -4).append('\n');
+
+        // First grow the heap to accommodate all the new instructions
+        int offSet = GP_REG_COUNT-1;
+        // Save all temporaries
+        for (int i = 0; i < 10; i++) {
+            instruction.append("sw").append(' ').append("$t").append(i).append(',').append(' ').append(offSet*4);
+            // note here we use the return value straight from the original syscall we did because
+            // nothing changed in it
+            instruction.append("($v0)").append('\n');
+
+            offSet--;
+        }
+
+        // Save all s registers
+
+        for (int i =0; i < 8; i++) {
+            instruction.append("sw").append(' ').append("$s").append(i).append(',').append(' ').append(offSet*4);
+            // note here we use the return value straight from the original syscall we did because
+            // nothing changed in it
+            instruction.append("($sp)").append('\n');
+
+            offSet--;
+        }
+
+        // save everything else
+        instruction.append("sw").append(' ').append("$at").append(',').append(' ').append(offSet*4);
+        instruction.append("($sp)").append('\n');
+        offSet--;
+
+        instruction.append("sw").append(' ').append("$k0").append(',').append(' ').append(offSet*4);
+        instruction.append("($sp)").append('\n');
+        offSet--;
+
+        instruction.append("sw").append(' ').append("$k1").append(',').append(' ').append(offSet*4);
+        instruction.append("($sp)").append('\n');
+        offSet--;
+
+        instruction.append("sw").append(' ').append("$ra").append(',').append(' ').append(offSet*4);
+        instruction.append("($sp)").append('\n');
+        offSet--;
+
+        return instruction.toString();
+    }
+    private String printRestoreAll() {
+        StringBuilder instruction = new StringBuilder();
+        int regCount = GP_REG_COUNT;
+        int startPoint = 0;
+
+        instruction.append("lw").append(' ').append("$ra").append(COMMA_SPACE).append(startPoint*4);
+        instruction.append("($sp)").append('\n');
+        startPoint++;
+
+        instruction.append("lw").append(' ').append("$k1").append(COMMA_SPACE).append(startPoint*4);
+        instruction.append("($sp)").append('\n');
+        startPoint++;
+
+        instruction.append("lw").append(' ').append("$k0").append(COMMA_SPACE).append(startPoint*4);
+        instruction.append("($sp)").append('\n');
+        startPoint++;
+
+        instruction.append("lw").append(' ').append("$at").append(COMMA_SPACE).append(startPoint*4);
+        instruction.append("($sp)").append('\n');
+        startPoint++;
+
+        for (int i = 0; i < 8; i ++) {
+            instruction.append("lw").append(' ').append("$s").append(i).append(COMMA_SPACE).append(startPoint*4);
+            // note here we use the return value straight from the original syscall we did because
+            // nothing changed in it
+            instruction.append("($sp)").append('\n');
+
+            startPoint++;
+        }
+
+        // Save all temporaries
+        for (int i = 0; i < 10; i++) {
+            instruction.append("lw").append(' ').append("$t").append(i).append(COMMA_SPACE).append(startPoint*4);
+            // note here we use the return value straight from the original syscall we did because
+            // nothing changed in it
+            instruction.append("($sp)").append('\n');
+
+            startPoint++;
+        }
+
+        // Shrink the stack by passing a negative offffset
+        instruction.append("addi $sp, $sp, ").append(regCount * 4).append('\n');
+
+        return instruction.toString();
+    }
+
 }
