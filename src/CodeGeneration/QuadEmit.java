@@ -274,7 +274,19 @@ public class QuadEmit {
     public String handleUnaryAssignment(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
         String varLookup = quad.getResult();
-        String resRegister = regMap.get(varLookup);
+        String resRegister;
+
+
+        if (regMap.containsKey(varLookup)) {
+            resRegister = regMap.get(varLookup);
+
+        } else {
+            resRegister = getTReg();
+            // Add temporary to the map
+            regMap.put(varLookup,resRegister);
+        }
+
+
         if (quad.arg1Literal()) {
           int res = 0;
           if ( 0 == quad.arg1Int) {
