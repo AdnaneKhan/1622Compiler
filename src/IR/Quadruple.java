@@ -50,19 +50,22 @@ public class Quadruple {
     public final static int INDEXED_LOOKUP = 14;
     public final static int LABEL = 15;
 
-    ///public String arg1;
-    ///public String arg2;
-
     public String op;
     public String result;
 
     private boolean resultLiteral;
     private boolean resultBoolean;
-    private boolean arg1Literal;
-    private  boolean arg2Literal;
+
+    // NOT ACTUAL LITERALS
+    private boolean isArg1Literal;
+    private boolean isArg2Literal;
+
+
     private int intResult;
-    private int arg1Int;
-    private int arg2Int;
+
+
+    public int arg1Int;
+    public int arg2Int;
 
     public int type;
     public String label;
@@ -98,7 +101,7 @@ public class Quadruple {
     }
 
     public void setArg1(int toSet) {
-        arg1Literal = true;
+        isArg1Literal = true;
         arg1Int = toSet;
     }
 
@@ -107,7 +110,7 @@ public class Quadruple {
     }
 
     public String getArg1()  {
-        if (arg1Literal) {
+        if (isArg1Literal) {
             return Integer.toString(arg1Int);
         } else {
             return arg1;
@@ -115,7 +118,7 @@ public class Quadruple {
     }
 
     public String getArg2()  {
-        if (arg2Literal) {
+        if (isArg2Literal) {
             return Integer.toString(arg2Int);
         } else {
             return arg2;
@@ -123,7 +126,7 @@ public class Quadruple {
     }
 
     public void setArg2(int toSet) {
-        arg2Literal = true;
+        isArg2Literal = true;
         arg2Int = toSet;
     }
     public void setArg2(String toSet) {
@@ -159,9 +162,9 @@ public class Quadruple {
         return resultBoolean;
     }
 
-    public boolean arg1Literal() { return arg1Literal; }
+    public boolean arg1Literal() { return isArg1Literal; }
 
-    public boolean arg2Literal() { return arg2Literal; }
+    public boolean arg2Literal() { return isArg2Literal; }
 
 
     /**

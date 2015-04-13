@@ -267,12 +267,31 @@ public class QuadEmit {
         // If the lhs and rhs are literals then we need to get them and
         // first li to the reg, then add the second one to the reg
         if (quad.arg1Literal() && quad.arg2Literal()) {
+            String newTemp = getTReg();
+            regMap.put(quad.getResult(),newTemp);
 
-            String resRegister = getImmediateRegister(quad, instruction);
+            int result = 0;
+            if (quad.op.equals("+")) {
+                result = quad.arg1Int + quad.arg2Int;
+            } else if (quad.op.equals("-")) {
+                result = quad.arg1Int - quad.arg2Int;
+            } else if (quad.op.equals("&&")) {
+               boolean res = (quad.arg1Int == 1) &&( 1 == quad.arg2Int);
+                if (res) {
+                    result = 1;
+                }
+            } else if (quad.op.equals("<")) {
+                boolean res = (quad.arg1Int < quad.arg2Int);
+                if (res) {
+                    result = 1;
+                }
+            } else if (quad.op.equals("*")) {
+                result = quad.arg1Int * quad.arg2Int;
+            }
 
-            instruction.append("addi").append(" ");
-            instruction.append(resRegister).append(COMMA_SPACE).append(resRegister);
-            instruction.append(COMMA_SPACE).append(quad.getArg2());
+            instruction.append("li").append(" ").append(newTemp).append(COMMA_SPACE).append(Integer.toString(result));
+
+
         } else if (!quad.arg2Literal() && !quad.isTempArg1() && !quad.isTempArg2() && !quad.arg1Literal()) {
                 if (quad.arg1_entry.parent.isEntry(TableEntry.METHOD_ENTRY) && quad.arg2_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
 
@@ -317,7 +336,7 @@ public class QuadEmit {
 
                 int arg2Pos = getArgPos(quad.arg2_entry);
                 String arg2Reg = argRegStr(quad.getArg2(), arg2Pos);
-                String immediateRegister = getImmediateRegister(quad,instruction);
+                String immediateRegister = getImmediateRegister(quad.getResult(),quad.getArg1(),instruction);
                 instruction.append(generateOpInst(quad.op,quad.getResult(),immediateRegister,arg2Reg));
 
             } else {
@@ -329,7 +348,7 @@ public class QuadEmit {
 
                 int arg1Pos = getArgPos(quad.arg1_entry);
                 String arg1Reg = argRegStr(quad.getArg1(), arg1Pos);
-                String immediateRegister = getImmediateRegister(quad,instruction);
+                String immediateRegister = getImmediateRegister(quad.getResult(),quad.getArg1(),instruction);
                 instruction.append(generateOpInst(quad.op,quad.getResult(),arg1Reg,immediateRegister));
 
             } else {
@@ -341,13 +360,13 @@ public class QuadEmit {
         return instruction.toString();
     }
 
-    private String getImmediateRegister(Quadruple quad, StringBuilder instruction) {
+    private String getImmediateRegister(String key, String arg, StringBuilder instruction) {
         String resRegister= getTReg();
-        regMap.put(quad.getResult(),resRegister);
+        regMap.put(key,resRegister);
 
         instruction.append("li").append(" ");
         instruction.append(resRegister).append(COMMA_SPACE);
-        instruction.append(quad.getArg1()).append("\n");
+        instruction.append(arg).append("\n");
         return resRegister;
     }
 
