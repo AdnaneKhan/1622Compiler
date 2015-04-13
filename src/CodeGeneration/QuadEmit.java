@@ -224,7 +224,7 @@ public class QuadEmit {
 
                 int arg1Pos = getArgPos(quad.arg1_entry);
                 String arg1Reg = argRegStr(quad.getArg1(), arg1Pos);
-                String immediateRegister = getImmediateRegister(quad.getResult(),quad.getArg1(),instruction);
+                String immediateRegister = getImmediateRegister(quad.getResult(),quad.getArg2(),instruction);
                 instruction.append(generateOpInst(quad.op,quad.getResult(),arg1Reg,immediateRegister));
 
             } else {
