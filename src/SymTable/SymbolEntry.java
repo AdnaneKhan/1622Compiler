@@ -9,17 +9,31 @@ import SyntaxTree.*;
  * (anything that is not a method or a class)
  */
 public class SymbolEntry extends TableEntry {
+    public static final int DEAD_REG = -5;
     Type symType;
 
-
-    private int register= -1;
+    private int register= DEAD_REG;
 
     public int getRegister() {
         return register;
     }
 
-    public void setRegister(int new_regValue) {
-        register = new_regValue;
+    public void makeAlive(int new_regValue) {
+        if (register != DEAD_REG) {
+            System.err.println("We tried to give a live register a new live value!");
+        } else {
+            register = new_regValue;
+        }
+    }
+
+    public int kill() {
+        int oldValue = register;
+        if (register == DEAD_REG) {
+            System.err.println("We tried to kill a register that was already dead!");
+        } else {
+            register = DEAD_REG;
+        }
+        return register;
     }
 
     /**

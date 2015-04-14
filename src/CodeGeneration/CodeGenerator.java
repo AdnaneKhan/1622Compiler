@@ -15,15 +15,12 @@ import java.util.LinkedList;
  */
 public class CodeGenerator {
     private static final boolean DEBUG = true;
-
     ArrayList< ArrayList<LinkedList <String>>> useAndDef;
 
-    private
-    HashMap<Quadruple,ControlFlowNode> cfgMap;
+    private HashMap<Quadruple,ControlFlowNode> cfgMap;
     ArrayList<IRClass> ir;
     SymbolTable programTable;
     QuadEmit instPrinter;
-
 
     private void generateCfg() {
 
@@ -136,7 +133,6 @@ public class CodeGenerator {
 
         return fileOut.toString();
     }
-
 
 
     /**
