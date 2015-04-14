@@ -14,6 +14,13 @@ public class SymbolEntry extends TableEntry {
 
     private int register;
 
+    public int getRegister() {
+        return register;
+    }
+
+    public void setRegister(int new_regValue) {
+        register = new_regValue;
+    }
 
     /**
      *
@@ -41,6 +48,16 @@ public class SymbolEntry extends TableEntry {
         return entryType == LEAF_ENTRY;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder toRet = new StringBuilder();
+
+        toRet.append("This is a leaf entry named: ").append(symbolName).append('\n');
+        toRet.append("The parent is: ").append(this.parent.getSymbolName()).append('\n');
+        toRet.append("The type is: ").append(this.symType.toString()).append("\n");
+
+        return toRet.toString();
+    }
 
 
 }

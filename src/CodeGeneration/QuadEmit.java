@@ -55,13 +55,8 @@ public class QuadEmit {
         }
         else {
             String paramVar;
-            if (!quad.getResult().equals("this")) {
-                 paramVar = regMap.get(quad.getResult());
-            } else {
-                // if its this then we know we are in a class and the first argument will be the class location
-               paramVar = "$s0";
-            }
 
+            paramVar = regMap.get(quad.getResult());
             instruction.append("move ");
             instruction.append(getAReg());
             instruction.append(COMMA_SPACE);
@@ -114,6 +109,8 @@ public class QuadEmit {
         MethodTable callTable = (MethodTable) quad.arg1_entry;
         MethodDecl methodNode = (MethodDecl) callTable.getNode();
 
+
+        regMap.put(callTable.getEntry("this",TableEntry.LEAF_ENTRY).getSymbolName(),getAReg());
         for (int i = 0; i < methodNode.fl.size(); i++) {
             regMap.put(callTable.getEntry(methodNode.fl.elementAt(i).i.s,TableEntry.LEAF_ENTRY).getHierarchyName(),getAReg());
             if (fRegC == 4) {
