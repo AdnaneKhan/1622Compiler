@@ -1,10 +1,8 @@
 package Visitor;
 
-import CodeGeneration.QuadEmit;
 import SymTable.*;
 import SyntaxTree.*;
 import IR.*;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,8 +18,23 @@ public class IRGeneratorVisitor implements Visitor {
     ArrayList<Quadruple> quadstack;
 
     int tempNum = 0;
-    int methodSubscriptNum = 0;
-    int varSubscriptNum = 0;
+
+
+    private TableEntry addTemp(MethodTable methodScope, String tempVar, Type varType) {
+        VarDecl tempID = new VarDecl(varType, new Identifier(tempVar,0,0),0,0);
+
+        methodScope.putVariable(tempID);
+
+        return methodScope.getEntry(tempVar,TableEntry.LEAF_ENTRY);
+    }
+
+    private TableEntry addTemp(ClassTable classScope, String tempVar, Type varType) {
+        VarDecl tempID = new VarDecl(varType, new Identifier(tempVar,0,0),0,0);
+
+        classScope.putVariable(tempID);
+
+        return classScope.getEntry(tempVar,TableEntry.LEAF_ENTRY);
+    }
 
 
 
@@ -513,6 +526,8 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad = quadstack.get(top());
         currentQuad.op = "&&";
         currentQuad.result = "_t" + tempNum;
+        this.addTemp((MethodTable) base.getCurrentScope(),currentQuad.result,new BooleanType());
+
         tempNum++;
         quadstack.set(top(), currentQuad);
 
@@ -545,6 +560,8 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad = quadstack.get(top());
         currentQuad.op = "<";
         currentQuad.result = "_t" + tempNum;
+        this.addTemp((MethodTable) base.getCurrentScope(),currentQuad.result,new BooleanType());
+
         tempNum++;
         quadstack.set(top(), currentQuad);
 
@@ -578,6 +595,8 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad = quadstack.get(top());
         currentQuad.op = "+";
         currentQuad.result = "_t" + tempNum;
+        this.addTemp((MethodTable) base.getCurrentScope(),currentQuad.result, new IntegerType());
+
         tempNum++;
         quadstack.set(top(), currentQuad);
 
@@ -610,6 +629,7 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad = quadstack.get(top());
         currentQuad.op = "-";
         currentQuad.result = "_t" + tempNum;
+        this.addTemp((MethodTable) base.getCurrentScope(),currentQuad.result,new IntegerType());
         tempNum++;
         quadstack.set(top(), currentQuad);
 
@@ -643,6 +663,8 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad = quadstack.get(top());
         currentQuad.op = "*";
         currentQuad.result = "_t" + tempNum;
+        this.addTemp((MethodTable) base.getCurrentScope(),currentQuad.result,new IntegerType());
+
         tempNum++;
         quadstack.set(top(), currentQuad);
 
@@ -674,6 +696,8 @@ public class IRGeneratorVisitor implements Visitor {
     public void visit(ArrayLookup n) {
         currentQuad = quadstack.get(top());
         currentQuad.result = "_t" + tempNum;
+        this.addTemp((MethodTable) base.getCurrentScope(),currentQuad.result,new IntegerType());
+
         tempNum++;
         quadstack.set(top(), currentQuad);
 
@@ -708,6 +732,9 @@ public class IRGeneratorVisitor implements Visitor {
     public void visit(ArrayLength n) {
         currentQuad = quadstack.get(top());
         currentQuad.result = "_t" + tempNum;
+
+        this.addTemp((MethodTable) base.getCurrentScope(),currentQuad.result,new IntegerType());
+
         tempNum++;
         quadstack.set(top(), currentQuad);
 
@@ -856,9 +883,13 @@ public class IRGeneratorVisitor implements Visitor {
     public void visit(NewArray n) {
         currentQuad = quadstack.get(top());
         currentQuad.result = "_t" + tempNum;
+        this.addTemp((MethodTable) base.getCurrentScope(),currentQuad.result,new IntArrayType());
+
         tempNum++;
         currentQuad.op = "new int";
         quadstack.set(top(), currentQuad);
+
+
 
         currentQuad = new Quadruple();
         currentQuad.type = getType(n.e);
@@ -877,13 +908,21 @@ public class IRGeneratorVisitor implements Visitor {
     public void visit(NewObject n) {
         currentQuad = quadstack.get(top());
         currentQuad.result = "_t" + tempNum;
+
+
         tempNum++;
         currentQuad.op = "new";
 
         // Get the actual object
-
+        ClassTable temp = (ClassTable) base.getCurrentScope().getEntryWalk(n.i.s, TableEntry.CLASS_ENTRY);
         currentQuad.setArg1(n.i.s);
-        currentQuad.setArg1(base.getCurrentScope().getEntryWalk(n.i.s, TableEntry.CLASS_ENTRY));
+        currentQuad.setArg1(temp);
+
+        if (base.getCurrentScope().isEntry(TableEntry.METHOD_ENTRY)) {
+            this.addTemp((MethodTable) base.getCurrentScope(),currentQuad.result,temp.getClassType());
+        } else {
+            this.addTemp((ClassTable)base.getCurrentScope(),currentQuad.result,temp.getClassType());
+        }
 
         quadstack.set(top(), currentQuad);
         currentMethod.add(currentQuad);
@@ -892,7 +931,12 @@ public class IRGeneratorVisitor implements Visitor {
     // Exp e;
     public void visit(Not n) {
         currentQuad = quadstack.get(top());
+
+
         currentQuad.result = "_t" + tempNum;
+
+        this.addTemp((MethodTable)base.getCurrentScope(),currentQuad.result,new BooleanType());
+
         tempNum++;
         currentQuad.op = "!";
         quadstack.set(top(), currentQuad);

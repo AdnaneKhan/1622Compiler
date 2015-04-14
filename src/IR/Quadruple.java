@@ -9,7 +9,6 @@ public class Quadruple {
         arg2 = "";
         op = "";
         result = "";
-
         label = "";
         this.type = type;
     }

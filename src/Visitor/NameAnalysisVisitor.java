@@ -268,6 +268,11 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
                     }
             }
 
+           String className = base.getCurrentScope().parent.getSymbolName();
+           IdentifierType thisType = new IdentifierType(className, 0,0);
+           Formal thisFormal = new Formal(thisType,new Identifier("this",0,0),0,0);
+           current.putVariable(thisFormal);
+
             // Checks variable decls for duplicate names
             for (int i = 0; i < n.vl.size(); i++) {
                 if (!(n.vl.elementAt(i) instanceof ErroneousDecl)) {

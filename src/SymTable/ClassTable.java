@@ -9,7 +9,7 @@ import java.util.HashMap;
  */
 public class ClassTable extends TableEntry {
     private ClassTable parentClass;
-
+private IdentifierType classType;
 
     /**
      *
@@ -32,10 +32,17 @@ public class ClassTable extends TableEntry {
             parentClass = (ClassTable) parent.getEntry(parentId.s,CLASS_ENTRY);
         } else if (makeFrom instanceof ClassDeclSimple) {
             this.symbolName = ((ClassDeclSimple)makeFrom).i.s;
+
         }
 
+        this.classType = new IdentifierType(symbolName,0,0);
 
 
+
+    }
+
+    public Type getClassType() {
+        return classType;
     }
 
     public int entryType() {

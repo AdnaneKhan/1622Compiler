@@ -8,8 +8,13 @@ import SyntaxTree.*;
  * this can represent identifiers that do not lead to new scopes themselves
  * (anything that is not a method or a class)
  */
-public class SymbolEntry extends TableEntry{
+public class SymbolEntry extends TableEntry {
     Type symType;
+
+
+    private int register;
+
+
     /**
      *
      * @param symbolName of the symbol that this entry will represent
@@ -32,8 +37,10 @@ public class SymbolEntry extends TableEntry{
         return symType;
     }
 
-
     public boolean isEntry( int entryType) {
         return entryType == LEAF_ENTRY;
     }
+
+
+
 }

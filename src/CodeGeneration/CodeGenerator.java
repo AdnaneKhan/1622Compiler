@@ -6,6 +6,8 @@ import IR.Quadruple;
 import SymTable.SymbolTable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 
 /**
@@ -14,7 +16,11 @@ import java.util.ArrayList;
 public class CodeGenerator {
     private static final boolean DEBUG = true;
 
+    ArrayList< ArrayList<LinkedList <String>>> useAndDef;
 
+
+    private
+    HashMap<Quadruple,ControlFlowNode> cfgMap;
     ArrayList<IRClass> ir;
     SymbolTable programTable;
     QuadEmit instPrinter;
