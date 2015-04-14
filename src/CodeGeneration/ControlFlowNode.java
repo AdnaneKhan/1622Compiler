@@ -1,7 +1,10 @@
 package CodeGeneration;
 
 import IR.Quadruple;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -11,18 +14,21 @@ import java.util.Set;
  *  This is a single node of the conrol flow graph used in liveless analysis.
  */
 public class ControlFlowNode {
-    static HashMap<String,ControlFlowNode> labelMap = new HashMap<String, ControlFlowNode>();
+
     int index;
 
     public ControlFlowNode(Quadruple toWrap, int index) {
         this.index = index;
         this.irLine = toWrap;
+
+        predecessors = new ArrayList<ControlFlowNode>();
+        sucessors = new ArrayList< ControlFlowNode>();
     }
 
     // We store sucessors and predecssors since we are doing top to bottom when generating, but need
     // predecessors when we do reverse dfs liveness analysis
-    Set<ControlFlowNode> sucessors;
-    Set<ControlFlowNode> predecessors;
+    public List<ControlFlowNode> sucessors;
+    public List<ControlFlowNode> predecessors;
 
     private String lhsReg;
     private String rhs1Reg;

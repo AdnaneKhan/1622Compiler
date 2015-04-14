@@ -55,6 +55,13 @@ public class Compiler {
 
                 CodeGenerator codeGen = new CodeGenerator(ir,compilerTable);
 
+                // generate cfg nodes
+                codeGen.generateCfg();
+
+                // making cfg relations
+                codeGen.cfgRelations();
+
+
                 String output = codeGen.output();
                 System.out.println(output);
                 FileWriter fileOut = new FileWriter(fileName+".asm");

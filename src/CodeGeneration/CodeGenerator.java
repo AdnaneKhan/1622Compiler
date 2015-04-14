@@ -8,6 +8,7 @@ import SymTable.SymbolTable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Stack;
 
 
 /**
@@ -16,14 +17,80 @@ import java.util.LinkedList;
 public class CodeGenerator {
     private static final boolean DEBUG = true;
     ArrayList< ArrayList<LinkedList <String>>> useAndDef;
-
+    private ArrayList<ControlFlowNode> baseNodes = new ArrayList<ControlFlowNode>();
     private HashMap<Quadruple,ControlFlowNode> cfgMap;
+    private HashMap<String,ControlFlowNode> labelMap = new HashMap<String, ControlFlowNode>();
     ArrayList<IRClass> ir;
     SymbolTable programTable;
     QuadEmit instPrinter;
 
-    private void generateCfg() {
+    public void cfgRelations() {
 
+      for (int i = 0; i< baseNodes.size(); i++) {
+          ControlFlowNode cursor = baseNodes.get(i);
+
+          switch (cursor.irLine.type) {
+
+              case (Quadruple.UNCONDITIONAL_JUMP): {
+                  ControlFlowNode successor = labelMap.get(cursor.irLine.result);
+                  successor.predecessors.add(cursor);
+                  cursor.sucessors.add(successor);
+                }
+                  break;
+              case (Quadruple.RETURN_3AC):
+                  // no-op
+                  break;
+
+              case (Quadruple.CONDITIONAL_JUMP): {
+                  ControlFlowNode successor = labelMap.get(cursor.irLine.arg2);
+                  successor.predecessors.add(cursor);
+
+                  cursor.sucessors.add(successor);
+              }
+              // This executes in every case EXCEPT unconditional and return
+              default:
+
+                if (i+1 < baseNodes.size()) {
+                    ControlFlowNode next = baseNodes.get(i + 1);
+                    next.predecessors.add(cursor);
+                    cursor.sucessors.add(next);
+                }
+          }
+      }
+    }
+
+
+    /**
+     * Generates all the cfg nodes, does label resolution for branch landing,
+     * and places them in list according to ordering of IR
+     */
+    public void generateCfg() {
+        Stack<Quadruple> lastLabel = new Stack<Quadruple>();
+        int index = 0;
+
+        for (IRClass irClass : ir) {
+            for (IRMethod irMethod : irClass.lines ) {
+                Quadruple labelQuad = new Quadruple(Quadruple.LABEL);
+                labelQuad.result = irMethod.getName();
+                lastLabel.push(labelQuad);
+                for (Quadruple quad : irMethod.lines) {
+                    if (quad.type == Quadruple.LABEL) {
+                        lastLabel.push(quad);
+                    } else {
+
+                        ControlFlowNode newNode = new ControlFlowNode(quad,index);
+                        baseNodes.add(newNode);
+
+                        // while we have labels, bbind them to
+                        while (lastLabel.size() > 0) {
+                            labelMap.put(lastLabel.pop().result, newNode);
+                        }
+                    }
+
+                    index++;
+                }
+            }
+        }
     }
 
     public CodeGenerator (   ArrayList<IRClass> classes, SymbolTable symTable) {
