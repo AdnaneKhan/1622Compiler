@@ -12,7 +12,7 @@ public class SymbolEntry extends TableEntry {
     Type symType;
 
 
-    private int register;
+    private int register= -1;
 
     public int getRegister() {
         return register;

@@ -28,7 +28,7 @@ public class ControlFlowNode {
     private String rhs1Reg;
     private String rhs2Reg;
 
-    private Quadruple irLine;
+    public Quadruple irLine;
 
     public String getLhs() {
         return irLine.getResult();

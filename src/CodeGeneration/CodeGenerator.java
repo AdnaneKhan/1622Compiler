@@ -18,7 +18,6 @@ public class CodeGenerator {
 
     ArrayList< ArrayList<LinkedList <String>>> useAndDef;
 
-
     private
     HashMap<Quadruple,ControlFlowNode> cfgMap;
     ArrayList<IRClass> ir;
@@ -26,10 +25,11 @@ public class CodeGenerator {
     QuadEmit instPrinter;
 
 
+    private void generateCfg() {
 
+    }
 
     public CodeGenerator (   ArrayList<IRClass> classes, SymbolTable symTable) {
-      ///  programIR = interMediateRep;
         programTable = symTable;
         ir = classes;
         instPrinter = new QuadEmit();
@@ -78,6 +78,7 @@ public class CodeGenerator {
                 }
 
                 for (Quadruple quad : irMethod.lines) {
+                    quad.getResRegister();
                     // Switch based on the type of quadtruple
                     switch (quad.type) {
 

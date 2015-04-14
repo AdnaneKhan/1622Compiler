@@ -810,7 +810,7 @@ public class IRGeneratorVisitor implements Visitor {
         Quadruple tempQuad = popStack();
         currentQuad = new Quadruple();
         currentQuad.type = Quadruple.PARAMETER;
-        currentQuad.result = tempQuad.getResult();
+        currentQuad.transferResult(tempQuad);
         params.add(currentQuad);
 
         n.i.accept(this);
@@ -884,7 +884,7 @@ public class IRGeneratorVisitor implements Visitor {
 
     public void visit(This n) {
         currentQuad = quadstack.get(top());
-        currentQuad.result = "this";
+        currentQuad.setResEntry(base.getCurrentScope().getEntry("this",TableEntry.LEAF_ENTRY));
         quadstack.set(top(), currentQuad);
     }
 
