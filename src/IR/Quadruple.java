@@ -16,18 +16,19 @@ public class Quadruple {
     private String resolveVars(TableEntry theVar) {
 
         String varReturn = theVar.getSymbolName();
+        if (varReturn.charAt(0) != '_') {
+            if (theVar.parent.isEntry(SymbolTable.CLASS_ENTRY)) {
 
-        if (theVar.parent.isEntry(SymbolTable.CLASS_ENTRY)) {
+                String className = theVar.parent.getSymbolName();
+                varReturn = className + "_" + varReturn;
 
-            String className = theVar.parent.getSymbolName();
-            varReturn = className + "_" + varReturn;
+            } else if (theVar.parent.isEntry(SymbolTable.METHOD_ENTRY)) {
 
-        } else if (theVar.parent.isEntry(SymbolTable.METHOD_ENTRY)) {
+                String methName = theVar.parent.getSymbolName();
+                String className = theVar.parent.parent.getSymbolName();
 
-            String methName = theVar.parent.getSymbolName();
-            String className = theVar.parent.parent.getSymbolName();
-
-            varReturn = className + "_" + methName + "_" + varReturn;
+                varReturn = className + "_" + methName + "_" + varReturn;
+            }
         }
 
         return varReturn;
@@ -173,7 +174,7 @@ public class Quadruple {
     public String getResult() {
         if (resultLiteral) {
             return Integer.toString(this.intResult);
-        } else if (resVar != null) {
+        } else if (resVar != null && result.charAt(0) != '_') {
             return resVar.getHierarchyName();
         } else {
             return result;
