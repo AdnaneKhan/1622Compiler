@@ -61,6 +61,8 @@ public class Compiler {
                 // making cfg relations
                 codeGen.cfgRelations();
 
+                codeGen.generateDefUse();
+
 
                 String output = codeGen.output();
                 System.out.println(output);

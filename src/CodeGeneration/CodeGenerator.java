@@ -3,11 +3,11 @@ package CodeGeneration;
 import IR.IRClass;
 import IR.IRMethod;
 import IR.Quadruple;
+import SymTable.SymbolEntry;
 import SymTable.SymbolTable;
-
+import SymTable.TableEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Stack;
 
 
@@ -16,13 +16,36 @@ import java.util.Stack;
  */
 public class CodeGenerator {
     private static final boolean DEBUG = true;
-    ArrayList< ArrayList<LinkedList <String>>> useAndDef;
+    ArrayList< Row > useAndDefs = new ArrayList< Row>();
     private ArrayList<ControlFlowNode> baseNodes = new ArrayList<ControlFlowNode>();
     private HashMap<Quadruple,ControlFlowNode> cfgMap;
     private HashMap<String,ControlFlowNode> labelMap = new HashMap<String, ControlFlowNode>();
     ArrayList<IRClass> ir;
     SymbolTable programTable;
     QuadEmit instPrinter;
+
+    public void generateDefUse() {
+        Row newRow;
+
+        for ( ControlFlowNode cf : baseNodes) {
+            newRow = new Row();
+            if (cf.irLine.type != Quadruple.PARAMETER) {
+                newRow.defs.add((SymbolEntry) cf.irLine.getNode());
+            } else {
+                newRow.defs.add((SymbolEntry)cf.irLine.getNode());
+            }
+
+            if (cf.irLine.arg1_entry != null && cf.irLine.arg1_entry.isEntry(TableEntry.LEAF_ENTRY)) {
+
+                newRow.uses.add((SymbolEntry)cf.irLine.arg1_entry);
+            }
+
+            if (cf.irLine.arg2_entry != null&& cf.irLine.arg2_entry.isEntry(TableEntry.LEAF_ENTRY)) {
+                newRow.uses.add((SymbolEntry)cf.irLine.arg2_entry);
+            }
+            useAndDefs.add(newRow);
+        }
+    }
 
     public void cfgRelations() {
 
