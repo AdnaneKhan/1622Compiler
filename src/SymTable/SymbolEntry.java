@@ -18,7 +18,7 @@ public class SymbolEntry extends TableEntry {
         return register;
     }
 
-    public void makeAlive(int new_regValue) {
+    public void assignRegister(int new_regValue) {
         if (register != DEAD_REG) {
             System.err.println("We tried to give a live register a new live value!");
         } else {

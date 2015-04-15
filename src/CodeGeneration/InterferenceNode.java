@@ -9,10 +9,12 @@ import java.util.List;
  */
 public class InterferenceNode {
     private SymbolEntry variable;
+    private int color;
     public List<InterferenceNode> neighbors;
 
     public InterferenceNode(SymbolEntry node) {
         variable = node;
+        color = -5;
     }
 
 
@@ -27,7 +29,14 @@ public class InterferenceNode {
      */
     public void setColor(int color) {
         // set register in the symbol table entry
+        this.variable.assignRegister(color);
+
+        // set color value to color
+        this.color = color;
     }
 
+    public int getColor() {
+        return this.color;
+    }
 
 }
