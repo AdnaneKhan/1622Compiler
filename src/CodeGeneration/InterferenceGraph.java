@@ -63,14 +63,14 @@ public class InterferenceGraph {
     					break;
     				}
     			}
-    			for (SymbolEntry neighbor : inOut.get(i).defs) {
-    				for (int j = 0; j < igraph.size(); j++) {
-    					if (igraph.get(j).getVariable().equals(neighbor)) {
-    						currentNode.neighbors.add(igraph.get(j));
-    						break;
-    					}
-    				}
-    			}
+                    for (SymbolEntry neighbor : inOut.get(i).defs) {
+                        for (int j = 0; j < igraph.size(); j++) {
+                            if (igraph.get(j).getVariable().equals(neighbor)) {
+                                currentNode.neighbors.add(igraph.get(j));
+                                break;
+                            }
+                        }
+                    }
     		}
     	}
     }

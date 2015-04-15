@@ -2,6 +2,7 @@ package CodeGeneration;
 
 import SymTable.SymbolEntry;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -13,6 +14,8 @@ public class InterferenceNode {
     public List<InterferenceNode> neighbors;
 
     public InterferenceNode(SymbolEntry node) {
+
+        neighbors = new LinkedList<InterferenceNode>();
         variable = node;
         color = -5;
     }
