@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 import SymTable.SymbolEntry;
+import sun.jvm.hotspot.asm.Register;
 
 /**
  * Created by adnankhan on 4/14/15.
@@ -17,29 +18,29 @@ public class InterferenceGraph {
     public InterferenceGraph() {
         igraph = new LinkedList<InterferenceNode>();
         colors = new LinkedList<Integer>();
-        colors.add(1);
-        colors.add(3);
-        colors.add(8);
-        colors.add(9);
-        colors.add(10);
-        colors.add(11);
-        colors.add(12);
-        colors.add(13);
-        colors.add(14);
-        colors.add(15);
-        colors.add(24);
-        colors.add(25);
-        colors.add(16);
-        colors.add(17);
-        colors.add(18);
-        colors.add(19);
-        colors.add(20);
-        colors.add(21);
-        colors.add(22);
-        colors.add(23);
-        colors.add(26);
-        colors.add(27);
-        colors.add(28);
+        colors.add(Registers.AT);
+        colors.add(Registers.V1);
+        colors.add(Registers.TEMP0);
+        colors.add(Registers.TEMP1);
+        colors.add(Registers.TEMP2);
+        colors.add(Registers.TEMP3);
+        colors.add(Registers.TEMP4);
+        colors.add(Registers.TEMP5);
+        colors.add(Registers.TEMP6);
+        colors.add(Registers.TEMP7);
+        colors.add(Registers.TEMP8);
+        colors.add(Registers.TEMP9);
+        colors.add(Registers.SAVE0);
+        colors.add(Registers.SAVE1);
+        colors.add(Registers.SAVE2);
+        colors.add(Registers.SAVE3);
+        colors.add(Registers.SAVE4);
+        colors.add(Registers.SAVE5);
+        colors.add(Registers.SAVE6);
+        colors.add(Registers.SAVE7);
+        colors.add(Registers.K0);
+        colors.add(Registers.K1);
+        colors.add(Registers.GP);
     }
 
     public void buildGraph(ArrayList<Row> inOut, ArrayList<Row> useDefs) {
