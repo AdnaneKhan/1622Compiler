@@ -2,24 +2,24 @@ package SyntaxTree;
 
 import java.util.Vector;
 
-public class StatementList extends ASTNode{
-   private Vector list;
+public class StatementList extends ASTNode {
+    private Vector list;
 
-   public StatementList() {
-      list = new Vector();
+    public StatementList() {
+        list = new Vector();
 
-   }
+    }
 
-   public void addElement(Statement n) {
+    public void addElement(Statement n) {
 
-      list.add(0,n);
-   }
+        list.add(0, n);
+    }
 
-   public Statement elementAt(int i)  { 
-      return (Statement)list.elementAt(i); 
-   }
+    public Statement elementAt(int i) {
+        return (Statement) list.elementAt(i);
+    }
 
-   public int size() { 
-      return list.size(); 
-   }
+    public int size() {
+        return list.size();
+    }
 }

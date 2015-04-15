@@ -4,11 +4,11 @@ import SyntaxTree.*;
 
 /**
  * This is the root symbol table node for our tree of hash-tables.
- *
+ * <p/>
  * The children of this node will be the main static class and then any additional user
  * defined classes.
  */
-public class SymbolTable extends TableEntry{
+public class SymbolTable extends TableEntry {
     private TableEntry currentScope;
 
     /*
@@ -18,12 +18,11 @@ public class SymbolTable extends TableEntry{
      */
 
     /**
-     *
      * @param scopeID descends scope, if it is in highest scope it goes to a class, if it is in class scope
      *                it goes to method scope
      */
     private void descendScope(KeyWrapper scopeID) {
-        if (currentScope.hash.containsKey(scopeID)){
+        if (currentScope.hash.containsKey(scopeID)) {
             TableEntry scopeCheck = currentScope.hash.get(scopeID);
             if (scopeCheck instanceof SymbolEntry) {
                 System.out.println("Problem! We tried to descend scope to a leaf!");
@@ -34,14 +33,13 @@ public class SymbolTable extends TableEntry{
     }
 
     /**
-     *
      * @param scopeID descends scope, if it is in highest scope it goes to a class, if it is in class scope
      *                it goes to method scope
      */
-    public void descendScope(String scopeID, int scope_type ) {
-        KeyWrapper key = new KeyWrapper( scopeID, scope_type);
+    public void descendScope(String scopeID, int scope_type) {
+        KeyWrapper key = new KeyWrapper(scopeID, scope_type);
 
-        if (currentScope.hash.containsKey(key)){
+        if (currentScope.hash.containsKey(key)) {
             TableEntry scopeCheck = currentScope.hash.get(key);
             if (scopeCheck instanceof SymbolEntry) {
                 System.out.println("Problem! We tried to descend scope to a leaf!");
@@ -75,14 +73,13 @@ public class SymbolTable extends TableEntry{
     }
 
     /**
-     *
-     * @param key in this case the ID of the class
+     * @param key   in this case the ID of the class
      * @param value Scope for the class
      * @return the HashTable belonging to the value (if it leads to a method/class) null otherwise
      */
     protected void put(String key, TableEntry value) {
-        KeyWrapper wrap = new KeyWrapper(key,CLASS_ENTRY);
-        hash.put(wrap,value);
+        KeyWrapper wrap = new KeyWrapper(key, CLASS_ENTRY);
+        hash.put(wrap, value);
         currentScope = this;
         // Given that what we will be adding here are classes we
 
@@ -90,43 +87,47 @@ public class SymbolTable extends TableEntry{
 
     /**
      * Adds a class to the root. this class can have a parent node
+     *
      * @param classNode
      */
     public void putClass(ClassDeclExtends classNode) {
-        ClassTable tableEntry = new ClassTable(classNode,this);
+        ClassTable tableEntry = new ClassTable(classNode, this);
 
-        put( classNode.i.toString(),tableEntry);
+        put(classNode.i.toString(), tableEntry);
     }
 
     /**
      * adds a class to the root, this one has no parent
+     *
      * @param classNode
      */
     public void putClass(ClassDeclSimple classNode) {
-        ClassTable tableEntry = new ClassTable(classNode,this);
+        ClassTable tableEntry = new ClassTable(classNode, this);
 
-        put(classNode.i.toString(),tableEntry);
+        put(classNode.i.toString(), tableEntry);
 
     }
 
     /**
      * adds the mmain class to the node
+     *
      * @param classNode
      */
     public void putClass(MainClass classNode) {
 
-        ClassTable tableEntry = new ClassTable(classNode,this);
-        put(classNode.i1.toString(),tableEntry);
+        ClassTable tableEntry = new ClassTable(classNode, this);
+        put(classNode.i1.toString(), tableEntry);
     }
 
 
     /**
      * adds a class to the node
+     *
      * @param classNode
      */
     public void putClass(ClassDecl classNode) {
         if (classNode instanceof ClassDeclSimple) {
-            this.putClass((ClassDeclSimple)classNode);
+            this.putClass((ClassDeclSimple) classNode);
         } else {
             this.putClass((ClassDeclExtends) classNode);
         }
@@ -142,7 +143,6 @@ public class SymbolTable extends TableEntry{
     }
 
     /**
-     *
      * @param key string
      * @return Object associated with the key
      */

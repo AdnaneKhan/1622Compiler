@@ -8,9 +8,9 @@ import java.util.List;
 
 /**
  * Created by adnankhan on 4/14/15.
- *
- *
- *  This is a single node of the conrol flow graph used in liveless analysis.
+ * <p/>
+ * <p/>
+ * This is a single node of the conrol flow graph used in liveless analysis.
  */
 public class ControlFlowNode {
 
@@ -21,7 +21,7 @@ public class ControlFlowNode {
         this.irLine = toWrap;
 
         predecessors = new ArrayList<ControlFlowNode>();
-        sucessors = new ArrayList< ControlFlowNode>();
+        sucessors = new ArrayList<ControlFlowNode>();
     }
 
     // We store sucessors and predecssors since we are doing top to bottom when generating, but need

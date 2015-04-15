@@ -9,7 +9,7 @@ import java.util.HashMap;
 /**
  * Created by adnankhan on 3/29/15.
  */
-public abstract  class TableEntry {
+public abstract class TableEntry {
     protected HashMap<KeyWrapper, TableEntry> hash;
     public final static int METHOD_ENTRY = 1;
     public final static int CLASS_ENTRY = 2;
@@ -28,15 +28,16 @@ public abstract  class TableEntry {
     public int getLine() {
         return lineNum;
     }
+
     public int getColumn() {
         return charNum;
     }
 
-     protected  TableEntry(ASTNode actualNode) {
+    protected TableEntry(ASTNode actualNode) {
 
-         if (!this.isEntry(LEAF_ENTRY)) {
-             hash= new HashMap<KeyWrapper,TableEntry>();
-         }
+        if (!this.isEntry(LEAF_ENTRY)) {
+            hash = new HashMap<KeyWrapper, TableEntry>();
+        }
 
         this.actualNode = actualNode;
         this.lineNum = actualNode.lineNum();
@@ -45,34 +46,32 @@ public abstract  class TableEntry {
 
 
     /**
-     *
-     @param key string key to lookup, this is the identifier in the code
-      * @param entry_type Class, Method, or Type (leaf
+     * @param key        string key to lookup, this is the identifier in the code
+     * @param entry_type Class, Method, or Type (leaf
      *                   meaning int[], boolean, int or Object
      * @return true if the type exists in THIS SCOPE
      */
     public boolean hasEntry(String key, int entry_type) {
 
-        if (! this.isEntry(LEAF_ENTRY)) {
-            KeyWrapper checkWrap = new KeyWrapper(key,entry_type);
+        if (!this.isEntry(LEAF_ENTRY)) {
+            KeyWrapper checkWrap = new KeyWrapper(key, entry_type);
 
             if (this.hash.containsKey(checkWrap)) {
                 return true;
             }
         }
-      return false;
+        return false;
     }
 
     /**
-     *
-     * @param key string key to lookup, this is the identifier in the code
+     * @param key        string key to lookup, this is the identifier in the code
      * @param entry_type Class, Method, or Type (leaf
      *                   meaning int[], boolean, int or Object
      * @return null if entry does not exist with the specified type
      */
     public TableEntry getEntry(String key, int entry_type) {
         if (this.entryType() != LEAF_ENTRY) {
-            KeyWrapper checkWrap = new KeyWrapper(key,entry_type);
+            KeyWrapper checkWrap = new KeyWrapper(key, entry_type);
             if (this.hash.containsKey(checkWrap)) {
                 return hash.get(checkWrap);
             }
@@ -82,7 +81,6 @@ public abstract  class TableEntry {
 
 
     /**
-     *
      * @param key
      * @param entry_type
      * @return the entry if it exists in this scope OR any of its parent scopes
@@ -90,8 +88,8 @@ public abstract  class TableEntry {
     public TableEntry getEntryWalk(String key, int entry_type) {
         TableEntry retV = null;
 
-        TableEntry cursor =this;
-        KeyWrapper checkKey = new KeyWrapper(key,entry_type);
+        TableEntry cursor = this;
+        KeyWrapper checkKey = new KeyWrapper(key, entry_type);
 
         do {
             if (cursor.entryType() != LEAF_ENTRY) {
@@ -101,7 +99,7 @@ public abstract  class TableEntry {
                         retV = ((ClassTable) cursor).getMethod(key);
 
                     } else if (entry_type == LEAF_ENTRY) {
-                        retV= ((ClassTable) cursor).getVariable(key);
+                        retV = ((ClassTable) cursor).getVariable(key);
                     }
                 } else {
                     retV = cursor.hash.get(checkKey);
@@ -118,7 +116,6 @@ public abstract  class TableEntry {
     }
 
     /**
-     *
      * @param key
      * @param entry_type
      * @return true if the entry if it exists in this scope OR any of its parent scopes
@@ -126,33 +123,33 @@ public abstract  class TableEntry {
     public boolean hasEntryWalk(String key, int entry_type) {
 
         boolean found = false;
-        TableEntry cursor =this;
-        KeyWrapper checkKey = new KeyWrapper(key,entry_type);
+        TableEntry cursor = this;
+        KeyWrapper checkKey = new KeyWrapper(key, entry_type);
 
         do {
-           if (cursor.entryType() != LEAF_ENTRY) {
+            if (cursor.entryType() != LEAF_ENTRY) {
                 found = cursor.hash.containsKey(checkKey);
-               if (found) {
-                   break;
-               }
-           }
-                cursor = cursor.parent;
+                if (found) {
+                    break;
+                }
+            }
+            cursor = cursor.parent;
         } while (cursor != null);
 
-       return found;
+        return found;
     }
 
 
     /**
-     The string name of this symbol associated with the ID type
-     there may be more names in which case the getNode method must be used
+     * The string name of this symbol associated with the ID type
+     * there may be more names in which case the getNode method must be used
      */
     public String getSymbolName() {
         return symbolName;
     }
 
     public String getHierarchyName() {
-       StringBuilder hierarchy = new StringBuilder();
+        StringBuilder hierarchy = new StringBuilder();
 
         if (this.isEntry(ROOT_ENTRY)) {
             // no op
@@ -169,7 +166,6 @@ public abstract  class TableEntry {
     }
 
     /**
-     *
      * @return the actual AST node wrapped by this entry
      */
     public ASTNode getNode() {
@@ -177,18 +173,15 @@ public abstract  class TableEntry {
     }
 
     /**
-     *
      * @return type of this entry which can be:
-     *
-     *      Method
-     *      Class
-     *      Leaf Entry
-     *
+     * <p/>
+     * Method
+     * Class
+     * Leaf Entry
      */
     public abstract int entryType();
 
     /**
-     *
      * @return whether entry type is equal to that passed in
      */
     public abstract boolean isEntry(int entryType);

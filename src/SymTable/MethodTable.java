@@ -3,6 +3,7 @@ package SymTable;
 import SyntaxTree.*;
 
 import java.util.HashMap;
+
 /**
  * Created by adnankhan on 3/29/15.
  */
@@ -38,18 +39,17 @@ public class MethodTable extends TableEntry {
      * @param toAdd Var declaration for this method
      */
     public void putVariable(VarDecl toAdd) {
-        SymbolEntry newLeaf = new SymbolEntry(toAdd.i.toString(),toAdd.t, toAdd);
+        SymbolEntry newLeaf = new SymbolEntry(toAdd.i.toString(), toAdd.t, toAdd);
         newLeaf.parent = this;
 
         hash.put(new KeyWrapper(toAdd.i.s, LEAF_ENTRY), newLeaf);
     }
 
     /**
-     *
      * @param toAdd parameter list variable to add to this mmethod
      */
     public void putVariable(Formal toAdd) {
-        SymbolEntry newLeaf = new SymbolEntry(toAdd.i.s,toAdd.t, toAdd);
+        SymbolEntry newLeaf = new SymbolEntry(toAdd.i.s, toAdd.t, toAdd);
         newLeaf.parent = this;
 
         hash.put(new KeyWrapper(toAdd.i.s, LEAF_ENTRY), newLeaf);

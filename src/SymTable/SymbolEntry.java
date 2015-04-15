@@ -12,7 +12,7 @@ public class SymbolEntry extends TableEntry {
     public static final int DEAD_REG = -5;
     Type symType;
 
-    private int register= DEAD_REG;
+    private int register = DEAD_REG;
 
     public int getRegister() {
         return register;
@@ -37,11 +37,9 @@ public class SymbolEntry extends TableEntry {
     }
 
     /**
-     *
-     * @param symbolName of the symbol that this entry will represent
+     * @param symbolName    of the symbol that this entry will represent
      * @param constructFrom Abstract syntax node that this symbol table entry
-     * will represent.
-     *
+     *                      will represent.
      */
     public SymbolEntry(String symbolName, Type t, ASTNode constructFrom) {
         super(constructFrom);
@@ -58,7 +56,7 @@ public class SymbolEntry extends TableEntry {
         return symType;
     }
 
-    public boolean isEntry( int entryType) {
+    public boolean isEntry(int entryType) {
         return entryType == LEAF_ENTRY;
     }
 

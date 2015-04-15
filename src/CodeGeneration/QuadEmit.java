@@ -18,7 +18,7 @@ public class QuadEmit {
 
     // a very simple register map that works
     // its purposes prior to true regisster allocation
-    private HashMap<String,String> regMap;
+    private HashMap<String, String> regMap;
 
     public int tRegC;
     int sRegC;
@@ -26,24 +26,22 @@ public class QuadEmit {
 
 
     public QuadEmit() {
-        regMap = new HashMap<String,String>();
+        regMap = new HashMap<String, String>();
     }
 
 
     /**
-     *
      * @return mips instruction loading the parameter into appropriate variable
      */
     public String handleParameter(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
-        if ( quad.isLiteral() ) {
+        if (quad.isLiteral()) {
             instruction.append("li ");
             instruction.append(getAReg());
             instruction.append(", ");
             instruction.append(quad.getResult());
-        }
-        else if ( quad.isBoolean() ) {
+        } else if (quad.isBoolean()) {
             instruction.append("li ");
             instruction.append(getAReg());
             instruction.append(", ");
@@ -52,8 +50,7 @@ public class QuadEmit {
             } else {
                 instruction.append("0");
             }
-        }
-        else {
+        } else {
             String paramVar;
 
             paramVar = regMap.get(quad.getResult());
@@ -65,6 +62,7 @@ public class QuadEmit {
 
         return instruction.toString();
     }
+
     public String handlePrint(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
@@ -73,6 +71,7 @@ public class QuadEmit {
 
         return instruction.toString();
     }
+
     public String handleCall(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
@@ -96,7 +95,7 @@ public class QuadEmit {
         } else {
 
             defRegister = getTReg();
-            regMap.put(quad.getResult(),defRegister);
+            regMap.put(quad.getResult(), defRegister);
         }
 
         instruction.append("move").append(' ').append(defRegister).append(COMMA_SPACE).append("$v0");
@@ -110,9 +109,9 @@ public class QuadEmit {
         MethodDecl methodNode = (MethodDecl) callTable.getNode();
 
 
-        regMap.put(callTable.getEntry("this",TableEntry.LEAF_ENTRY).getSymbolName(),getAReg());
+        regMap.put(callTable.getEntry("this", TableEntry.LEAF_ENTRY).getSymbolName(), getAReg());
         for (int i = 0; i < methodNode.fl.size(); i++) {
-            regMap.put(callTable.getEntry(methodNode.fl.elementAt(i).i.s,TableEntry.LEAF_ENTRY).getHierarchyName(),getAReg());
+            regMap.put(callTable.getEntry(methodNode.fl.elementAt(i).i.s, TableEntry.LEAF_ENTRY).getHierarchyName(), getAReg());
             if (fRegC == 4) {
                 break;
             }
@@ -122,6 +121,7 @@ public class QuadEmit {
 
         return instruction.toString();
     }
+
     public String handleAssignment(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
@@ -129,19 +129,19 @@ public class QuadEmit {
         String var = quad.getResult();
         String reg;
         if (regMap.containsKey(var)) {
-             reg = regMap.get(var);
+            reg = regMap.get(var);
 
         } else {
-             reg = getTReg();
+            reg = getTReg();
             // Add temporary to the map
-            regMap.put(var,reg);
+            regMap.put(var, reg);
         }
 
         // If the lhs and rhs are literals then we need to get them and
         // first li to the reg, then add the second one to the reg
         if (quad.arg1Literal() && quad.arg2Literal()) {
             String newTemp = getTReg();
-            regMap.put(quad.getResult(),newTemp);
+            regMap.put(quad.getResult(), newTemp);
 
             int result = 0;
             if (quad.op.equals("+")) {
@@ -149,7 +149,7 @@ public class QuadEmit {
             } else if (quad.op.equals("-")) {
                 result = quad.arg1Int - quad.arg2Int;
             } else if (quad.op.equals("&&")) {
-               boolean res = (quad.arg1Int == 1) &&( 1 == quad.arg2Int);
+                boolean res = (quad.arg1Int == 1) && (1 == quad.arg2Int);
                 if (res) {
                     result = 1;
                 }
@@ -166,17 +166,17 @@ public class QuadEmit {
 
 
         } else if (!quad.arg2Literal() && !quad.isTempArg1() && !quad.isTempArg2() && !quad.arg1Literal()) {
-                if (quad.arg1_entry.parent.isEntry(TableEntry.METHOD_ENTRY) && quad.arg2_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+            if (quad.arg1_entry.parent.isEntry(TableEntry.METHOD_ENTRY) && quad.arg2_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
 
-                    int arg1Pos = getArgPos(quad.arg1_entry);
-                    int arg2Pos = getArgPos(quad.arg2_entry);
-                    instruction.append(generateOpInst(quad.op, quad.getResult(), "$s" + arg1Pos, "$s" + arg2Pos));
+                int arg1Pos = getArgPos(quad.arg1_entry);
+                int arg2Pos = getArgPos(quad.arg2_entry);
+                instruction.append(generateOpInst(quad.op, quad.getResult(), "$s" + arg1Pos, "$s" + arg2Pos));
 
-                } else if (quad.arg1_entry.parent.isEntry(TableEntry.CLASS_ENTRY)) {
-                    // TODO
-                    System.err.println(" We have class scoope variable we tried to reference!");
-                }
-        } else if (quad.isTempArg1() &&  quad.arg2_entry != null) {
+            } else if (quad.arg1_entry.parent.isEntry(TableEntry.CLASS_ENTRY)) {
+                // TODO
+                System.err.println(" We have class scoope variable we tried to reference!");
+            }
+        } else if (quad.isTempArg1() && quad.arg2_entry != null) {
 
             String arg1Reg = regMap.get(quad.getArg1());
 
@@ -209,8 +209,8 @@ public class QuadEmit {
 
                 int arg2Pos = getArgPos(quad.arg2_entry);
                 String arg2Reg = argRegStr(quad.getArg2(), arg2Pos);
-                String immediateRegister = getImmediateRegister(quad.getResult(),quad.getArg1(),instruction);
-                instruction.append(generateOpInst(quad.op,quad.getResult(),immediateRegister,arg2Reg));
+                String immediateRegister = getImmediateRegister(quad.getResult(), quad.getArg1(), instruction);
+                instruction.append(generateOpInst(quad.op, quad.getResult(), immediateRegister, arg2Reg));
 
             } else {
                 // TODO
@@ -221,8 +221,8 @@ public class QuadEmit {
 
                 int arg1Pos = getArgPos(quad.arg1_entry);
                 String arg1Reg = argRegStr(quad.getArg1(), arg1Pos);
-                String immediateRegister = getImmediateRegister(quad.getResult(),quad.getArg2(),instruction);
-                instruction.append(generateOpInst(quad.op,quad.getResult(),arg1Reg,immediateRegister));
+                String immediateRegister = getImmediateRegister(quad.getResult(), quad.getArg2(), instruction);
+                instruction.append(generateOpInst(quad.op, quad.getResult(), arg1Reg, immediateRegister));
 
             } else {
                 // TODO
@@ -232,6 +232,7 @@ public class QuadEmit {
 
         return instruction.toString();
     }
+
     public String handleCopy(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
@@ -249,6 +250,7 @@ public class QuadEmit {
 
         return instruction.toString();
     }
+
     public String handleReturn(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
@@ -268,6 +270,7 @@ public class QuadEmit {
 
         return instruction.toString();
     }
+
     public String handleUnaryAssignment(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
         String varLookup = quad.getResult();
@@ -280,15 +283,15 @@ public class QuadEmit {
         } else {
             resRegister = getTReg();
             // Add temporary to the map
-            regMap.put(varLookup,resRegister);
+            regMap.put(varLookup, resRegister);
         }
 
 
         if (quad.arg1Literal()) {
-          int res = 0;
-          if ( 0 == quad.arg1Int) {
-              res = 1;
-          }
+            int res = 0;
+            if (0 == quad.arg1Int) {
+                res = 1;
+            }
 
             instruction.append("li").append(' ').append(resRegister).append(COMMA_SPACE).append(res).append('\n');
             instruction.append("slti").append(' ').append(resRegister).append(COMMA_SPACE).append(resRegister).append(COMMA_SPACE).append("1");
@@ -305,11 +308,13 @@ public class QuadEmit {
 
         return instruction.toString();
     }
+
     public String handleUncondJump(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
         instruction.append("j " + quad.getResult());
         return instruction.toString();
     }
+
     public String handleCondJump(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
         String varLookup = quad.getArg1();
@@ -317,13 +322,14 @@ public class QuadEmit {
         instruction.append("beq ").append(resRegister).append(COMMA_SPACE).append("$zero").append(COMMA_SPACE).append(quad.getArg2());
         return instruction.toString();
     }
+
     public String handleNew(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
         // Steps:
-         ClassTable classTable = (ClassTable) quad.arg1_entry;
+        ClassTable classTable = (ClassTable) quad.arg1_entry;
 
-         ClassDecl classNode = (ClassDecl) classTable.getNode();
+        ClassDecl classNode = (ClassDecl) classTable.getNode();
 
         // Using size we can get our allocation count for new
         int varCount = classNode.vl.size();
@@ -332,7 +338,7 @@ public class QuadEmit {
 
         // Load the size into the argument zero register
         // yes, our max class size is the size of 16 bit immediate, god help us if that is tested...
-        instruction.append("li").append(' ').append("$a0").append(',').append( varCount * 4 ).append('\n');
+        instruction.append("li").append(' ').append("$a0").append(',').append(varCount * 4).append('\n');
         // now we call the object maker
         instruction.append("jal").append(" _new_object").append('\n');
 
@@ -343,12 +349,13 @@ public class QuadEmit {
         String tempVar = quad.getResult();
         String tempReg = getTReg();
 
-        regMap.put(tempVar,tempReg);
+        regMap.put(tempVar, tempReg);
         // Now we move the address into the temporary, this is our new object address.
         instruction.append("move").append(' ').append(tempReg).append(", ").append("$v0");
 
         return instruction.toString();
     }
+
     public String handleNewArray(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
@@ -363,7 +370,8 @@ public class QuadEmit {
 
         return instruction.toString();
     }
-    public String handleIndexedAssignment(Quadruple quad){
+
+    public String handleIndexedAssignment(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
         // In indexed assignment since we are saving a value to an index of an array what we have to do
@@ -375,6 +383,7 @@ public class QuadEmit {
 
         return instruction.toString();
     }
+
     public String handleIndexedLookup(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
@@ -394,45 +403,49 @@ public class QuadEmit {
 
     private String getSide(String sideCheck) {
         String regReturn;
-        if ( regMap.containsKey(sideCheck) && regMap.get(sideCheck) != null && !regMap.get(sideCheck).substring(0,1).equals("$a")) {
+        if (regMap.containsKey(sideCheck) && regMap.get(sideCheck) != null && !regMap.get(sideCheck).substring(0, 1).equals("$a")) {
             regReturn = regMap.get(sideCheck);
         } else {
             regReturn = getTReg();
-            regMap.put(sideCheck,regReturn);
+            regMap.put(sideCheck, regReturn);
         }
         return regReturn;
     }
+
     private String getImmediateRegister(String key, String arg, StringBuilder instruction) {
-        String resRegister= getTReg();
-        regMap.put(key,resRegister);
+        String resRegister = getTReg();
+        regMap.put(key, resRegister);
 
         instruction.append("li").append(" ");
         instruction.append(resRegister).append(COMMA_SPACE);
         instruction.append(arg).append("\n");
         return resRegister;
     }
+
     private int getArgPos(TableEntry quad_entry) {
         MethodDecl arg1Table = (MethodDecl) quad_entry.parent.getNode();
 
         int argPos = -1;
         int i;
 
-        for ( i = 0; i < arg1Table.fl.size(); i++) {
-            if ( arg1Table.fl.elementAt(i).i.s.equals(quad_entry.getSymbolName())) {
+        for (i = 0; i < arg1Table.fl.size(); i++) {
+            if (arg1Table.fl.elementAt(i).i.s.equals(quad_entry.getSymbolName())) {
                 argPos = i + 1;
             }
         }
         return argPos;
     }
+
     private String argRegStr(String arg, int argPos) {
         String argReg;
         if (argPos >= 0) {
-            argReg = "$s"+argPos;
+            argReg = "$s" + argPos;
         } else {
             argReg = regMap.get(arg);
         }
         return argReg;
     }
+
     private String generateOpInst(String op, String res, String reg1, String reg2) {
         StringBuilder instruction = new StringBuilder();
         String opCode = "";
@@ -452,7 +465,7 @@ public class QuadEmit {
             tempReg = regMap.get(res);
         } else {
             tempReg = getTReg();
-            regMap.put(res,tempReg);
+            regMap.put(res, tempReg);
         }
 
         if (op.equals("*")) {
@@ -460,12 +473,13 @@ public class QuadEmit {
 
             instruction.append(opCode).append(' ').append(reg1).append(COMMA_SPACE).append(reg2).append('\n');
             instruction.append("mflo").append(' ').append(tempReg);
-        } else{
+        } else {
             instruction.append(opCode).append(' ').append(tempReg).append(COMMA_SPACE).append(reg1).append(COMMA_SPACE).append(reg2);
         }
 
         return instruction.toString();
     }
+
     private String getTReg() {
         String tempReg = null;
 
@@ -477,6 +491,7 @@ public class QuadEmit {
         }
         return tempReg;
     }
+
     private String getAReg() {
         String tempReg = null;
 
@@ -488,6 +503,7 @@ public class QuadEmit {
         }
         return tempReg;
     }
+
     // This function prints code to naively save
     // all registers
     private String printSaveAll() {
@@ -497,10 +513,10 @@ public class QuadEmit {
         instruction.append("addi $sp, $sp,").append(regCount * -4).append('\n');
 
         // First grow the heap to accommodate all the new instructions
-        int offSet = GP_REG_COUNT-1;
+        int offSet = GP_REG_COUNT - 1;
         // Save all temporaries
         for (int i = 0; i < 10; i++) {
-            instruction.append("sw").append(' ').append("$t").append(i).append(',').append(' ').append(offSet*4);
+            instruction.append("sw").append(' ').append("$t").append(i).append(',').append(' ').append(offSet * 4);
             // note here we use the return value straight from the original syscall we did because
             // nothing changed in it
             instruction.append("($v0)").append('\n');
@@ -510,8 +526,8 @@ public class QuadEmit {
 
         // Save all s registers
 
-        for (int i =0; i < 8; i++) {
-            instruction.append("sw").append(' ').append("$s").append(i).append(',').append(' ').append(offSet*4);
+        for (int i = 0; i < 8; i++) {
+            instruction.append("sw").append(' ').append("$s").append(i).append(',').append(' ').append(offSet * 4);
             // note here we use the return value straight from the original syscall we did because
             // nothing changed in it
             instruction.append("($sp)").append('\n');
@@ -520,47 +536,48 @@ public class QuadEmit {
         }
 
         // save everything else
-        instruction.append("sw").append(' ').append("$at").append(',').append(' ').append(offSet*4);
+        instruction.append("sw").append(' ').append("$at").append(',').append(' ').append(offSet * 4);
         instruction.append("($sp)").append('\n');
         offSet--;
 
-        instruction.append("sw").append(' ').append("$k0").append(',').append(' ').append(offSet*4);
+        instruction.append("sw").append(' ').append("$k0").append(',').append(' ').append(offSet * 4);
         instruction.append("($sp)").append('\n');
         offSet--;
 
-        instruction.append("sw").append(' ').append("$k1").append(',').append(' ').append(offSet*4);
+        instruction.append("sw").append(' ').append("$k1").append(',').append(' ').append(offSet * 4);
         instruction.append("($sp)").append('\n');
         offSet--;
 
-        instruction.append("sw").append(' ').append("$ra").append(',').append(' ').append(offSet*4);
+        instruction.append("sw").append(' ').append("$ra").append(',').append(' ').append(offSet * 4);
         instruction.append("($sp)").append('\n');
         offSet--;
 
         return instruction.toString();
     }
+
     private String printRestoreAll() {
         StringBuilder instruction = new StringBuilder();
         int regCount = GP_REG_COUNT;
         int startPoint = 0;
 
-        instruction.append("lw").append(' ').append("$ra").append(COMMA_SPACE).append(startPoint*4);
+        instruction.append("lw").append(' ').append("$ra").append(COMMA_SPACE).append(startPoint * 4);
         instruction.append("($sp)").append('\n');
         startPoint++;
 
-        instruction.append("lw").append(' ').append("$k1").append(COMMA_SPACE).append(startPoint*4);
+        instruction.append("lw").append(' ').append("$k1").append(COMMA_SPACE).append(startPoint * 4);
         instruction.append("($sp)").append('\n');
         startPoint++;
 
-        instruction.append("lw").append(' ').append("$k0").append(COMMA_SPACE).append(startPoint*4);
+        instruction.append("lw").append(' ').append("$k0").append(COMMA_SPACE).append(startPoint * 4);
         instruction.append("($sp)").append('\n');
         startPoint++;
 
-        instruction.append("lw").append(' ').append("$at").append(COMMA_SPACE).append(startPoint*4);
+        instruction.append("lw").append(' ').append("$at").append(COMMA_SPACE).append(startPoint * 4);
         instruction.append("($sp)").append('\n');
         startPoint++;
 
-        for (int i =7; i >= 0; i--) {
-            instruction.append("lw").append(' ').append("$s").append(i).append(COMMA_SPACE).append(startPoint*4);
+        for (int i = 7; i >= 0; i--) {
+            instruction.append("lw").append(' ').append("$s").append(i).append(COMMA_SPACE).append(startPoint * 4);
             // note here we use the return value straight from the original syscall we did because
             // nothing changed in it
             instruction.append("($sp)").append('\n');
@@ -570,7 +587,7 @@ public class QuadEmit {
 
         // Save all temporaries
         for (int i = 9; i >= 0; i--) {
-            instruction.append("lw").append(' ').append("$t").append(i).append(COMMA_SPACE).append(startPoint*4);
+            instruction.append("lw").append(' ').append("$t").append(i).append(COMMA_SPACE).append(startPoint * 4);
             // note here we use the return value straight from the original syscall we did because
             // nothing changed in it
             instruction.append("($sp)").append('\n');

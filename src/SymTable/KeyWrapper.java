@@ -10,7 +10,7 @@ public class KeyWrapper {
 
     public KeyWrapper(String id, int type) {
         toHash = id;
-        this.type= type;
+        this.type = type;
     }
 
 

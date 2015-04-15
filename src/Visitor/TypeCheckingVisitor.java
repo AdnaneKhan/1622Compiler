@@ -7,6 +7,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
 
     SymbolTable base;
+
     public TypeCheckingVisitor(SymbolTable toUse) {
 
         // This symbol table has already been populated with appropriate values
@@ -18,9 +19,9 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
             if (e instanceof IdentifierExp) {
                 String nameCheck = ((IdentifierExp) e).s;
 
-                if (base.getCurrentScope().hasEntryWalk(nameCheck,SymbolEntry.CLASS_ENTRY) ||
+                if (base.getCurrentScope().hasEntryWalk(nameCheck, SymbolEntry.CLASS_ENTRY) ||
                         base.getCurrentScope().hasEntryWalk(nameCheck, SymbolEntry.METHOD_ENTRY)) {
-                    Errors.methClassOp(e.lineNum(),e.charNum(),operator);
+                    Errors.methClassOp(e.lineNum(), e.charNum(), operator);
                 }
             }
         }
@@ -40,7 +41,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     // Identifier i1,i2;
     // Statement s;
     public Type visit(MainClass n) {
-        base.descendScope(n.i1.s,SymbolTable.CLASS_ENTRY);
+        base.descendScope(n.i1.s, SymbolTable.CLASS_ENTRY);
 
         n.i1.accept(this);
         n.i2.accept(this);
@@ -54,7 +55,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     // VarDeclList vl;
     // MethodDeclList ml;
     public Type visit(ClassDeclSimple n) {
-        base.descendScope(n.i.s,SymbolEntry.CLASS_ENTRY);
+        base.descendScope(n.i.s, SymbolEntry.CLASS_ENTRY);
 
 
         n.i.accept(this);
@@ -76,7 +77,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     // MethodDeclList ml;
     public Type visit(ClassDeclExtends n) {
 
-        base.descendScope(n.i.s,SymbolTable.CLASS_ENTRY);
+        base.descendScope(n.i.s, SymbolTable.CLASS_ENTRY);
 
         n.i.accept(this);
         n.j.accept(this);
@@ -105,7 +106,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     // StatementList sl;
     // Exp e;
     public Type visit(MethodDecl n) {
-        base.descendScope(n.i.s,SymbolTable.METHOD_ENTRY);
+        base.descendScope(n.i.s, SymbolTable.METHOD_ENTRY);
 
         n.t.accept(this);
         n.i.accept(this);
@@ -151,8 +152,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         String idCheck = n.s;
 
 
-
-        if (!base.hasEntry(idCheck,SymbolTable.CLASS_ENTRY) && !n.erroneous){
+        if (!base.hasEntry(idCheck, SymbolTable.CLASS_ENTRY) && !n.erroneous) {
             Errors.badType(n.lineNum(), n.charNum());
         }
 
@@ -173,8 +173,8 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
         Type ret1 = n.e.accept(this);
 
-        if (! (ret1 instanceof BooleanType)) {
-            Errors.nonBoolIf(n.e.lineNum(),n.e.charNum(),"if");
+        if (!(ret1 instanceof BooleanType)) {
+            Errors.nonBoolIf(n.e.lineNum(), n.e.charNum(), "if");
         }
 
         n.s1.accept(this);
@@ -187,8 +187,8 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     public Type visit(While n) {
         Type ret1 = n.e.accept(this);
 
-        if (! (ret1 instanceof BooleanType)) {
-            Errors.nonBoolIf(n.e.lineNum(),n.e.charNum(),"while");
+        if (!(ret1 instanceof BooleanType)) {
+            Errors.nonBoolIf(n.e.lineNum(), n.e.charNum(), "while");
         }
 
         n.s.accept(this);
@@ -215,21 +215,21 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
 
         // If the lhs is a method or class
-        if ( ret instanceof IdentifierType && ((IdentifierType) ret).methClass) {
-            Errors.classMethodAssign(n.i.lineNum(),n.i.charNum(),n.i.s,((IdentifierType) ret).s);
+        if (ret instanceof IdentifierType && ((IdentifierType) ret).methClass) {
+            Errors.classMethodAssign(n.i.lineNum(), n.i.charNum(), n.i.s, ((IdentifierType) ret).s);
         }
 
         // If the rhs is a method or class
-        if ( (eRet instanceof IdentifierType) && ((IdentifierType) eRet).methClass) {
-             if (n.e instanceof IdentifierExp) {
-                Errors.assignFromMethodClass(n.e.lineNum(), n.e.charNum(),((IdentifierExp) n.e).s , ((IdentifierType) eRet).s);
+        if ((eRet instanceof IdentifierType) && ((IdentifierType) eRet).methClass) {
+            if (n.e instanceof IdentifierExp) {
+                Errors.assignFromMethodClass(n.e.lineNum(), n.e.charNum(), ((IdentifierExp) n.e).s, ((IdentifierType) eRet).s);
             }
 
 
-        // If both sides are valid identifiers but there is a type mismatch between the two
+            // If both sides are valid identifiers but there is a type mismatch between the two
         }
 
-        if ( ret instanceof IdentifierType && eRet instanceof IdentifierType  ) {
+        if (ret instanceof IdentifierType && eRet instanceof IdentifierType) {
             IdentifierType checkClass = (IdentifierType) eRet;
 
             ClassTable rhsClass = base.getClassTable(checkClass.s);
@@ -239,9 +239,9 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
                 // if node is not an error, then we can
                 // check its declared type
-                if ( !node.erroneous ) {
+                if (!node.erroneous) {
                     // asume no match
-                    boolean mismatch= true;
+                    boolean mismatch = true;
 
                     // Simple equality check, if they are not equal it is
                     // a type mmismatch
@@ -249,27 +249,26 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
                         mismatch = false;
                     }
 
-                    if( node instanceof ClassDeclExtends) {
+                    if (node instanceof ClassDeclExtends) {
 
-                      // check parent
-                      Identifier superId = ((ClassDeclExtends) node).j;
-                      if (superId.s.equals(((IdentifierType) ret).s)) {
+                        // check parent
+                        Identifier superId = ((ClassDeclExtends) node).j;
+                        if (superId.s.equals(((IdentifierType) ret).s)) {
                             mismatch = false;
-                      }
+                        }
 
 
-                  }
+                    }
 
                     if (mismatch) {
-                        Errors.typeMismatch(n.i.lineNum(),n.i.charNum());
+                        Errors.typeMismatch(n.i.lineNum(), n.i.charNum());
                     }
                 }
             }
             // check to see if the rhs is a superclass of the lhs
-        }
-        else if (!ret.getClass().equals(eRet.getClass())){
+        } else if (!ret.getClass().equals(eRet.getClass())) {
 
-              Errors.typeMismatch(n.i.lineNum(),n.i.charNum());
+            Errors.typeMismatch(n.i.lineNum(), n.i.charNum());
         }
 
         return ret;
@@ -281,7 +280,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         // Look up ID in symbol table to ensure it is an integer array
 
         n.i.accept(this);
-        SymbolEntry temp =((SymbolEntry) base.getCurrentScope().getEntryWalk(n.i.s,TableEntry.LEAF_ENTRY));
+        SymbolEntry temp = ((SymbolEntry) base.getCurrentScope().getEntryWalk(n.i.s, TableEntry.LEAF_ENTRY));
         Type toCheck = null;
         if (temp != null) {
             toCheck = temp.getType();
@@ -290,18 +289,18 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
         // If the type is not an instancce of int array
         if (!(toCheck instanceof IntArrayType)) {
-            Errors.typeMismatch(n.lineNum(),n.charNum());
+            Errors.typeMismatch(n.lineNum(), n.charNum());
         }
 
         Type checkLhs = n.e1.accept(this);
 
         Type checkRhs = n.e2.accept(this);
         if (!(checkRhs instanceof IntegerType)) {
-            Errors.typeMismatch(n.e2.lineNum(),n.e2.charNum());
+            Errors.typeMismatch(n.e2.lineNum(), n.e2.charNum());
         }
 
         if (!(checkLhs instanceof IntegerType)) {
-            Errors.typeMismatch(n.e1.lineNum(),n.e1.charNum());
+            Errors.typeMismatch(n.e1.lineNum(), n.e1.charNum());
         }
         return new IntArrayType();
     }
@@ -313,7 +312,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
         // Check if we are trying to operate on method or class
         classOpCheck(ret1, n.e1, "&&");
-        classOpCheck(ret2,n.e2, "&&");
+        classOpCheck(ret2, n.e2, "&&");
 
         // Check if type mismatch
         if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof BooleanType))) {
@@ -330,10 +329,10 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
         // Check if we are trying to operate on method or class
         classOpCheck(ret1, n.e1, "<");
-        classOpCheck(ret2,n.e2, "<");
+        classOpCheck(ret2, n.e2, "<");
 
         if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
-            Errors.nonIntegerOperand(n.lineNum(),n.charNum(),'<');
+            Errors.nonIntegerOperand(n.lineNum(), n.charNum(), '<');
         }
 
         return new BooleanType();
@@ -347,11 +346,11 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
         // Check if we are trying to operate on method or class
         classOpCheck(ret1, n.e1, "+");
-        classOpCheck(ret2,n.e2, "+");
+        classOpCheck(ret2, n.e2, "+");
 
 
         if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
-            Errors.nonIntegerOperand(n.lineNum(),n.charNum(),'+');
+            Errors.nonIntegerOperand(n.lineNum(), n.charNum(), '+');
         }
 
         return new IntegerType();
@@ -364,12 +363,12 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
 
         // Check if we are trying to operate on method or class
-        classOpCheck(ret1, n.e1,"-");
-        classOpCheck(ret2,n.e2, "-");
+        classOpCheck(ret1, n.e1, "-");
+        classOpCheck(ret2, n.e2, "-");
 
 
-        if ( !(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
-            Errors.nonIntegerOperand(n.lineNum(),n.charNum(),'-');
+        if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
+            Errors.nonIntegerOperand(n.lineNum(), n.charNum(), '-');
         }
 
         return new IntegerType();
@@ -383,11 +382,11 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         Type ret2 = n.e2.accept(this);
 
         // Check if we are trying to operate on method or class
-        classOpCheck(ret1, n.e1,"*");
-        classOpCheck(ret2,n.e2, "*");
+        classOpCheck(ret1, n.e1, "*");
+        classOpCheck(ret2, n.e2, "*");
 
         if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
-            Errors.nonIntegerOperand(n.lineNum(),n.charNum(),'*');
+            Errors.nonIntegerOperand(n.lineNum(), n.charNum(), '*');
         }
 
         return new IntegerType();
@@ -407,7 +406,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
         Type ret1 = n.e.accept(this);
         if (!(ret1 instanceof IntArrayType)) {
-            Errors.nonArrayLength(n.e.lineNum(),n.e.charNum());
+            Errors.nonArrayLength(n.e.lineNum(), n.e.charNum());
         }
         return new IntegerType();
     }
@@ -415,8 +414,8 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     // Exp e;
     // Identifier i;
     // ExpList el;
-    public Type visit(Call n)  {
-        Type toReturn= null;
+    public Type visit(Call n) {
+        Type toReturn = null;
 
         Type callObject = n.e.accept(this);
 
@@ -428,22 +427,22 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
             MethodTable toLookup;
 
             // first try child
-            toLookup = (MethodTable) toCheck.getEntry(n.i.s,TableEntry.METHOD_ENTRY);
+            toLookup = (MethodTable) toCheck.getEntry(n.i.s, TableEntry.METHOD_ENTRY);
             // Check if toCheck has a super class
             if (toLookup == null && actualNode instanceof ClassDeclExtends) {
-                    TableEntry superTable = base.getEntry(((ClassDeclExtends)actualNode).j.s, TableEntry.CLASS_ENTRY);
-                    toLookup = (MethodTable) superTable.getEntry(n.i.s,TableEntry.METHOD_ENTRY);
+                TableEntry superTable = base.getEntry(((ClassDeclExtends) actualNode).j.s, TableEntry.CLASS_ENTRY);
+                toLookup = (MethodTable) superTable.getEntry(n.i.s, TableEntry.METHOD_ENTRY);
             }
 
             // If we found a method
             if (toLookup != null) {
                 // Now we get the type associated with the methid
-                toReturn = ((MethodDecl)toLookup.getNode()).t;
+                toReturn = ((MethodDecl) toLookup.getNode()).t;
                 FormalList called = ((MethodDecl) toLookup.getNode()).fl;
 
                 // If sizes of expression lists don't match print them
                 if (n.el.size() != called.size()) {
-                    Errors.argCount(n.i.lineNum(),n.i.charNum(),n.i.s);
+                    Errors.argCount(n.i.lineNum(), n.i.charNum(), n.i.s);
                 } else {
                     // If counts are the same then we iterate comparing types
                     for (int i = 0; i < n.el.size(); i++) {
@@ -457,10 +456,10 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
                     }
                 }
             } else {
-                Errors.badCall(n.i.lineNum(),n.i.charNum());
+                Errors.badCall(n.i.lineNum(), n.i.charNum());
             }
-        } else  if (!base.hasEntryWalk(n.i.s, TableEntry.METHOD_ENTRY)) {
-            Errors.badCall(n.i.lineNum(),n.i.charNum());
+        } else if (!base.hasEntryWalk(n.i.s, TableEntry.METHOD_ENTRY)) {
+            Errors.badCall(n.i.lineNum(), n.i.charNum());
 
             /// Regardless we do type checking on the param list anyway
             for (int i = 0; i < n.el.size(); i++) {
@@ -470,7 +469,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
         // Don't return null
         if (toReturn == null) {
-            toReturn = new IdentifierType(n.i.lineNum(),n.i.charNum());
+            toReturn = new IdentifierType(n.i.lineNum(), n.i.charNum());
         }
 
         return toReturn;
@@ -493,18 +492,18 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     public Type visit(IdentifierExp n) {
         Type returnVal = null;
 
-        TableEntry entry = base.getCurrentScope().getEntryWalk(n.s,TableEntry.LEAF_ENTRY);
+        TableEntry entry = base.getCurrentScope().getEntryWalk(n.s, TableEntry.LEAF_ENTRY);
 
 
         if (entry instanceof SymbolEntry) {
             returnVal = ((SymbolEntry) entry).getType();
         }
 
-        if (returnVal == null ) {
+        if (returnVal == null) {
             // We don't know the type, so we lie and create fake ID
             // We use a string that can not be used as a valid type
             // as to avoid any conflicts
-            IdentifierType temp = new IdentifierType(":UNKNOWN_TYPE:",n.lineNum(),n.charNum() );
+            IdentifierType temp = new IdentifierType(":UNKNOWN_TYPE:", n.lineNum(), n.charNum());
             temp.erroneous = true;
             returnVal = temp;
         }
@@ -520,24 +519,24 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         // if it is class entry it means we aren't in a method and therefore calling from main.
         if (base.getCurrentScope().isEntry(TableEntry.CLASS_ENTRY)) {
 
-            Errors.thisInMain(n.lineNum(),n.charNum());
-            toReturn = new IdentifierType("this",n.lineNum(),n.charNum());
+            Errors.thisInMain(n.lineNum(), n.charNum());
+            toReturn = new IdentifierType("this", n.lineNum(), n.charNum());
             toReturn.erroneous = true;
-        // if it is a method then we know we are in the right place
+            // if it is a method then we know we are in the right place
         } else if (base.getCurrentScope().isEntry(TableEntry.METHOD_ENTRY)) {
             ASTNode classNode = base.getCurrentScope().parent.getNode();
             if (classNode instanceof ClassDeclSimple) {
-                toReturn = new IdentifierType(((ClassDeclSimple) classNode).i.s,n.lineNum(),n.charNum() );
+                toReturn = new IdentifierType(((ClassDeclSimple) classNode).i.s, n.lineNum(), n.charNum());
                 toReturn.methClass = true;
 
             } else if (classNode instanceof ClassDeclExtends) {
-                toReturn = new IdentifierType(((ClassDeclExtends) classNode).i.s,n.lineNum(),n.charNum() );
+                toReturn = new IdentifierType(((ClassDeclExtends) classNode).i.s, n.lineNum(), n.charNum());
                 toReturn.methClass = true;
             }
         } else {
             // WE SHOULD NEVER GET HERE
             System.err.println("PROBLEM IN PROGRAM!!");
-            toReturn = new IdentifierType("this",n.lineNum(),n.charNum());
+            toReturn = new IdentifierType("this", n.lineNum(), n.charNum());
         }
 
         return toReturn;
@@ -551,7 +550,7 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
     // Identifier i;
     public Type visit(NewObject n) {
-        return new IdentifierType(n.i.s,n.lineNum(),n.charNum());
+        return new IdentifierType(n.i.s, n.lineNum(), n.charNum());
     }
 
     // Exp e;
@@ -560,8 +559,8 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
 
         classOpCheck(toCheck, n.e, "!");
 
-        if (! (toCheck instanceof BooleanType)) {
-            Errors.nonBooleanOperand(n.e.lineNum(),n.e.charNum(),"!");
+        if (!(toCheck instanceof BooleanType)) {
+            Errors.nonBooleanOperand(n.e.lineNum(), n.e.charNum(), "!");
         }
 
         return new BooleanType();
@@ -571,26 +570,26 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
     public Type visit(Identifier n) {
         Type retV = null;
 
-        TableEntry getlLeaf = base.getCurrentScope().getEntryWalk(n.s,TableEntry.LEAF_ENTRY);
+        TableEntry getlLeaf = base.getCurrentScope().getEntryWalk(n.s, TableEntry.LEAF_ENTRY);
         TableEntry getMethod = base.getCurrentScope().getEntryWalk(n.s, TableEntry.METHOD_ENTRY);
-        TableEntry getClass = base.getCurrentScope().getEntryWalk(n.s,TableEntry.CLASS_ENTRY);
+        TableEntry getClass = base.getCurrentScope().getEntryWalk(n.s, TableEntry.CLASS_ENTRY);
 
         if (getlLeaf != null) {
             retV = ((SymbolEntry) getlLeaf).getType();
         }
 
         if (getMethod != null) {
-           retV=  ((MethodTable) getMethod).getType();
+            retV = ((MethodTable) getMethod).getType();
         }
 
         if (getClass != null) {
-            ASTNode temp =  getClass.getNode();
+            ASTNode temp = getClass.getNode();
             if (temp instanceof MainClass) {
-                retV = new IdentifierType("main",n.lineNum(),n.charNum());
+                retV = new IdentifierType("main", n.lineNum(), n.charNum());
             } else {
                 String classId = ((ClassDecl) temp).i.s;
 
-                retV = new IdentifierType(classId,n.lineNum(), n.charNum());
+                retV = new IdentifierType(classId, n.lineNum(), n.charNum());
             }
         }
 

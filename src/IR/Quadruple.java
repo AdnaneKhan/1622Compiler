@@ -74,7 +74,7 @@ public class Quadruple {
     public String arg2;
 
     public TableEntry arg1_entry;
-    public  TableEntry arg2_entry;
+    public TableEntry arg2_entry;
     private TableEntry resVar;
 
 
@@ -91,13 +91,12 @@ public class Quadruple {
     public int getResRegister() {
         int reg = 0;
         if (resVar != null && this.resVar.isEntry(TableEntry.LEAF_ENTRY)) {
-            reg= ((SymbolEntry) resVar).getRegister();
+            reg = ((SymbolEntry) resVar).getRegister();
         }
         return reg;
     }
 
     /**
-     *
      * @param toSet integer literal to place in the result field
      */
     public void setIntResult(int toSet) {
@@ -118,7 +117,7 @@ public class Quadruple {
         arg1 = toSet;
     }
 
-    public String getArg1()  {
+    public String getArg1() {
         if (isArg1Literal) {
             return Integer.toString(arg1Int);
         } else {
@@ -126,7 +125,7 @@ public class Quadruple {
         }
     }
 
-    public String getArg2()  {
+    public String getArg2() {
         if (isArg2Literal) {
             return Integer.toString(arg2Int);
         } else {
@@ -138,6 +137,7 @@ public class Quadruple {
         isArg2Literal = true;
         arg2Int = toSet;
     }
+
     public void setArg2(String toSet) {
         arg2 = toSet;
     }
@@ -160,7 +160,6 @@ public class Quadruple {
     }
 
     /**
-     *
      * @return true if this quadruple represents an integer literal
      */
     public boolean isLiteral() {
@@ -171,13 +170,16 @@ public class Quadruple {
         return resultBoolean;
     }
 
-    public boolean arg1Literal() { return isArg1Literal; }
+    public boolean arg1Literal() {
+        return isArg1Literal;
+    }
 
-    public boolean arg2Literal() { return isArg2Literal; }
+    public boolean arg2Literal() {
+        return isArg2Literal;
+    }
 
 
     /**
-     *
      * @return string representation off the result
      */
     public String getResult() {
@@ -193,8 +195,9 @@ public class Quadruple {
     /**
      * IF THIS quadruple is associated with a node, like a class or method, then
      * return the node associated.
-     *
+     * <p/>
      * Otherwise returns null
+     *
      * @return
      */
     public TableEntry getNode() {
@@ -204,6 +207,7 @@ public class Quadruple {
 
     /**
      * Transfers result from one quad to antoher, retaining the type iff it is an int
+     *
      * @param origin
      */
     public void transferResult(Quadruple origin) {
@@ -252,61 +256,47 @@ public class Quadruple {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         String ret = "";
 
         if (label.compareTo("") != 0) {
-        	ret += label + ": ";
+            ret += label + ": ";
         }
 
-		if (type == ASSIGNMENT) {
-			ret += result + " := " + getArg1() + " " + op + " " + getArg2();
-		}
-		else if (type == UNARY_ASSIGNMENT) {
-			ret += result + " := " + op + getArg1();
-		}
-		else if (type == COPY) {
-			ret += result + " := " + getArg1();
-		}
-		else if (type == PARAMETER) {
-			ret += "param " + getResult();
-		}
-		else if (type == CALL) {
-			ret += result + " := call " + this.arg1_entry.getSymbolName() + ", " + getArg2();
-		}
-		else if (type == RETURN_3AC) {
-			ret += "return " + result;
-		}
-		else if (type == INDEXED_ASSIGNMENT) {
-			ret += result + "[" + getArg2() + "]" + " := " + getArg1();
-		}
-		else if (type == NEW_3AC) {
-			ret += result + " := " + op + " " + getArg1();
-		}
-		else if (type == NEW_ARRAY) {
-			ret += result + " := " + op + "[" + getArg1() + "]";
-		}
-		else if (type == LENGTH_3AC) {
-			ret += result + " := length " + getArg1();
-		}
-		else if (type == PRINT) {
-			ret += "call print, 1";
-		}
-		else if (type == INDEXED_LOOKUP) {
-			ret += result + " := " + getArg1() + "[" + getArg2() + "]";
-		}
-		else if (type == LABEL) {
-			ret += result + ": ";
-		}
-		else if (type == UNCONDITIONAL_JUMP) {
-			ret += "goto " + result;
-		}
-		else if (type == CONDITIONAL_JUMP) {
-			ret += result + " " + getArg1() + " goto " + getArg2();
-		}
+        if (type == ASSIGNMENT) {
+            ret += result + " := " + getArg1() + " " + op + " " + getArg2();
+        } else if (type == UNARY_ASSIGNMENT) {
+            ret += result + " := " + op + getArg1();
+        } else if (type == COPY) {
+            ret += result + " := " + getArg1();
+        } else if (type == PARAMETER) {
+            ret += "param " + getResult();
+        } else if (type == CALL) {
+            ret += result + " := call " + this.arg1_entry.getSymbolName() + ", " + getArg2();
+        } else if (type == RETURN_3AC) {
+            ret += "return " + result;
+        } else if (type == INDEXED_ASSIGNMENT) {
+            ret += result + "[" + getArg2() + "]" + " := " + getArg1();
+        } else if (type == NEW_3AC) {
+            ret += result + " := " + op + " " + getArg1();
+        } else if (type == NEW_ARRAY) {
+            ret += result + " := " + op + "[" + getArg1() + "]";
+        } else if (type == LENGTH_3AC) {
+            ret += result + " := length " + getArg1();
+        } else if (type == PRINT) {
+            ret += "call print, 1";
+        } else if (type == INDEXED_LOOKUP) {
+            ret += result + " := " + getArg1() + "[" + getArg2() + "]";
+        } else if (type == LABEL) {
+            ret += result + ": ";
+        } else if (type == UNCONDITIONAL_JUMP) {
+            ret += "goto " + result;
+        } else if (type == CONDITIONAL_JUMP) {
+            ret += result + " " + getArg1() + " goto " + getArg2();
+        }
 
 
         return ret;
-	}
+    }
 
 }

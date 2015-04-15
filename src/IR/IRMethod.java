@@ -45,7 +45,6 @@ public class IRMethod {
     }
 
     /**
-     *
      * @return the 3AC representation in string form to be outputted in the 3AC generation
      */
     @Override

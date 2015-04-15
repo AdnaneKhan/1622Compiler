@@ -3,7 +3,8 @@ package CodeGeneration;
 /**
  * Created by adnankhan on 4/14/15.
  */
-public enum Registers {;
+public enum Registers {
+    ;
     public static final int AT = 1;
     public static final int V0 = 2;
     public static final int V1 = 3;
@@ -19,7 +20,7 @@ public enum Registers {;
     public static final int TEMP5 = 13;
     public static final int TEMP6 = 14;
     public static final int TEMP7 = 15;
-    public static final int TEMP8 = 24 ;
+    public static final int TEMP8 = 24;
     public static final int TEMP9 = 25;
     public static final int SAVE0 = 16;
     public static final int SAVE1 = 17;

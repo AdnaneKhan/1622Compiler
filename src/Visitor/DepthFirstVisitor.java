@@ -236,7 +236,7 @@ public class DepthFirstVisitor implements Visitor {
 
     }
 
-    public void visit(ErroneousMethodDecl n){
+    public void visit(ErroneousMethodDecl n) {
 
     }
 }

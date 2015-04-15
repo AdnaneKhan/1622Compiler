@@ -1,5 +1,6 @@
 
 import CodeGeneration.CodeGenerator;
+import CodeGeneration.Row;
 import IR.IRClass;
 import SymTable.SymbolTable;
 import Visitor.*;
@@ -32,7 +33,7 @@ public class Compiler {
 
             // Since we defined the root non terminal as the executable
             // that is what the parser will report
-            Program minJProgram = (Program)parse_tree.value;
+            Program minJProgram = (Program) parse_tree.value;
 
             // Symbol table constructed, but its empty
             SymbolTable compilerTable = new SymbolTable(minJProgram);
@@ -53,7 +54,7 @@ public class Compiler {
 
                 ArrayList<IRClass> ir = irGen.getClasses();
 
-                CodeGenerator codeGen = new CodeGenerator(ir,compilerTable);
+                CodeGenerator codeGen = new CodeGenerator(ir, compilerTable);
 
                 // generate cfg nodes
                 codeGen.generateCfg();
@@ -63,16 +64,14 @@ public class Compiler {
 
                 codeGen.generateDefUse();
 
-                codeGen.generateLiveness();
+                ArrayList<Row> liveness = codeGen.generateLiveness();
 
 
                 String output = codeGen.output();
                 System.out.println(output);
-                FileWriter fileOut = new FileWriter(fileName+".asm");
+                FileWriter fileOut = new FileWriter(fileName + ".asm");
                 fileOut.write(output);
                 fileOut.flush();
-
-
 
 
             }

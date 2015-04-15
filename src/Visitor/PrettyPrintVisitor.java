@@ -338,7 +338,7 @@ public class PrettyPrintVisitor implements Visitor {
 
     }
 
-    public void visit (ErroneousMethodDecl n) {
+    public void visit(ErroneousMethodDecl n) {
 
     }
 }

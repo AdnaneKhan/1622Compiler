@@ -11,6 +11,7 @@ public class ErroneousClassDecl extends ClassDecl {
     public ErroneousClassDecl() {
         super.erroneous = true;
     }
+
     @Override
     public void accept(Visitor v) {
         v.visit(this);

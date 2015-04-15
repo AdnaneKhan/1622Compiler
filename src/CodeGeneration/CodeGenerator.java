@@ -6,6 +6,7 @@ import IR.Quadruple;
 import SymTable.SymbolEntry;
 import SymTable.SymbolTable;
 import SymTable.TableEntry;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
@@ -16,22 +17,21 @@ import java.util.Stack;
  */
 public class CodeGenerator {
     private static final boolean DEBUG = true;
-    ArrayList< Row > useAndDefs = new ArrayList< Row>();
-    ArrayList< ArrayList<Row>  > inOut = new ArrayList<ArrayList<Row>>();
+    ArrayList<Row> useAndDefs = new ArrayList<Row>();
     private ArrayList<ControlFlowNode> baseNodes = new ArrayList<ControlFlowNode>();
-    private HashMap<Quadruple,ControlFlowNode> cfgMap;
-    private HashMap<String,ControlFlowNode> labelMap = new HashMap<String, ControlFlowNode>();
+    private HashMap<Quadruple, ControlFlowNode> cfgMap;
+    private HashMap<String, ControlFlowNode> labelMap = new HashMap<String, ControlFlowNode>();
     ArrayList<IRClass> ir;
     SymbolTable programTable;
     QuadEmit instPrinter;
     Quadruple mainLast;
 
 
-    public void generateLiveness() {
+    public ArrayList<Row> generateLiveness() {
         int iteration = 0;
         boolean change;
         boolean clear = true;
-
+        ArrayList<ArrayList<Row>> inOut = new ArrayList<ArrayList<Row>>();
 
         do {
 
@@ -46,67 +46,69 @@ public class CodeGenerator {
             }
 
             // Uses - in, defs - out
-                for (int i = 0; i < baseNodes.size(); i++) {
+            for (int i = 0; i < baseNodes.size(); i++) {
 
-                    int oldInSize = 0;
-                    int oldOutSize = 0;
+                int oldInSize = 0;
+                int oldOutSize = 0;
 
-                    if (iteration > 0) {
-                        oldInSize = inOut.get(iteration -1).get(i).uses.size();
-                        oldOutSize = inOut.get(iteration -1).get(i).defs.size();
+                if (iteration > 0) {
+                    oldInSize = inOut.get(iteration - 1).get(i).uses.size();
+                    oldOutSize = inOut.get(iteration - 1).get(i).defs.size();
 
 
-                        for (SymbolEntry se : inOut.get(iteration - 1).get(i).uses) {
-                            cycle.get(i).uses.add(se);
-                        }
-
-                        for (SymbolEntry se : inOut.get(iteration - 1).get(i).defs) {
-                            cycle.get(i).defs.add(se);
-                        }
-
-                    } else {
-
-                        // Copy uses into in
-                        for (SymbolEntry se : useAndDefs.get(i).uses) {
-                            cycle.get(i).uses.add(se);
-                        }
+                    for (SymbolEntry se : inOut.get(iteration - 1).get(i).uses) {
+                        cycle.get(i).uses.add(se);
                     }
 
-                    for (SymbolEntry outEntry : cycle.get(i).defs ) {
-                        if (!useAndDefs.get(i).defs.contains(outEntry)) {
-                            cycle.get(i).uses.add(outEntry);
-                        }
+                    for (SymbolEntry se : inOut.get(iteration - 1).get(i).defs) {
+                        cycle.get(i).defs.add(se);
                     }
 
-                   // Union Step in Algo
-                    for (ControlFlowNode predecessor : baseNodes.get(i).predecessors) {
-                            int predIndex = predecessor.index;
+                } else {
 
-
-                            for (SymbolEntry inValue : cycle.get(predIndex).uses) {
-
-                                cycle.get(i).defs.add(inValue);
-                            }
-                        }
-
-
-                    if ( clear && oldInSize != inOut.get(iteration).get(i).uses.size() ||
-                         oldOutSize != inOut.get(iteration).get(i).defs.size()) {
-                         change = true;
-                         clear = false;
+                    // Copy uses into in
+                    for (SymbolEntry se : useAndDefs.get(i).uses) {
+                        cycle.get(i).uses.add(se);
                     }
                 }
+
+                for (SymbolEntry outEntry : cycle.get(i).defs) {
+                    if (!useAndDefs.get(i).defs.contains(outEntry)) {
+                        cycle.get(i).uses.add(outEntry);
+                    }
+                }
+
+                // Union Step in Algo
+                for (ControlFlowNode predecessor : baseNodes.get(i).predecessors) {
+                    int predIndex = predecessor.index;
+
+
+                    for (SymbolEntry inValue : cycle.get(predIndex).uses) {
+
+                        cycle.get(i).defs.add(inValue);
+                    }
+                }
+
+
+                if (clear && oldInSize != inOut.get(iteration).get(i).uses.size() ||
+                        oldOutSize != inOut.get(iteration).get(i).defs.size()) {
+                    change = true;
+                    clear = false;
+                }
+            }
 
             iteration++;
         } while (change);
 
+
+        return inOut.get(iteration - 1);
     }
 
 
     public void generateDefUse() {
         Row newRow;
 
-        for ( ControlFlowNode cf : baseNodes) {
+        for (ControlFlowNode cf : baseNodes) {
             newRow = new Row();
             if (cf.irLine.type == Quadruple.PARAMETER || cf.irLine.type == Quadruple.RETURN_3AC) {
 
@@ -118,11 +120,11 @@ public class CodeGenerator {
 
             if (cf.irLine.arg1_entry != null && cf.irLine.arg1_entry.isEntry(TableEntry.LEAF_ENTRY)) {
 
-                newRow.uses.add((SymbolEntry)cf.irLine.arg1_entry);
+                newRow.uses.add((SymbolEntry) cf.irLine.arg1_entry);
             }
 
-            if (cf.irLine.arg2_entry != null&& cf.irLine.arg2_entry.isEntry(TableEntry.LEAF_ENTRY)) {
-                newRow.uses.add((SymbolEntry)cf.irLine.arg2_entry);
+            if (cf.irLine.arg2_entry != null && cf.irLine.arg2_entry.isEntry(TableEntry.LEAF_ENTRY)) {
+                newRow.uses.add((SymbolEntry) cf.irLine.arg2_entry);
             }
             useAndDefs.add(newRow);
         }
@@ -130,42 +132,42 @@ public class CodeGenerator {
 
     public void cfgRelations() {
 
-      for (int i = 0; i< baseNodes.size(); i++) {
-          ControlFlowNode cursor = baseNodes.get(i);
+        for (int i = 0; i < baseNodes.size(); i++) {
+            ControlFlowNode cursor = baseNodes.get(i);
 
-          switch (cursor.irLine.type) {
+            switch (cursor.irLine.type) {
 
-              case (Quadruple.UNCONDITIONAL_JUMP): {
-                  ControlFlowNode successor = labelMap.get(cursor.irLine.result);
-                  successor.predecessors.add(cursor);
-                  cursor.sucessors.add(successor);
+                case (Quadruple.UNCONDITIONAL_JUMP): {
+                    ControlFlowNode successor = labelMap.get(cursor.irLine.result);
+                    successor.predecessors.add(cursor);
+                    cursor.sucessors.add(successor);
                 }
-                  break;
-              case (Quadruple.RETURN_3AC):
-                  // no-op
-                  break;
+                break;
+                case (Quadruple.RETURN_3AC):
+                    // no-op
+                    break;
 
-              case (Quadruple.CONDITIONAL_JUMP): {
-                  ControlFlowNode successor = labelMap.get(cursor.irLine.arg2);
-                  successor.predecessors.add(cursor);
+                case (Quadruple.CONDITIONAL_JUMP): {
+                    ControlFlowNode successor = labelMap.get(cursor.irLine.arg2);
+                    successor.predecessors.add(cursor);
 
-                  cursor.sucessors.add(successor);
-              }
-              // This executes in every case EXCEPT unconditional and return
-              default:
+                    cursor.sucessors.add(successor);
+                }
+                // This executes in every case EXCEPT unconditional and return
+                default:
 
-                if (i+1 < baseNodes.size()) {
-                    ControlFlowNode next = baseNodes.get(i + 1);
+                    if (i + 1 < baseNodes.size()) {
+                        ControlFlowNode next = baseNodes.get(i + 1);
 
-                    if (!cursor.irLine.equals(mainLast)) {
-                        next.predecessors.add(cursor);
+                        if (!cursor.irLine.equals(mainLast)) {
+                            next.predecessors.add(cursor);
 
-                        cursor.sucessors.add(next);
+                            cursor.sucessors.add(next);
+                        }
+
                     }
-
-                }
-          }
-      }
+            }
+        }
     }
 
 
@@ -178,10 +180,10 @@ public class CodeGenerator {
         int index = 0;
 
         int mainSize = ir.get(0).lines.get(0).getLength();
-        mainLast = ir.get(0).lines.get(0).get(mainSize-1);
+        mainLast = ir.get(0).lines.get(0).get(mainSize - 1);
 
         for (IRClass irClass : ir) {
-            for (IRMethod irMethod : irClass.lines ) {
+            for (IRMethod irMethod : irClass.lines) {
                 Quadruple labelQuad = new Quadruple(Quadruple.LABEL);
                 labelQuad.result = irMethod.getName();
                 lastLabel.push(labelQuad);
@@ -190,7 +192,7 @@ public class CodeGenerator {
                         lastLabel.push(quad);
                     } else {
 
-                        ControlFlowNode newNode = new ControlFlowNode(quad,index);
+                        ControlFlowNode newNode = new ControlFlowNode(quad, index);
                         baseNodes.add(newNode);
 
                         // while we have labels, bbind them to
@@ -207,17 +209,16 @@ public class CodeGenerator {
         }
     }
 
-    public CodeGenerator (   ArrayList<IRClass> classes, SymbolTable symTable) {
+    public CodeGenerator(ArrayList<IRClass> classes, SymbolTable symTable) {
         programTable = symTable;
         ir = classes;
         instPrinter = new QuadEmit();
 
-        if(DEBUG) {
+        if (DEBUG) {
             System.out.println(" -------------- SOURCE INTERMEDIATE REPRESENTATION --------------");
 
 
-
-            for (IRClass quadCode : this.ir)  {
+            for (IRClass quadCode : this.ir) {
                 System.out.println(quadCode);
             }
             System.out.println(" -------------- END INTERMEDIATE REPRESENTATION -----------------");
@@ -228,7 +229,7 @@ public class CodeGenerator {
     public String output() {
         StringBuilder fileOut = new StringBuilder();
 
-      fileOut.append(".text\n");
+        fileOut.append(".text\n");
         for (IRClass irClass : ir) {
             for (IRMethod irMethod : irClass.lines) {
 
@@ -298,13 +299,13 @@ public class CodeGenerator {
                         case (Quadruple.UNARY_ASSIGNMENT):
                             fileOut.append(instPrinter.handleUnaryAssignment(quad)).append('\n');
                             break;
-                        case (Quadruple.UNCONDITIONAL_JUMP): 
+                        case (Quadruple.UNCONDITIONAL_JUMP):
                             fileOut.append(instPrinter.handleUncondJump(quad)).append('\n');
                             break;
                     }
                 }
 
-                if (labelQuad.getResult().equals("main"));
+                if (labelQuad.getResult().equals("main")) ;
                 fileOut.append("jal _system_exit\n");
 
             }
@@ -321,78 +322,78 @@ public class CodeGenerator {
      */
     private static String getLibrary() {
         String library = "# main is testing the functions I've provided. You will include this code at the end\n" +
-        "# of your output file so that you may call these system services.\n" +
-        "\n" +
-        "#main:\n" +
-        "#\tli $a0, 100\n" +
-        "#\tjal _new_array\n" +
-        "#\tmove $s0, $v0\n" +
-        "#\tmove $a0, $v0\n" +
-        "#\tjal _system_out_println\n" +
-        "#\tlw $a0, 0($s0)\n" +
-        "#\tjal _system_out_println\n" +
-        "#\tjal _system_exit\n" +
-        "\n" +
-        "_system_exit:\n" +
-        "\tli $v0, 10 #exit\n" +
-        "\tsyscall\n" +
-        "\t\n" +
-        "# Integer to print is in $a0. \n" +
-        "# Kills $v0 and $a0\n" +
-        "_system_out_println:\n" +
-        "\t# print integer\n" +
-        "\tli  $v0, 1 \n" +
-        "\tsyscall\n" +
-        "\t# print a newline\n" +
-        "\tli $a0, 10\n" +
-        "\tli $v0, 11\n" +
-        "\tsyscall\n" +
-        "\tjr $ra\n" +
-        "\t\n" +
-        "# $a0 = number of bytes to allocate\n" +
-        "# $v0 contains address of allocated memory\n" +
-        "_new_object:\n" +
-        "\t# sbrk\n" +
-        "\tli $v0, 9 \n" +
-        "\tsyscall\n" +
-        "\t\n" +
-        "\t#initialize with zeros\n" +
-        "\tmove $t0, $a0\n" +
-        "\tmove $t1, $v0\n" +
-        "_new_object_loop:\n" +
-        "\tbeq $t0, $zero, _new_object_exit\n" +
-        "\tsb $zero, 0($t1)\n" +
-        "\taddi $t1, $t1, 1\n" +
-        "\taddi $t0, $t0, -1\n" +
-        "\tj _new_object_loop\n" +
-        "_new_object_exit:\n" +
-        "\tjr $ra\n" +
-        "\t\n" +
-        "# $a0 = number of bytes to allocate \n" +
-        "# $v0 contains address of allocated memory (with offset 0 being the size)\t\n" +
-        "_new_array:\n" +
-        "\t# add space for the size (1 integer)\n" +
-        "\taddi $a0, $a0, 4\n" +
-        "\t# sbrk\n" +
-        "\tli $v0, 9\n" +
-        "\tsyscall\n" +
-        "#initialize to zeros\n" +
-        "\tmove $t0, $a0\n" +
-        "\tmove $t1, $v0\n" +
-        "_new_array_loop:\n" +
-        "\tbeq $t0, $zero, _new_array_exit\n" +
-        "\tsb $zero, 0($t1)\n" +
-        "\taddi $t1, $t1, 1\n" +
-        "\taddi $t0, $t0, -1\n" +
-        "\tj _new_array_loop\n" +
-        "_new_array_exit:\n" +
-        "\t#store the size (number of ints) in offset 0\n" +
-        "\taddi $t0, $a0, -4\n" +
-        "\tsra $t0, $t0, 2\n" +
-        "\tsw $t0, 0($v0)\n" +
-        "\tjr $ra";
+                "# of your output file so that you may call these system services.\n" +
+                "\n" +
+                "#main:\n" +
+                "#\tli $a0, 100\n" +
+                "#\tjal _new_array\n" +
+                "#\tmove $s0, $v0\n" +
+                "#\tmove $a0, $v0\n" +
+                "#\tjal _system_out_println\n" +
+                "#\tlw $a0, 0($s0)\n" +
+                "#\tjal _system_out_println\n" +
+                "#\tjal _system_exit\n" +
+                "\n" +
+                "_system_exit:\n" +
+                "\tli $v0, 10 #exit\n" +
+                "\tsyscall\n" +
+                "\t\n" +
+                "# Integer to print is in $a0. \n" +
+                "# Kills $v0 and $a0\n" +
+                "_system_out_println:\n" +
+                "\t# print integer\n" +
+                "\tli  $v0, 1 \n" +
+                "\tsyscall\n" +
+                "\t# print a newline\n" +
+                "\tli $a0, 10\n" +
+                "\tli $v0, 11\n" +
+                "\tsyscall\n" +
+                "\tjr $ra\n" +
+                "\t\n" +
+                "# $a0 = number of bytes to allocate\n" +
+                "# $v0 contains address of allocated memory\n" +
+                "_new_object:\n" +
+                "\t# sbrk\n" +
+                "\tli $v0, 9 \n" +
+                "\tsyscall\n" +
+                "\t\n" +
+                "\t#initialize with zeros\n" +
+                "\tmove $t0, $a0\n" +
+                "\tmove $t1, $v0\n" +
+                "_new_object_loop:\n" +
+                "\tbeq $t0, $zero, _new_object_exit\n" +
+                "\tsb $zero, 0($t1)\n" +
+                "\taddi $t1, $t1, 1\n" +
+                "\taddi $t0, $t0, -1\n" +
+                "\tj _new_object_loop\n" +
+                "_new_object_exit:\n" +
+                "\tjr $ra\n" +
+                "\t\n" +
+                "# $a0 = number of bytes to allocate \n" +
+                "# $v0 contains address of allocated memory (with offset 0 being the size)\t\n" +
+                "_new_array:\n" +
+                "\t# add space for the size (1 integer)\n" +
+                "\taddi $a0, $a0, 4\n" +
+                "\t# sbrk\n" +
+                "\tli $v0, 9\n" +
+                "\tsyscall\n" +
+                "#initialize to zeros\n" +
+                "\tmove $t0, $a0\n" +
+                "\tmove $t1, $v0\n" +
+                "_new_array_loop:\n" +
+                "\tbeq $t0, $zero, _new_array_exit\n" +
+                "\tsb $zero, 0($t1)\n" +
+                "\taddi $t1, $t1, 1\n" +
+                "\taddi $t0, $t0, -1\n" +
+                "\tj _new_array_loop\n" +
+                "_new_array_exit:\n" +
+                "\t#store the size (number of ints) in offset 0\n" +
+                "\taddi $t0, $a0, -4\n" +
+                "\tsra $t0, $t0, 2\n" +
+                "\tsw $t0, 0($v0)\n" +
+                "\tjr $ra";
 
-       // System.out.println(library);
+        // System.out.println(library);
 
         return library;
     }
