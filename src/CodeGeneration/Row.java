@@ -1,9 +1,7 @@
 package CodeGeneration;
 
 import SymTable.SymbolEntry;
-
 import java.util.HashSet;
-import java.util.LinkedList;
 
 /**
  * Created by adnankhan on 4/14/15.

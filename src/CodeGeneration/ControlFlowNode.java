@@ -3,9 +3,8 @@ package CodeGeneration;
 import IR.Quadruple;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+
 
 /**
  * Created by adnankhan on 4/14/15.

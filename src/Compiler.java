@@ -63,6 +63,8 @@ public class Compiler {
 
                 codeGen.generateDefUse();
 
+                codeGen.generateLiveness();
+
 
                 String output = codeGen.output();
                 System.out.println(output);

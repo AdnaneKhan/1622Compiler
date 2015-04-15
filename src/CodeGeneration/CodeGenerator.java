@@ -17,22 +17,103 @@ import java.util.Stack;
 public class CodeGenerator {
     private static final boolean DEBUG = true;
     ArrayList< Row > useAndDefs = new ArrayList< Row>();
+    ArrayList< ArrayList<Row>  > inOut = new ArrayList<ArrayList<Row>>();
     private ArrayList<ControlFlowNode> baseNodes = new ArrayList<ControlFlowNode>();
     private HashMap<Quadruple,ControlFlowNode> cfgMap;
     private HashMap<String,ControlFlowNode> labelMap = new HashMap<String, ControlFlowNode>();
     ArrayList<IRClass> ir;
     SymbolTable programTable;
     QuadEmit instPrinter;
+    Quadruple mainLast;
+
+
+    public void generateLiveness() {
+        int iteration = 0;
+        boolean change;
+        boolean clear = true;
+
+
+        do {
+
+            ArrayList<Row> cycle = new ArrayList<Row>();
+            inOut.add(cycle);
+            change = false;
+
+            // pre instantiate the array of rows to prevent null pointers
+            for (int i = 0; i < baseNodes.size(); i++) {
+                Row temp = new Row();
+                cycle.add(temp);
+            }
+
+            // Uses - in, defs - out
+                for (int i = 0; i < baseNodes.size(); i++) {
+
+                    int oldInSize = 0;
+                    int oldOutSize = 0;
+
+                    if (iteration > 0) {
+                        oldInSize = inOut.get(iteration -1).get(i).uses.size();
+                        oldOutSize = inOut.get(iteration -1).get(i).defs.size();
+
+
+                        for (SymbolEntry se : inOut.get(iteration - 1).get(i).uses) {
+                            cycle.get(i).uses.add(se);
+                        }
+
+                        for (SymbolEntry se : inOut.get(iteration - 1).get(i).defs) {
+                            cycle.get(i).defs.add(se);
+                        }
+
+                    } else {
+
+                        // Copy uses into in
+                        for (SymbolEntry se : useAndDefs.get(i).uses) {
+                            cycle.get(i).uses.add(se);
+                        }
+                    }
+
+                    for (SymbolEntry outEntry : cycle.get(i).defs ) {
+                        if (!useAndDefs.get(i).defs.contains(outEntry)) {
+                            cycle.get(i).uses.add(outEntry);
+                        }
+                    }
+
+                   // Union Step in Algo
+                    for (ControlFlowNode predecessor : baseNodes.get(i).predecessors) {
+                            int predIndex = predecessor.index;
+
+
+                            for (SymbolEntry inValue : cycle.get(predIndex).uses) {
+
+                                cycle.get(i).defs.add(inValue);
+                            }
+                        }
+
+
+                    if ( clear && oldInSize != inOut.get(iteration).get(i).uses.size() ||
+                         oldOutSize != inOut.get(iteration).get(i).defs.size()) {
+                         change = true;
+                         clear = false;
+                    }
+                }
+
+            iteration++;
+        } while (change);
+
+    }
+
 
     public void generateDefUse() {
         Row newRow;
 
         for ( ControlFlowNode cf : baseNodes) {
             newRow = new Row();
-            if (cf.irLine.type != Quadruple.PARAMETER) {
-                newRow.defs.add((SymbolEntry) cf.irLine.getNode());
+            if (cf.irLine.type == Quadruple.PARAMETER || cf.irLine.type == Quadruple.RETURN_3AC) {
+
+                // Placing in uses due to exxceptiions
+                newRow.uses.add((SymbolEntry) cf.irLine.getNode());
             } else {
-                newRow.defs.add((SymbolEntry)cf.irLine.getNode());
+                newRow.defs.add((SymbolEntry) cf.irLine.getNode());
             }
 
             if (cf.irLine.arg1_entry != null && cf.irLine.arg1_entry.isEntry(TableEntry.LEAF_ENTRY)) {
@@ -75,8 +156,13 @@ public class CodeGenerator {
 
                 if (i+1 < baseNodes.size()) {
                     ControlFlowNode next = baseNodes.get(i + 1);
-                    next.predecessors.add(cursor);
-                    cursor.sucessors.add(next);
+
+                    if (!cursor.irLine.equals(mainLast)) {
+                        next.predecessors.add(cursor);
+
+                        cursor.sucessors.add(next);
+                    }
+
                 }
           }
       }
@@ -90,6 +176,9 @@ public class CodeGenerator {
     public void generateCfg() {
         Stack<Quadruple> lastLabel = new Stack<Quadruple>();
         int index = 0;
+
+        int mainSize = ir.get(0).lines.get(0).getLength();
+        mainLast = ir.get(0).lines.get(0).get(mainSize-1);
 
         for (IRClass irClass : ir) {
             for (IRMethod irMethod : irClass.lines ) {
@@ -112,6 +201,8 @@ public class CodeGenerator {
 
                     index++;
                 }
+
+
             }
         }
     }
