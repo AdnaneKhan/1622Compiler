@@ -1,5 +1,6 @@
 
 import CodeGeneration.CodeGenerator;
+import CodeGeneration.InterferenceGraph;
 import CodeGeneration.Row;
 import IR.IRClass;
 import SymTable.SymbolTable;
@@ -62,9 +63,17 @@ public class Compiler {
                 // making cfg relations
                 codeGen.cfgRelations();
 
-                codeGen.generateDefUse();
+                ArrayList<Row> defsAndUse = codeGen.generateDefUse();
 
                 ArrayList<Row> liveness = codeGen.generateLiveness();
+
+                InterferenceGraph ifGraph = new InterferenceGraph();
+
+                ifGraph.buildGraph(liveness,defsAndUse);
+
+                ifGraph.colorGraph();
+
+
 
 
                 String output = codeGen.output();

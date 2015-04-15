@@ -19,7 +19,6 @@ public class CodeGenerator {
     private static final boolean DEBUG = true;
     ArrayList<Row> useAndDefs = new ArrayList<Row>();
     private ArrayList<ControlFlowNode> baseNodes = new ArrayList<ControlFlowNode>();
-    private HashMap<Quadruple, ControlFlowNode> cfgMap;
     private HashMap<String, ControlFlowNode> labelMap = new HashMap<String, ControlFlowNode>();
     ArrayList<IRClass> ir;
     SymbolTable programTable;
@@ -105,16 +104,16 @@ public class CodeGenerator {
     }
 
 
-    public void generateDefUse() {
+    public ArrayList<Row> generateDefUse() {
         Row newRow;
 
         for (ControlFlowNode cf : baseNodes) {
             newRow = new Row();
-            if (cf.irLine.type == Quadruple.PARAMETER || cf.irLine.type == Quadruple.RETURN_3AC) {
+            if ((cf.irLine.type == Quadruple.PARAMETER || cf.irLine.type == Quadruple.RETURN_3AC) && cf.irLine.getNode() != null) {
 
                 // Placing in uses due to exxceptiions
                 newRow.uses.add((SymbolEntry) cf.irLine.getNode());
-            } else {
+            } else if (cf.irLine.getNode() != null) {
                 newRow.defs.add((SymbolEntry) cf.irLine.getNode());
             }
 
@@ -128,6 +127,9 @@ public class CodeGenerator {
             }
             useAndDefs.add(newRow);
         }
+
+
+        return this.useAndDefs;
     }
 
     public void cfgRelations() {
