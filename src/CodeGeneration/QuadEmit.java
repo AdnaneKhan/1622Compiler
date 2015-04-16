@@ -20,7 +20,6 @@ public class QuadEmit {
     // its purposes prior to true regisster allocation
     private HashMap<String, String> regMap;
 
-    public int tRegC;
     int sRegC;
     int fRegC;
 
@@ -184,8 +183,8 @@ public class QuadEmit {
             if (quad.arg2_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
 
                 String arg2Reg = prettyRegister(quad.getArg2Register());
-                String immediateRegister = getImmediateRegister(quad.getResult(),quad.getArg1(),instruction);
-                instruction.append(generateOpInst(quad.op, prettyRegister(quad.getResRegister()), immediateRegister, arg2Reg));
+                setImmediateRegister(quad.getResRegister(), quad.getArg1(), instruction);
+                instruction.append(generateOpInst(quad.op, prettyRegister(quad.getResRegister()), prettyRegister(quad.getResRegister()), arg2Reg));
 
             } else {
                 // TODO
@@ -196,8 +195,8 @@ public class QuadEmit {
 
 
                 String arg1Reg = prettyRegister(quad.getArg1Register());
-                String immediateRegister = getImmediateRegister(quad.getResult(), quad.getArg2(), instruction);
-                instruction.append(generateOpInst(quad.op, prettyRegister(quad.getResRegister()), arg1Reg, immediateRegister));
+                setImmediateRegister(quad.getResRegister(), quad.getArg2(), instruction);
+                instruction.append(generateOpInst(quad.op, prettyRegister(quad.getResRegister()), arg1Reg,  prettyRegister(quad.getResRegister())));
 
             } else {
                 // TODO
@@ -363,16 +362,13 @@ public class QuadEmit {
 
         return prettyRegister.toString();
     }
-    
 
-    private String getImmediateRegister(String key, String arg, StringBuilder instruction) {
-        String resRegister = getTReg();
-        regMap.put(key, resRegister);
+
+    private void setImmediateRegister(int resRegister, String arg, StringBuilder instruction) {
 
         instruction.append("li").append(" ");
-        instruction.append(resRegister).append(COMMA_SPACE);
+        instruction.append(prettyRegister(resRegister)).append(COMMA_SPACE);
         instruction.append(arg).append("\n");
-        return resRegister;
     }
 
     private int getArgPos(TableEntry quad_entry) {
@@ -424,18 +420,6 @@ public class QuadEmit {
         }
 
         return instruction.toString();
-    }
-
-    private String getTReg() {
-        String tempReg = null;
-
-        if (tRegC == 9) {
-            // Limit Reached
-        } else {
-            tempReg = "$t" + tRegC;
-            tRegC++;
-        }
-        return tempReg;
     }
 
     private String getAReg() {
