@@ -202,11 +202,8 @@ public class CodeGenerator {
                             labelMap.put(lastLabel.pop().result, newNode);
                         }
                     }
-
                     index++;
                 }
-
-
             }
         }
     }
@@ -259,7 +256,6 @@ public class CodeGenerator {
                 }
 
                 for (Quadruple quad : irMethod.lines) {
-                    quad.getResRegister();
                     // Switch based on the type of quadtruple
                     switch (quad.type) {
 

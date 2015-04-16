@@ -1,5 +1,6 @@
 package SymTable;
 
+import CodeGeneration.Registers;
 import SyntaxTree.*;
 
 
@@ -15,6 +16,11 @@ public class SymbolEntry extends TableEntry {
     private int register = DEAD_REG;
 
     public int getRegister() {
+
+        if (register == DEAD_REG) {
+            System.err.println("We are trying to get a dead register for:\n" + this.toString());
+        }
+
         return register;
     }
 
@@ -46,6 +52,9 @@ public class SymbolEntry extends TableEntry {
 
         symType = t;
         this.symbolName = symbolName;
+        if (symbolName.equals("this")) {
+            this.register = Registers.ARG0;
+        }
     }
 
     public int entryType() {

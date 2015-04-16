@@ -751,26 +751,21 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad.result = "_t" + tempNum;
         tempNum++;
 
-
+        ////////////////////////////////////////////////////
+        // There is an error when you try to call a method that is a member of a type
+        // that is the result of the call itself (recursive calls)
         String toAdd = "";
         if (n.e instanceof NewObject) {
-
 
             String lookup = ((NewObject) n.e).i.s;
             toAdd = lookup;
 
         } else if (n.e instanceof IdentifierExp) {
+
+            // If it is an identifier type we need to get the type (since that is the class that is part of this)
             String lookup = ((IdentifierExp) n.e).s;
             SymbolEntry temp = (SymbolEntry) base.getCurrentScope().getEntryWalk(lookup, TableEntry.LEAF_ENTRY);
-            String classParam;
-
-
-            /// Get the name of the current class to act as the this paramemter
-            if (temp.parent.isEntry(TableEntry.CLASS_ENTRY)) {
-                classParam = temp.parent.getSymbolName();
-            } else if (temp.parent.isEntry(TableEntry.METHOD_ENTRY)) {
-                classParam = temp.parent.parent.getSymbolName();
-            }
+            toAdd =((IdentifierType) temp.getType()).s;
 
         } else if (n.e instanceof This) {
             if (base.getCurrentScope().isEntry(TableEntry.METHOD_ENTRY)) {
@@ -778,12 +773,14 @@ public class IRGeneratorVisitor implements Visitor {
             }
         }
 
-        currentQuad.setArg1(base.getClassTable(toAdd).getMethod(n.i.s));
+        ClassTable tempAdd = base.getClassTable(toAdd);
+        currentQuad.setArg1(tempAdd.getMethod(n.i.s));
         if (base.getCurrentScope().isEntry(TableEntry.METHOD_ENTRY)) {
             currentQuad.setResEntry(this.addTemp((MethodTable) base.getCurrentScope(), currentQuad.result, base.getClassTable(toAdd).getMethod(n.i.s).getType()));
         } else {
             currentQuad.setResEntry(this.addTemp((ClassTable) base.getCurrentScope(), currentQuad.result, base.getClassTable(toAdd).getMethod(n.i.s).getType()));
         }
+        //////////////////////////////////////////////////
 
         quadstack.set(top(), currentQuad);
 
@@ -791,6 +788,8 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad.type = getType(n.e);
         pushStack(currentQuad);
         n.e.accept(this);
+
+
         Quadruple tempQuad = popStack();
         currentQuad = new Quadruple();
         currentQuad.type = Quadruple.PARAMETER;

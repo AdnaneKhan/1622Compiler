@@ -87,15 +87,35 @@ public class Quadruple {
         label = "";
     }
 
-
     public int getResRegister() {
         int reg = 0;
         if (resVar != null && this.resVar.isEntry(TableEntry.LEAF_ENTRY)) {
             reg = ((SymbolEntry) resVar).getRegister();
+        } else {
+            System.err.println("Attempted to get register for a non var " + result);
         }
         return reg;
     }
 
+    public int getArg1Register() {
+        int reg = 0;
+        if (arg1_entry != null && this.arg1_entry.isEntry(TableEntry.LEAF_ENTRY)) {
+            reg = ((SymbolEntry) arg1_entry).getRegister();
+        } else {
+            System.err.println("Attempted to get register for a non var " + arg1);
+        }
+        return reg;
+    }
+
+    public int getArg2Register() {
+        int reg = 0;
+        if (arg2_entry != null && this.arg2_entry.isEntry(TableEntry.LEAF_ENTRY)) {
+            reg = ((SymbolEntry) arg2_entry).getRegister();
+        } else {
+            System.err.println("Attempted to get register for a non var " + arg2);
+        }
+        return reg;
+    }
     /**
      * @param toSet integer literal to place in the result field
      */
