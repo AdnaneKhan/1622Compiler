@@ -13,19 +13,31 @@ public class SymbolEntry extends TableEntry {
     public static final int DEAD_REG = -5;
     Type symType;
 
+    private SymbolEntry coalesceBridge = null;
+
     private int register = DEAD_REG;
 
     public int getRegister() {
 
-        if (register == DEAD_REG) {
+        if (coalesceBridge != null) {
+          return coalesceBridge.getRegister();
+        } else if (register == DEAD_REG) {
             System.err.println("We are trying to get a dead register for:\n" + this.toString());
         }
 
         return register;
     }
 
+    public void buildBridge(SymbolEntry toBridge) {
+        coalesceBridge = toBridge;
+    }
+
     public void assignRegister(int new_regValue) {
-        if (register != DEAD_REG) {
+
+        // If there is a coalesce bridge present then assign the register to the other value
+        if (coalesceBridge != null) {
+            coalesceBridge.assignRegister(new_regValue);
+        } if (register != DEAD_REG) {
             System.err.println("We tried to give a live register a new live value:\n" + this.toString());
         } else {
             register = new_regValue;
