@@ -1,6 +1,7 @@
 
 import CodeGeneration.CodeGenerator;
 import CodeGeneration.InterferenceGraph;
+import CodeGeneration.InterferenceNode;
 import CodeGeneration.Row;
 import IR.IRClass;
 import SymTable.SymbolTable;
@@ -10,6 +11,7 @@ import SyntaxTree.*;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Stack;
 
 
 public class Compiler {
@@ -71,8 +73,14 @@ public class Compiler {
 
                 ifGraph.buildGraph(liveness,defsAndUse);
 
-                ifGraph.colorGraph();
+                //
+                Stack<InterferenceNode> tempStack =ifGraph.coalesceGraph(liveness,defsAndUse);
 
+                // Simplify the graph
+
+                Stack<InterferenceNode> simpleStack = ifGraph.simplifyGraph(tempStack);
+
+                ifGraph.colorGraph(simpleStack);
 
 
 

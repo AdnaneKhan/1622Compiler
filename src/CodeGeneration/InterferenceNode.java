@@ -19,6 +19,7 @@ public class InterferenceNode {
         moveAssoc = toSet;
     }
 
+
     public List<InterferenceNode> neighbors;
 
     public InterferenceNode(SymbolEntry node) {

@@ -6,13 +6,11 @@ import java.util.List;
 import java.util.Stack;
 
 import SymTable.SymbolEntry;
-import sun.jvm.hotspot.asm.Register;
 
 /**
  * Created by adnankhan on 4/14/15.
  */
 public class InterferenceGraph {
-    Stack<InterferenceNode> istack;
     List<InterferenceNode> igraph;
     List<Integer> colors;
 
@@ -44,78 +42,45 @@ public class InterferenceGraph {
         colors.add(Registers.GP);
     }
 
-    public void buildGraph(ArrayList<Row> inOut, ArrayList<Row> useDefs) {
-        // instantiate igraph
-        for (int i = 0; i < useDefs.size(); i++) {
-            InterferenceNode newNode;
 
+    public Stack<InterferenceNode> coalesceGraph(ArrayList<Row> inOut, ArrayList<Row> useDefs) {
+        Stack<InterferenceNode> coalesceStack = new Stack<InterferenceNode>();
 
-            for (SymbolEntry var : useDefs.get(i).defs) {
-                boolean exists = false;
-                for (InterferenceNode existingNode : igraph) {
-                    if (existingNode.getVariable().equals(var)) {
-                        if (useDefs.get(i).moveRelated) {
+        for (int i = 0; i < igraph.size(); i++) {
 
-                            for (SymbolEntry use : useDefs.get(i).uses) {
-                                existingNode.setMoveAssoc(use);
-                                existingNode.moveRelated = true;
-                                break;
-                            }
-
-
-                        }
-                        exists = true;
-                        break;
-                    }
-
-                }
-                if (!exists) {
-                    newNode = new InterferenceNode(var);
-                    if (useDefs.get(i).moveRelated) {
-
-                        for (SymbolEntry use : useDefs.get(i).uses) {
-                            newNode.setMoveAssoc(use);
-                            newNode.moveRelated = true;
-                            break;
-                        }
-
-
-                    }
-                    igraph.add(newNode);
-                }
-
+            InterferenceNode cursor = igraph.get(i);
+            if (!cursor.moveRelated && cursor.neighbors.size() < colors.size()) {
+                // if less than signficant degree and not move related
+                // remove from the graph and push onto stack
+                igraph.remove(cursor);
+                coalesceStack.push(cursor);
             }
         }
 
-        // add neighbors to nodes in graph
-        for (int i = 0; i < useDefs.size(); i++) {
-            InterferenceNode currentNode = null;
-            for (SymbolEntry var : useDefs.get(i).defs) {
-                for (int j = 0; j < igraph.size(); j++) {
-                    if (igraph.get(j).getVariable().equals(var)) {
-                        currentNode = igraph.get(j);
-                        break;
-                    }
-                }
+        // At this point coalescing is ready to occur
+
+        // logic for coalescing:
+
+        // the RHS becomes the delegate of the new combined node
+
+        // The move quadruple is flagged as bad, we might be able to do this
+        // by saying that hte lhs has been dominated, and add that
+        // check when we try to emit the dominated quadruple, so the symbol entry
+        // will pass the info back, this might be the cleanest way to do it without modfying
+        // program structure too much
 
 
-                for (SymbolEntry neighbor : inOut.get(i).defs) {
-                    for (int j = 0; j < igraph.size(); j++) {
-                        if (igraph.get(j).getVariable().equals(neighbor)) {
-                            currentNode.neighbors.add(igraph.get(j));
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+
+        return coalesceStack;
     }
 
-    public void colorGraph() {
 
-        istack = new Stack<InterferenceNode>();
-
-        
+    // This is the standard simplification call used without coalescing
+    public Stack<InterferenceNode> simplifyGraph(Stack<InterferenceNode> oldStack) {
+        Stack<InterferenceNode> istack = new Stack<InterferenceNode>();
+        // Add all the elements from the old stack (in cases where we had nodes
+        // of less than significant degree popped off in coalesce simplify stage
+        istack.addAll(oldStack);
 
         // While the graph still contains nodes
         while (igraph.size() > 0) {
@@ -145,9 +110,54 @@ public class InterferenceGraph {
             }
         }
 
+        return istack;
+    }
+
+
+    public void buildGraph(ArrayList<Row> inOut, ArrayList<Row> useDefs) {
+        // instantiate igraph
+        for (int i = 0; i < useDefs.size(); i++) {
+            InterferenceNode newNode;
+
+            for (SymbolEntry var : useDefs.get(i).defs) {
+                boolean exists = false;
+                for (InterferenceNode existingNode : igraph) {
+                    if (existingNode.getVariable().equals(var)) {
+                        if (useDefs.get(i).moveRelated) {
+                            // If we find it in the duplicate check
+                            for (SymbolEntry use : useDefs.get(i).uses) {
+                                existingNode.setMoveAssoc(use);
+                                existingNode.moveRelated = true;
+                                break;
+                            }
+                        }
+                        exists = true;
+                        break;
+                    }
+                }
+
+                // Handle the standard case
+                if (!exists) {
+                    newNode = new InterferenceNode(var);
+                    if (useDefs.get(i).moveRelated) {
+
+                        for (SymbolEntry use : useDefs.get(i).uses) {
+                            newNode.setMoveAssoc(use);
+                            newNode.moveRelated = true;
+                            break;
+                        }
+                    }
+                    igraph.add(newNode);
+                }
+            }
+        }
+    }
+
+    public void colorGraph(Stack<InterferenceNode> simplifyStack) {
+    Stack<InterferenceNode> istack = simplifyStack;
+
         // Now we pop these nodes off the stack one at a time while assigning colors and add them back to the graph
         while (istack.size() > 0) {
-
             // Pop a node
             InterferenceNode inode = istack.pop();
 
@@ -161,7 +171,6 @@ public class InterferenceGraph {
                         break;
                     }
                 }
-
                 // If color found is still true, set the color and break, else continue
                 if (colorFound) {
                     inode.setColor(colors.get(i));
@@ -171,7 +180,6 @@ public class InterferenceGraph {
 
             // Add the node back to the graph
             igraph.add(inode);
-
         }
     }
 }
