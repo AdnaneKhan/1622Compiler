@@ -83,7 +83,6 @@ public class CodeGenerator {
 
 
                     for (SymbolEntry inValue : cycle.get(predIndex).uses) {
-
                         cycle.get(i).defs.add(inValue);
                     }
                 }
@@ -194,7 +193,7 @@ public class CodeGenerator {
                         lastLabel.push(quad);
                     } else {
 
-                        ControlFlowNode newNode = new ControlFlowNode(quad, index);
+                        ControlFlowNode newNode = new ControlFlowNode(quad, index++);
                         baseNodes.add(newNode);
 
                         // while we have labels, bbind them to
@@ -202,7 +201,6 @@ public class CodeGenerator {
                             labelMap.put(lastLabel.pop().result, newNode);
                         }
                     }
-                    index++;
                 }
             }
         }
@@ -251,10 +249,7 @@ public class CodeGenerator {
                 Quadruple labelQuad = new Quadruple(Quadruple.LABEL);
                 labelQuad.result = irMethod.getName();
                 fileOut.append(labelQuad.getResult()).append(':').append('\n');
-                for (int i = 0; i < 4; i++) {
-                    fileOut.append("move").append(' ').append("$s").append(i).append(", ").append("$a").append(i).append('\n');
-                }
-
+              
                 for (Quadruple quad : irMethod.lines) {
                     // Switch based on the type of quadtruple
                     switch (quad.type) {

@@ -13,9 +13,9 @@ import java.util.HashMap;
  * Created by adnankhan on 4/10/15.
  */
 public class QuadEmit {
-    private static final int GP_REG_COUNT = 22;
+    private static final int GP_REG_COUNT = 26;
     private static final String COMMA_SPACE = ", ";
-
+    boolean functParam = true;
     // a very simple register map that works
     // its purposes prior to true regisster allocation
     private HashMap<String, String> regMap;
@@ -33,6 +33,14 @@ public class QuadEmit {
      */
     public String handleParameter(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
+
+
+        if (functParam) {
+
+            instruction.append(printSaveAll());
+        }
+
+        functParam = false;
 
         if (quad.isLiteral()) {
             instruction.append("li ");
@@ -58,6 +66,8 @@ public class QuadEmit {
             instruction.append(paramVar);
         }
 
+
+
         return instruction.toString();
     }
 
@@ -65,6 +75,8 @@ public class QuadEmit {
         StringBuilder instruction = new StringBuilder();
 
         instruction.append("jal _system_out_println");
+
+        functParam = true;
         fRegC = 0;
 
         return instruction.toString();
@@ -76,10 +88,10 @@ public class QuadEmit {
         // Add reference to method for calls
         // Get class nam
 
-        instruction.append(printSaveAll());
+
         instruction.append("jal").append(' ').append(quad.getArg1()).append("\n");
+        functParam = true;
         instruction.append(printRestoreAll());
-        printRestoreAll();
         // Now for moving the return value
 
         // Now we need to output instruction to get the value that returns
@@ -144,7 +156,7 @@ public class QuadEmit {
 
                 int arg1Pos = getArgPos(quad.arg1_entry);
                 int arg2Pos = getArgPos(quad.arg2_entry);
-                instruction.append(generateOpInst(quad.op, prettyRegister(quad.getResRegister()), "$s" + arg1Pos, "$s" + arg2Pos));
+                instruction.append(generateOpInst(quad.op, prettyRegister(quad.getResRegister()), "$a" + arg1Pos, "$a" + arg2Pos));
 
             } else if (quad.arg1_entry.parent.isEntry(TableEntry.CLASS_ENTRY)) {
                 // TODO
@@ -296,7 +308,7 @@ public class QuadEmit {
         instruction.append("li").append(' ').append("$a0").append(',').append(varCount * 4).append('\n');
         // now we call the object maker
         instruction.append("jal").append(" _new_object").append('\n');
-
+        this.functParam = true;
 
         // But right now since we aren't doing classes -- curr time Fri, April 10 7PM
         // we just make a variable and shove zero in it
@@ -387,7 +399,7 @@ public class QuadEmit {
     private String argRegStr(String arg, int argPos) {
         String argReg;
         if (argPos >= 0) {
-            argReg = "$s" + argPos;
+            argReg = "$a" + argPos;
         } else {
             argReg = regMap.get(arg);
         }
@@ -445,18 +457,7 @@ public class QuadEmit {
         int offSet = GP_REG_COUNT - 1;
         // Save all temporaries
         for (int i = 0; i < 10; i++) {
-            instruction.append("sw").append(' ').append("$t").append(i).append(',').append(' ').append(offSet * 4);
-            // note here we use the return value straight from the original syscall we did because
-            // nothing changed in it
-            instruction.append("($v0)").append('\n');
-
-            offSet--;
-        }
-
-        // Save all s registers
-
-        for (int i = 0; i < 8; i++) {
-            instruction.append("sw").append(' ').append("$s").append(i).append(',').append(' ').append(offSet * 4);
+            instruction.append("sw").append(' ').append("$t").append(i).append(COMMA_SPACE).append(offSet * 4);
             // note here we use the return value straight from the original syscall we did because
             // nothing changed in it
             instruction.append("($sp)").append('\n');
@@ -464,20 +465,39 @@ public class QuadEmit {
             offSet--;
         }
 
+        // Save all s registers
+
+        for (int i = 0; i < 8; i++) {
+            instruction.append("sw").append(' ').append("$s").append(i).append(COMMA_SPACE).append(offSet * 4);
+            // note here we use the return value straight from the original syscall we did because
+            // nothing changed in it
+            instruction.append("($sp)").append('\n');
+
+            offSet--;
+        }
+
+
+        for (int i = 0; i < 4; i++) {
+            instruction.append("sw").append(' ').append("$a").append(i).append(COMMA_SPACE).append(offSet * 4);
+            instruction.append("($sp)").append("\n");
+            
+            offSet--;
+        }
+
         // save everything else
-        instruction.append("sw").append(' ').append("$at").append(',').append(' ').append(offSet * 4);
+        instruction.append("sw").append(' ').append("$at").append(COMMA_SPACE).append(offSet * 4);
         instruction.append("($sp)").append('\n');
         offSet--;
 
-        instruction.append("sw").append(' ').append("$k0").append(',').append(' ').append(offSet * 4);
+        instruction.append("sw").append(' ').append("$k0").append(COMMA_SPACE).append(offSet * 4);
         instruction.append("($sp)").append('\n');
         offSet--;
 
-        instruction.append("sw").append(' ').append("$k1").append(',').append(' ').append(offSet * 4);
+        instruction.append("sw").append(' ').append("$k1").append(COMMA_SPACE).append(offSet * 4);
         instruction.append("($sp)").append('\n');
         offSet--;
 
-        instruction.append("sw").append(' ').append("$ra").append(',').append(' ').append(offSet * 4);
+        instruction.append("sw").append(' ').append("$ra").append(COMMA_SPACE).append(offSet * 4);
         instruction.append("($sp)").append('\n');
         offSet--;
 
@@ -504,6 +524,13 @@ public class QuadEmit {
         instruction.append("lw").append(' ').append("$at").append(COMMA_SPACE).append(startPoint * 4);
         instruction.append("($sp)").append('\n');
         startPoint++;
+        
+        
+        for (int i = 3; i >= 0; i--) {
+            instruction.append("lw").append(' ').append("$a").append(i).append(COMMA_SPACE).append(startPoint * 4);
+            instruction.append("($sp)").append("\n");
+            startPoint++;
+        }
 
         for (int i = 7; i >= 0; i--) {
             instruction.append("lw").append(' ').append("$s").append(i).append(COMMA_SPACE).append(startPoint * 4);

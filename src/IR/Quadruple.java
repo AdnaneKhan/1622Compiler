@@ -125,6 +125,7 @@ public class Quadruple {
     }
 
     public void setIsBoolean() {
+
         this.resultBoolean = true;
     }
 
@@ -294,7 +295,19 @@ public class Quadruple {
         } else if (type == CALL) {
             ret += result + " := call " + this.arg1_entry.getSymbolName() + ", " + getArg2();
         } else if (type == RETURN_3AC) {
-            ret += "return " + result;
+
+            String boolRes;
+            if (this.isBoolean()) {
+                if (intResult == 1) {
+                    boolRes = "true";
+                } else {
+                    boolRes = "false";
+                }
+                ret += "return " + boolRes;
+            } else {
+                ret += "return " + this.getResult();
+            }
+
         } else if (type == INDEXED_ASSIGNMENT) {
             ret += result + "[" + getArg2() + "]" + " := " + getArg1();
         } else if (type == NEW_3AC) {

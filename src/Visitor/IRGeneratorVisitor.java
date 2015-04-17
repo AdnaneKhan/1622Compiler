@@ -7,6 +7,7 @@ import IR.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
 public class IRGeneratorVisitor implements Visitor {
 
@@ -771,6 +772,52 @@ public class IRGeneratorVisitor implements Visitor {
             if (base.getCurrentScope().isEntry(TableEntry.METHOD_ENTRY)) {
                 toAdd = base.getCurrentScope().parent.getSymbolName();
             }
+        } else if ( n.e instanceof Call ) {
+
+                Stack<Call> callsStack = new Stack<Call>();
+                String subType = null;
+                Exp callExp =  n.e;
+                String methodID = ((Call) callExp).i.s;
+
+                while (callExp instanceof Call) {
+                    callsStack.push((Call) callExp);
+                    callExp = ((Call) callExp).e;
+                }
+
+                if (callExp instanceof NewObject) {
+
+                    subType = ((NewObject) callExp).i.s;
+                } else if (callExp instanceof IdentifierExp) {
+
+                    // If it is an identifier type we need to get the type (since that is the class that is part of this)
+                    String lookup = ((IdentifierExp) callExp).s;
+                    SymbolEntry temp = (SymbolEntry) base.getCurrentScope().getEntryWalk(lookup, TableEntry.LEAF_ENTRY);
+                    subType =((IdentifierType) temp.getType()).s;
+                } else if (callExp instanceof  This) {
+
+                    if (base.getCurrentScope().isEntry(TableEntry.METHOD_ENTRY)) {
+                        subType = base.getCurrentScope().parent.getSymbolName();
+                    }
+                }
+
+
+                MethodTable methodClass = (MethodTable) base.getClassTable(subType).getEntry(methodID,TableEntry.METHOD_ENTRY);
+                subType = methodClass.parent.getSymbolName();
+
+
+                // Pop calls off of the stack
+                while (!callsStack.empty()) {
+                    String callId;
+                    Call fromStack = callsStack.pop();
+                    callId = fromStack.i.s;
+                    methodClass = (MethodTable) base.getClassTable(subType).getEntry(callId,TableEntry.METHOD_ENTRY);
+                    subType = methodClass.parent.getSymbolName();
+
+                }
+
+
+
+                toAdd = subType;
         }
 
         ClassTable tempAdd = base.getClassTable(toAdd);

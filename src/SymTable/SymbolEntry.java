@@ -26,7 +26,7 @@ public class SymbolEntry extends TableEntry {
 
     public void assignRegister(int new_regValue) {
         if (register != DEAD_REG) {
-            System.err.println("We tried to give a live register a new live value!");
+            System.err.println("We tried to give a live register a new live value:\n" + this.toString());
         } else {
             register = new_regValue;
         }
@@ -52,9 +52,6 @@ public class SymbolEntry extends TableEntry {
 
         symType = t;
         this.symbolName = symbolName;
-        if (symbolName.equals("this")) {
-            this.register = Registers.ARG0;
-        }
 
     }
 

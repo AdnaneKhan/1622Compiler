@@ -48,8 +48,19 @@ public class InterferenceGraph {
     	for (int i = 0; i < useDefs.size(); i++) {
     		InterferenceNode newNode;
     		for (SymbolEntry var : useDefs.get(i).defs) {
-    			newNode = new InterferenceNode(var);
-    			igraph.add(newNode);
+    			boolean exists = false;
+                for (InterferenceNode existingNode : igraph) {
+                    if (existingNode.getVariable().equals(var)) {
+                        exists = true;
+                        break;
+                    }
+
+                }
+               if (!exists) {
+                    newNode = new InterferenceNode(var);
+                    igraph.add(newNode);
+                }
+
     		}
     	}
 
@@ -63,14 +74,16 @@ public class InterferenceGraph {
     					break;
     				}
     			}
-                    for (SymbolEntry neighbor : inOut.get(i).defs) {
-                        for (int j = 0; j < igraph.size(); j++) {
+
+
+                for (SymbolEntry neighbor : inOut.get(i).defs) {
+                    for (int j = 0; j < igraph.size(); j++) {
                             if (igraph.get(j).getVariable().equals(neighbor)) {
                                 currentNode.neighbors.add(igraph.get(j));
                                 break;
-                            }
                         }
                     }
+                }
     		}
     	}
     }
