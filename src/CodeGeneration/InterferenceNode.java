@@ -22,7 +22,7 @@ public class InterferenceNode {
             break;
         }
         moveAssoc.getLinked().moveRelated = true;
-        moveAssoc.getLinked().moveAssoc = moveAssoc;
+        moveAssoc.getLinked().moveAssoc = variable;
         toSet.moveRelated = true;
         moveRelated = true;
     }

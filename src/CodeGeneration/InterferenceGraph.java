@@ -57,6 +57,30 @@ public class InterferenceGraph {
             }
         }
 
+        Stack<InterferenceNode> toRemove = new Stack<InterferenceNode>();
+        for (InterferenceNode inode : igraph ){
+
+            // Check if the neighbors lists of all coalesce candidate pairs are less than 2
+            if (inode.moveRelated && inode.moveAssoc.getLinked().neighbors.size() < 23
+                    && inode.neighbors.size() < 23) {
+                /// We can link
+                System.err.println("Ready to link");
+               toRemove.push(inode.moveAssoc.getLinked());
+                inode.getVariable().buildBridge(inode.moveAssoc);
+            }
+
+        }
+
+        // this is a little hack to allow us to store nodes that get linked, and then
+        // wait until we have all the coalesce candidates to remove them so we only remove
+        // one side
+        while (toRemove.size() > 0) {
+            InterferenceNode value = toRemove.pop();
+            igraph.remove(value);
+            toRemove.remove(value.moveAssoc.getLinked());
+            value.moveAssoc.clearBridge();
+
+        }
         // At this point coalescing is ready to occur
 
         // logic for coalescing:

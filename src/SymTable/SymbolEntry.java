@@ -42,6 +42,10 @@ public class SymbolEntry extends TableEntry {
         coalesceBridge = toBridge;
     }
 
+    public void clearBridge() {
+        coalesceBridge = null;
+    }
+
     public void assignRegister(int new_regValue) {
 
         // If there is a coalesce bridge present then assign the register to the other value
