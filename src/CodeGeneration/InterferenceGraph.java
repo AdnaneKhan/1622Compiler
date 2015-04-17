@@ -98,7 +98,7 @@ public class InterferenceGraph {
 
         }
 
-        
+
         // At this point the nodes are coalesced, the stack and the remaining graph can then be simmplified as normal
 
 
