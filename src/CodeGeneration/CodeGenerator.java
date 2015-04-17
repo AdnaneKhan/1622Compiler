@@ -128,8 +128,9 @@ public class CodeGenerator {
             if (cf.irLine.type == Quadruple.COPY && cf.irLine.arg1_entry != null) {
                 if (DEBUG ) {
                     System.err.println("Adding move related row!");
-                    newRow.moveRelated = true;
+                   
                 }
+                newRow.moveRelated = true;
             }
 
             useAndDefs.add(newRow);

@@ -15,8 +15,16 @@ public class InterferenceNode {
     public boolean moveRelated = false;
     public SymbolEntry moveAssoc;
 
-    public void  setMoveAssoc(SymbolEntry toSet) {
-        moveAssoc = toSet;
+    public void  setMoveAssoc(Row toSet) {
+
+        for (SymbolEntry use : toSet.uses) {
+            moveAssoc = use;
+            break;
+        }
+        moveAssoc.getLinked().moveRelated = true;
+        moveAssoc.getLinked().moveAssoc = moveAssoc;
+        toSet.moveRelated = true;
+        moveRelated = true;
     }
 
 
@@ -26,6 +34,8 @@ public class InterferenceNode {
 
         neighbors = new LinkedList<InterferenceNode>();
         variable = node;
+
+        variable.setINode(this);
         color = -5;
     }
 

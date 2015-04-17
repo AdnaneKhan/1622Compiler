@@ -29,29 +29,6 @@ public class ControlFlowNode {
     public List<ControlFlowNode> sucessors;
     public List<ControlFlowNode> predecessors;
 
-    private String lhsReg;
-    private String rhs1Reg;
-    private String rhs2Reg;
-
     public Quadruple irLine;
 
-    public String getLhs() {
-        return irLine.getResult();
-    }
-
-    public boolean isRhsTuple() {
-        if (irLine.arg2.length() > 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public String getRhsOne() {
-        return irLine.getArg1();
-    }
-
-    public String getRhsTwo() {
-        return irLine.getArg2();
-    }
 }

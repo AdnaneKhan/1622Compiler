@@ -1,5 +1,6 @@
 package SymTable;
 
+import CodeGeneration.InterferenceNode;
 import CodeGeneration.Registers;
 import SyntaxTree.*;
 
@@ -14,6 +15,7 @@ public class SymbolEntry extends TableEntry {
     Type symType;
 
     private SymbolEntry coalesceBridge = null;
+    private InterferenceNode nodeLink;
 
     private int register = DEAD_REG;
 
@@ -26,6 +28,14 @@ public class SymbolEntry extends TableEntry {
         }
 
         return register;
+    }
+
+    public void setINode(InterferenceNode inode) {
+        nodeLink = inode;
+    }
+
+    public InterferenceNode getLinked() {
+        return nodeLink;
     }
 
     public void buildBridge(SymbolEntry toBridge) {

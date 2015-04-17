@@ -125,11 +125,7 @@ public class InterferenceGraph {
                     if (existingNode.getVariable().equals(var)) {
                         if (useDefs.get(i).moveRelated) {
                             // If we find it in the duplicate check
-                            for (SymbolEntry use : useDefs.get(i).uses) {
-                                existingNode.setMoveAssoc(use);
-                                existingNode.moveRelated = true;
-                                break;
-                            }
+                            existingNode.setMoveAssoc( useDefs.get(i));
                         }
                         exists = true;
                         break;
@@ -140,12 +136,7 @@ public class InterferenceGraph {
                 if (!exists) {
                     newNode = new InterferenceNode(var);
                     if (useDefs.get(i).moveRelated) {
-
-                        for (SymbolEntry use : useDefs.get(i).uses) {
-                            newNode.setMoveAssoc(use);
-                            newNode.moveRelated = true;
-                            break;
-                        }
+                            newNode.setMoveAssoc(useDefs.get(i));
                     }
                     igraph.add(newNode);
                 }
