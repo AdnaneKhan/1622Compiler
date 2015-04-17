@@ -11,6 +11,14 @@ import java.util.List;
 public class InterferenceNode {
     private SymbolEntry variable;
     private int color;
+
+    public boolean moveRelated = false;
+    public SymbolEntry moveAssoc;
+
+    public void  setMoveAssoc(SymbolEntry toSet) {
+        moveAssoc = toSet;
+    }
+
     public List<InterferenceNode> neighbors;
 
     public InterferenceNode(SymbolEntry node) {

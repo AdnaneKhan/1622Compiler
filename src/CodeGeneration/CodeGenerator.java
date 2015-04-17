@@ -124,6 +124,14 @@ public class CodeGenerator {
             if (cf.irLine.arg2_entry != null && cf.irLine.arg2_entry.isEntry(TableEntry.LEAF_ENTRY)) {
                 newRow.uses.add((SymbolEntry) cf.irLine.arg2_entry);
             }
+
+            if (cf.irLine.type == Quadruple.COPY && cf.irLine.arg1_entry != null) {
+                if (DEBUG ) {
+                    System.err.println("Adding move related row!");
+                    newRow.moveRelated = true;
+                }
+            }
+
             useAndDefs.add(newRow);
         }
 
@@ -249,7 +257,7 @@ public class CodeGenerator {
                 Quadruple labelQuad = new Quadruple(Quadruple.LABEL);
                 labelQuad.result = irMethod.getName();
                 fileOut.append(labelQuad.getResult()).append(':').append('\n');
-              
+
                 for (Quadruple quad : irMethod.lines) {
                     // Switch based on the type of quadtruple
                     switch (quad.type) {
