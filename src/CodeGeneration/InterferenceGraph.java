@@ -61,14 +61,19 @@ public class InterferenceGraph {
         for (InterferenceNode inode : igraph ){
 
             // Check if the neighbors lists of all coalesce candidate pairs are less than 2
-            if (inode.moveRelated && inode.moveAssoc.getLinked().neighbors.size() < 23
-                    && inode.neighbors.size() < 23) {
-                /// We can link
-                System.err.println("Ready to link");
-               toRemove.push(inode.moveAssoc.getLinked());
-                inode.getVariable().buildBridge(inode.moveAssoc);
+            if (inode.moveRelated) {
+                if(inode.moveAssoc.getLinked().neighbors.size() < 23
+                        && inode.neighbors.size() < 23) {
+                    /// We can link
+                    System.err.println("Ready to link");
+                    toRemove.push(inode.moveAssoc.getLinked());
+                    inode.getVariable().buildBridge(inode.moveAssoc);
+                } else {
+                    // We need to clear the link
+                    inode.moveRelated = false;
+                    inode.moveAssoc.getLinked().moveRelated = false;
+                }
             }
-
         }
 
         // this is a little hack to allow us to store nodes that get linked, and then

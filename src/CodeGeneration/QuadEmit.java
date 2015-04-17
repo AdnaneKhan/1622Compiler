@@ -3,6 +3,7 @@ package CodeGeneration;
 import IR.Quadruple;
 import SymTable.ClassTable;
 import SymTable.MethodTable;
+import SymTable.SymbolEntry;
 import SymTable.TableEntry;
 import SyntaxTree.ClassDecl;
 import SyntaxTree.MethodDecl;
@@ -224,8 +225,10 @@ public class QuadEmit {
         if (quad.arg1Literal()) {
             instruction.append("li").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(quad.getArg1());
         } else {
-            String rhsReg = prettyRegister(quad.getArg1Register());
-            instruction.append("move").append(" ").append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(rhsReg);
+            if (! (((SymbolEntry) quad.arg1_entry).getLinked().moveRelated && ((SymbolEntry)quad.getNode()).getLinked().moveRelated)) {
+                String rhsReg = prettyRegister(quad.getArg1Register());
+                instruction.append("move").append(" ").append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(rhsReg);
+            }
         }
 
 
