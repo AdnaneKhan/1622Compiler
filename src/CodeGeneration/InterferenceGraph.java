@@ -42,10 +42,16 @@ public class InterferenceGraph {
         colors.add(Registers.GP);
     }
 
-
-    public Stack<InterferenceNode> coalesceGraph(ArrayList<Row> inOut, ArrayList<Row> useDefs) {
+    /**
+     * Starts off by simplifying nodes of flesser degree
+     * @param inOut
+     * @param useDefs
+     * @return
+     */
+    public Stack<InterferenceNode> coalesceGraph() {
         Stack<InterferenceNode> coalesceStack = new Stack<InterferenceNode>();
 
+        // remove things of lesser degree
         for (int i = 0; i < igraph.size(); i++) {
 
             InterferenceNode cursor = igraph.get(i);
@@ -58,12 +64,14 @@ public class InterferenceGraph {
         }
 
         Stack<InterferenceNode> toRemove = new Stack<InterferenceNode>();
+
+        /// now check neighbors
         for (InterferenceNode inode : igraph ){
 
             // Check if the neighbors lists of all coalesce candidate pairs are less than 2
             if (inode.moveRelated) {
-                if(inode.moveAssoc.getLinked().neighbors.size() < 23
-                        && inode.neighbors.size() < 23) {
+                if(inode.moveAssoc.getLinked().neighbors.size() < colors.size()
+                        && inode.neighbors.size() < colors.size()) {
                     /// We can link
                     System.err.println("Ready to link");
                     toRemove.push(inode.moveAssoc.getLinked());
@@ -83,20 +91,16 @@ public class InterferenceGraph {
             InterferenceNode value = toRemove.pop();
             igraph.remove(value);
             toRemove.remove(value.moveAssoc.getLinked());
+
+            // clear the bridge on the value that is not the delegate, for all purposes it has
+            /// been erased from existence
             value.moveAssoc.clearBridge();
 
         }
-        // At this point coalescing is ready to occur
 
-        // logic for coalescing:
+        
+        // At this point the nodes are coalesced, the stack and the remaining graph can then be simmplified as normal
 
-        // the RHS becomes the delegate of the new combined node
-
-        // The move quadruple is flagged as bad, we might be able to do this
-        // by saying that hte lhs has been dominated, and add that
-        // check when we try to emit the dominated quadruple, so the symbol entry
-        // will pass the info back, this might be the cleanest way to do it without modfying
-        // program structure too much
 
 
 
@@ -104,7 +108,12 @@ public class InterferenceGraph {
     }
 
 
-    // This is the standard simplification call used without coalescing
+    /**
+     * simplifies the graph
+     * @param oldStack if there is a stack that has old variables in it, this stack can transfer them in
+     *                 other wise it is acceptabble to pass in an empty stack.
+     * @return
+     */
     public Stack<InterferenceNode> simplifyGraph(Stack<InterferenceNode> oldStack) {
         Stack<InterferenceNode> istack = new Stack<InterferenceNode>();
         // Add all the elements from the old stack (in cases where we had nodes
@@ -142,8 +151,11 @@ public class InterferenceGraph {
         return istack;
     }
 
-
-    public void buildGraph(ArrayList<Row> inOut, ArrayList<Row> useDefs) {
+    /**
+     * Builds the interference graph from the uses and defs
+     * @param useDefs
+     */
+    public void buildGraph(ArrayList<Row> useDefs) {
         // instantiate igraph
         for (int i = 0; i < useDefs.size(); i++) {
             InterferenceNode newNode;
@@ -174,12 +186,11 @@ public class InterferenceGraph {
     }
 
     public void colorGraph(Stack<InterferenceNode> simplifyStack) {
-    Stack<InterferenceNode> istack = simplifyStack;
 
         // Now we pop these nodes off the stack one at a time while assigning colors and add them back to the graph
-        while (istack.size() > 0) {
+        while (simplifyStack.size() > 0) {
             // Pop a node
-            InterferenceNode inode = istack.pop();
+            InterferenceNode inode = simplifyStack.pop();
 
             // Begin color assignment
             for (int i = 0; i < colors.size(); i++) {

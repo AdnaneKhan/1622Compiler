@@ -225,6 +225,9 @@ public class QuadEmit {
         if (quad.arg1Literal()) {
             instruction.append("li").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(quad.getArg1());
         } else {
+
+            // Check the symbol entries if they are both move related, at this point any pairs of entries thaat are move related are
+            // properly set
             if (! (((SymbolEntry) quad.arg1_entry).getLinked().moveRelated && ((SymbolEntry)quad.getNode()).getLinked().moveRelated)) {
                 String rhsReg = prettyRegister(quad.getArg1Register());
                 instruction.append("move").append(" ").append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(rhsReg);

@@ -30,14 +30,28 @@ public class SymbolEntry extends TableEntry {
         return register;
     }
 
+    /**
+     *
+     * @param inode set inode for this entry (happens in graph coloring phase)
+     */
     public void setINode(InterferenceNode inode) {
         nodeLink = inode;
     }
 
+    /**
+     *
+     * @return the interefrence node that is assocated with this variable
+     */
     public InterferenceNode getLinked() {
         return nodeLink;
     }
 
+    /**
+     *
+     *
+     * @param toBridge symbol table entry to bridge this one with (the one we bridge with becomes the domminant
+     *                 value)
+     */
     public void buildBridge(SymbolEntry toBridge) {
         coalesceBridge = toBridge;
     }
@@ -45,8 +59,6 @@ public class SymbolEntry extends TableEntry {
     public void clearBridge() {
         coalesceBridge = null;
     }
-
-
 
     public void assignRegister(int new_regValue) {
 

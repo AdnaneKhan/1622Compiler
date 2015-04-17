@@ -71,10 +71,10 @@ public class Compiler {
 
                 InterferenceGraph ifGraph = new InterferenceGraph();
 
-                ifGraph.buildGraph(liveness,defsAndUse);
+                ifGraph.buildGraph(defsAndUse);
 
                 //
-                Stack<InterferenceNode> tempStack =ifGraph.coalesceGraph(liveness,defsAndUse);
+                Stack<InterferenceNode> tempStack =ifGraph.coalesceGraph();
 
                 // Simplify the graph
 
