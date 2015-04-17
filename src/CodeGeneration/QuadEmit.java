@@ -20,7 +20,6 @@ public class QuadEmit {
     // its purposes prior to true regisster allocation
     private HashMap<String, String> regMap;
 
-    int sRegC;
     int fRegC;
 
 

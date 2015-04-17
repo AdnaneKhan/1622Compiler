@@ -55,6 +55,7 @@ public class SymbolEntry extends TableEntry {
         if (symbolName.equals("this")) {
             this.register = Registers.ARG0;
         }
+
     }
 
     public int entryType() {

@@ -1,6 +1,7 @@
 package SymTable;
 
 import SyntaxTree.ASTNode;
+import SyntaxTree.MethodDecl;
 import SyntaxTree.VarDecl;
 import javafx.scene.control.Tab;
 

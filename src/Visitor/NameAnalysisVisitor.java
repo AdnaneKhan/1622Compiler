@@ -263,7 +263,8 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
                 if (current.hasEntry(n.fl.elementAt(i).i.toString(), SymbolTable.LEAF_ENTRY)) {
                     Errors.multiplyDefinedError(n.fl.elementAt(i).lineNum(), n.fl.elementAt(i).charNum(), n.fl.elementAt(i).i.s);
                 } else {
-                    current.putVariable(n.fl.elementAt(i));
+                    current.putVariable(n.fl.elementAt(i),i+1);
+
                     n.fl.elementAt(i).accept(this);
                 }
             }
@@ -271,7 +272,7 @@ public class NameAnalysisVisitor extends DepthFirstVisitor {
             String className = base.getCurrentScope().parent.getSymbolName();
             IdentifierType thisType = new IdentifierType(className, 0, 0);
             Formal thisFormal = new Formal(thisType, new Identifier("this", 0, 0), 0, 0);
-            current.putVariable(thisFormal);
+            current.putVariable(thisFormal,0);
 
             // Checks variable decls for duplicate names
             for (int i = 0; i < n.vl.size(); i++) {
