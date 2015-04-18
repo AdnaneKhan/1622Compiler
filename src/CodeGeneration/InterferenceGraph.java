@@ -126,6 +126,27 @@ public class InterferenceGraph {
             }
         }
 
+        // DEBUG: Print the Pairs
+        /*System.out.println("PAIRS");
+        for (Pair<InterferenceNode, InterferenceNode> curr : assocs) {
+            System.out.print(curr.getKey().getVariable().getSymbolName() + ": ");
+            if (curr.getKey().dominated) {
+                System.out.print("Dominated, ");
+            }
+            else {
+                System.out.print("Not Dominated, ");
+            }
+            System.out.print(curr.getValue().getVariable().getSymbolName() + ": ");
+            if (curr.getKey().dominated) {
+                System.out.print("Dominated");
+            }
+            else {
+                System.out.print("Not Dominated");
+            }
+            System.out.println();
+        }
+        System.out.println();*/
+
 
         return coalesceStack;
     }
@@ -303,6 +324,22 @@ public class InterferenceGraph {
         for (InterferenceNode node : igraph) {
             node.copyNeighbors();
         }
+
+        // DEBUG: Print the uncolored graph
+        /*System.out.println("UNCOLORED IGRAPH");
+        for (InterferenceNode n : igraph) {
+            System.out.print(n.getVariable().getSymbolName() + ": ");
+            for (InterferenceNode i : n.getNeighbors()) {
+                System.out.print(i.getVariable().getSymbolName() + ",");
+            }
+            System.out.println();
+        }
+        System.out.println();
+
+        for (InterferenceNode node : igraph) {
+            node.copyNeighbors();
+        }*/
+
     }
 
     public void colorGraph(Stack<InterferenceNode> simplifyStack) {
@@ -331,5 +368,21 @@ public class InterferenceGraph {
             // Add the node back to the graph
             igraph.add(inode);
         }
+
+        // DEBUG: Print the colored graph
+        /*System.out.println("COLORED IGRAPH");
+        for (InterferenceNode n : igraph) {
+            System.out.print(n.getVariable().getSymbolName() + ": ");
+            for (InterferenceNode i : n.getNeighbors()) {
+                System.out.print(i.getVariable().getSymbolName() + ",");
+            }
+            System.out.println();
+        }
+        System.out.println();
+
+        for (InterferenceNode node : igraph) {
+            node.copyNeighbors();
+        }*/
+
     }
 }
