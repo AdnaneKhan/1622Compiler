@@ -107,6 +107,32 @@ public class Quadruple {
         return reg;
     }
 
+
+    public boolean isResultClass() {
+        if (resVar != null && this.resVar.parent.isEntry(TableEntry.CLASS_ENTRY)) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isArg2Class() {
+        if (arg2_entry != null && this.arg2_entry.parent.isEntry(TableEntry.CLASS_ENTRY)) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    public boolean isArg1Class() {
+        if (arg1_entry != null && this.arg1_entry.parent.isEntry(TableEntry.CLASS_ENTRY)) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
     public int getArg2Register() {
         int reg = 0;
         if (arg2_entry != null && this.arg2_entry.isEntry(TableEntry.LEAF_ENTRY)) {
