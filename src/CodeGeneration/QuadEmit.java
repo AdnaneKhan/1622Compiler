@@ -348,6 +348,26 @@ public class QuadEmit {
     public String handleNewArray(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
+
+            if (quad.arg1_entry != null) {
+                instruction.append("move").append(' ').append("$a0").append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append('\n');
+
+            } else {
+                int varCount = quad.arg1Int;
+                instruction.append("li").append(' ').append("$a0").append(',').append(varCount * 4).append('\n');
+            }
+
+
+
+        instruction.append("jal").append("_new_array").append("\n");
+        this.functParam = true;
+
+
+        String resReg = prettyRegister(quad.getResRegister());
+
+        instruction.append("move").append(' ').append(resReg).append(COMMA_SPACE).append("$v0");
+
+
         // This will function in a manner that is similar to the new object instantiation
 
         // Get the size of the array from the node in the quadruple (may have to augment in the IR visitor)
@@ -362,6 +382,14 @@ public class QuadEmit {
 
     public String handleIndexedAssignment(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
+
+
+        if (quad.arg1_entry != null) {
+            instruction.append("move").append(' ').append("$a0").append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append('\n');
+         } else {
+            int varCount = quad.arg1Int;
+            instruction.append("li").append(' ').append("$a0").append(',').append(varCount * 4).append('\n');
+        }
 
         // In indexed assignment since we are saving a value to an index of an array what we have to do
         // is use the register that is holding the value and pull the pointer out of it
