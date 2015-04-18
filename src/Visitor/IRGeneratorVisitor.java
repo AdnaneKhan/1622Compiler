@@ -511,7 +511,7 @@ public class IRGeneratorVisitor implements Visitor {
         currentQuad = quadstack.get(top());
         currentQuad.op = "&&";
         currentQuad.result = "_t" + tempNum;
-        this.addTemp((MethodTable) base.getCurrentScope(), currentQuad.result, new BooleanType());
+        currentQuad.setResEntry(this.addTemp((MethodTable) base.getCurrentScope(), currentQuad.result, new BooleanType()));
 
         tempNum++;
         quadstack.set(top(), currentQuad);
