@@ -154,7 +154,7 @@ public class QuadEmit {
 
 
         } else if (!quad.arg2Literal() && !quad.isTempArg1() && !quad.isTempArg2() && !quad.arg1Literal()) {
-            if (quad.arg1_entry.parent.isEntry(TableEntry.METHOD_ENTRY) && quad.arg2_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+            if (quad.isArg1MethodVar() && quad.isArg2MethodVar()) {
                 String a1Reg = null;
                 String a2Reg = null;
                 if (quad.arg1_entry.getNode() instanceof Formal) {
@@ -173,7 +173,7 @@ public class QuadEmit {
 
                 instruction.append(generateOpInst(quad.op, prettyRegister(quad.getResRegister()), a1Reg, a2Reg));
 
-            } else if (quad.arg1_entry.parent.isEntry(TableEntry.CLASS_ENTRY)) {
+            } else if (quad.isArg1ClassVar()) {
                 // TODO
 
                 int variableOffset = ((ClassTable)quad.arg1_entry.parent).getVariableOffset((SymbolEntry) quad.arg1_entry);
@@ -192,13 +192,13 @@ public class QuadEmit {
 
             String arg1Reg = regMap.get(quad.getArg1());
 
-            if (quad.arg2_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+            if (quad.isArg2MethodVar()) {
 
                 int arg2Pos = getArgPos(quad.arg2_entry);
                 String arg2Reg = argRegStr(quad.getArg2(), arg2Pos);
                 instruction.append(generateOpInst(quad.op, prettyRegister(quad.getResRegister()), arg1Reg, arg2Reg));
 
-            } else {
+            } else if (quad.isArg2ClassVar()) {
 
                 int variableOffset = ((ClassTable)quad.arg2_entry.parent).getVariableOffset((SymbolEntry) quad.arg2_entry);
 
@@ -209,7 +209,7 @@ public class QuadEmit {
         } else if (quad.isTempArg2() && quad.arg1_entry != null) {
             String arg2Reg = prettyRegister(quad.getArg2Register());
 
-            if (quad.arg1_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+            if (quad.isArg1MethodVar()) {
 
                 int arg1Pos = getArgPos(quad.arg1_entry);
                 String arg1Reg = argRegStr(quad.getArg1(), arg1Pos);
@@ -223,7 +223,7 @@ public class QuadEmit {
                 System.err.println(" We have class scope variable we tried to reference!");
             }
         } else if (quad.arg1Literal() && quad.arg2_entry != null) {
-            if (quad.arg2_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+            if (quad.isArg2MethodVar()) {
 
                 String arg2Reg = prettyRegister(quad.getArg2Register());
                 setImmediateRegister(quad.getResRegister(), quad.getArg1(), instruction);
@@ -238,7 +238,7 @@ public class QuadEmit {
                 System.err.println(" We have class scope variable we tried to reference!");
             }
         } else if (quad.arg2Literal() && quad.arg1_entry != null) {
-            if (quad.arg1_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+            if (quad.isArg1MethodVar()) {
 
 
                 String arg1Reg = prettyRegister(quad.getArg1Register());
@@ -267,7 +267,7 @@ public class QuadEmit {
 
         if (quad.arg1Literal()) {
             instruction.append("li").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(quad.getArg1());
-        } else {
+        } else if (quad.isArg1MethodVar()) {
 
             // Check the symbol entries if they are both move related, at this point any pairs of entries thaat are move related are
             // properly set
@@ -292,10 +292,12 @@ public class QuadEmit {
         // Move return value into first return register
         if (quad.isLiteral()) {
             instruction.append("li").append(" ").append("$v0").append(COMMA_SPACE).append(quad.getResult()).append('\n');
-        } else {
+        } else if (quad.isResultMethodVar()) {
             String resRegister = prettyRegister(quad.getResRegister());
 
             instruction.append("move").append(' ').append("$v0").append(COMMA_SPACE).append(resRegister).append('\n');
+        } else if (quad.isResultClassVar()) {
+
         }
 
         // Print out the default jr $r
@@ -316,13 +318,13 @@ public class QuadEmit {
 
             instruction.append("li").append(' ').append(resRegister).append(COMMA_SPACE).append(res).append('\n');
             instruction.append("slti").append(' ').append(resRegister).append(COMMA_SPACE).append(resRegister).append(COMMA_SPACE).append("1");
-        } else if (quad.arg1_entry != null && quad.arg1_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+        } else if (quad.isArg1MethodVar()) {
             int arg1Pos = getArgPos(quad.arg1_entry);
             String arg1Reg = argRegStr(quad.getArg1(), arg1Pos);
 
             instruction.append("slti").append(' ').append(resRegister).append(COMMA_SPACE).append(arg1Reg).append(COMMA_SPACE).append("1");
 
-        } else if (quad.arg1_entry != null) {
+        } else if (quad.isArg1ClassVar()) {
 
 
             int variableOffset = ((ClassTable)quad.arg1_entry.parent).getVariableOffset((SymbolEntry) quad.arg1_entry);
@@ -484,6 +486,15 @@ public class QuadEmit {
 
     }
 
+    public String handleLength(Quadruple quad) {
+        StringBuilder instruction = new StringBuilder();
+
+
+
+        return instruction.toString();
+    }
+
+
     /*
      * ******************************************************************************************
      *   Begin Private Methods
@@ -502,11 +513,10 @@ public class QuadEmit {
 
         toRet.append("addi $sp, $sp,").append(4).append('\n');
         // save $s0
-        toRet.append("sw").append(' ').append("$s0").append(COMMA_SPACE).append('0');
+        toRet.append("sw").append(' ').append("$s5").append(COMMA_SPACE).append('0');
         toRet.append("($sp)").append('\n');
 
         // now we can use $s0 for our purposes
-
 
 
         toRet.append("lw").append(' ').append(prettyRegister(targetRegister)).append(COMMA_SPACE).append(Integer.toString(classOffset)).append('(').append(prettyRegister(classAddress)).append(')').append('\n');
@@ -514,7 +524,7 @@ public class QuadEmit {
 
 
 
-        toRet.append("lw").append(' ').append("$s0").append(COMMA_SPACE).append('0');
+        toRet.append("lw").append(' ').append("$s5").append(COMMA_SPACE).append('0');
         // note here we use the return value straight from the original syscall we did because
         // nothing changed in it
         toRet.append("($sp)").append('\n');
