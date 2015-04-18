@@ -404,6 +404,7 @@ public class CodeGenerator {
                         case (Quadruple.INDEXED_ASSIGNMENT):
                             break;
                         case (Quadruple.INDEXED_LOOKUP):
+                            fileOut.append(instPrinter.handleIndexedLookup(quad)).append('\n');
                             break;
                         case (Quadruple.LABEL):
                             fileOut.append(quad.getResult()).append(':').append('\n');
@@ -414,6 +415,7 @@ public class CodeGenerator {
                             fileOut.append(instPrinter.handleNew(quad)).append('\n');
                             break;
                         case (Quadruple.NEW_ARRAY):
+                            fileOut.append(instPrinter.handleNewArray(quad)).append('\n');
                             break;
                         case (Quadruple.PARAMETER):
                             fileOut.append(instPrinter.handleParameter(quad)).append('\n');

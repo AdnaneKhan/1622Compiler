@@ -30,13 +30,21 @@ public class Compiler {
             // Initialize Lexer
             MiniJavaLexer miniLex = new MiniJavaLexer(fileRead);
 
+            Program minJProgram = null;
             // Initialize Parserz
             parser p = new parser(miniLex);
-            Symbol parse_tree = p.parse();
+            try {
+                Symbol parse_tree = p.parse();
+                // Since we defined the root non terminal as the executable
+                // that is what the parser will report
+                minJProgram = (Program) parse_tree.value;
 
-            // Since we defined the root non terminal as the executable
-            // that is what the parser will report
-            Program minJProgram = (Program) parse_tree.value;
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+
+
 
             // Symbol table constructed, but its empty
             SymbolTable compilerTable = new SymbolTable(minJProgram);
@@ -98,7 +106,7 @@ public class Compiler {
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         // Exit

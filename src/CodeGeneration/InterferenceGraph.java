@@ -215,15 +215,14 @@ public class InterferenceGraph {
                 for (InterferenceNode existingNode : igraph) {
                     if (existingNode.getVariable().equals(var)) {
                         if (useDefs.get(i).moveRelated) {
-                            // If we find it in the duplicate check
-                            InterferenceNode otherNode = null;
                             for (SymbolEntry se : useDefs.get(i).uses) {
-                                otherNode = se.getLinked();
-                                otherNode.moveRelated = true;
-                                break;
+                                if (!(se.getNode() instanceof Formal)) {
+                                    InterferenceNode otherNode = se.getLinked();
+                                    otherNode.moveRelated = true;
+                                    addPair(existingNode, otherNode);
+                                    break;
+                                }
                             }
-                            addPair(existingNode, otherNode);
-
                         }
                         exists = true;
                         break;
@@ -234,13 +233,14 @@ public class InterferenceGraph {
                 if (!exists) {
                     newNode = new InterferenceNode(var);
                     if (useDefs.get(i).moveRelated) {
-                        InterferenceNode otherNode = null;
                         for (SymbolEntry se : useDefs.get(i).uses) {
-                            otherNode = se.getLinked();
-                            otherNode.moveRelated = true;
-                            break;
+                            if (!(se.getNode() instanceof Formal)) {
+                                InterferenceNode otherNode = se.getLinked();
+                                otherNode.moveRelated = true;
+                                addPair(newNode, otherNode);
+                                break;
+                            }
                         }
-                        addPair(newNode, otherNode);
                     }
                     igraph.add(newNode);
                 }

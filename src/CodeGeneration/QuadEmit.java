@@ -175,6 +175,17 @@ public class QuadEmit {
 
             } else if (quad.arg1_entry.parent.isEntry(TableEntry.CLASS_ENTRY)) {
                 // TODO
+
+                int variableOffset = ((ClassTable)quad.arg1_entry.parent).getVariableOffset((SymbolEntry) quad.arg1_entry);
+                // we need to get the position in the object that this variable resides in
+                // this means we need to do the following:
+
+
+                // Check if the class extends a prent
+
+
+
+
                 System.err.println(" We have class scoope variable we tried to reference!");
             }
         } else if (quad.isTempArg1() && quad.arg2_entry != null) {
@@ -188,6 +199,9 @@ public class QuadEmit {
                 instruction.append(generateOpInst(quad.op, prettyRegister(quad.getResRegister()), arg1Reg, arg2Reg));
 
             } else {
+
+                int variableOffset = ((ClassTable)quad.arg2_entry.parent).getVariableOffset((SymbolEntry) quad.arg2_entry);
+
                 // TODO
                 System.err.println(" We have class scoope variable we tried to reference!");
             }
@@ -202,6 +216,9 @@ public class QuadEmit {
                 instruction.append(generateOpInst(quad.op, prettyRegister(quad.getResRegister()), arg1Reg, arg2Reg));
 
             } else {
+
+                int variableOffset = ((ClassTable)quad.arg1_entry.parent).getVariableOffset((SymbolEntry) quad.arg1_entry);
+
                 // TODO
                 System.err.println(" We have class scope variable we tried to reference!");
             }
@@ -213,6 +230,10 @@ public class QuadEmit {
                 instruction.append(generateOpInst(quad.op, prettyRegister(quad.getResRegister()), prettyRegister(quad.getResRegister()), arg2Reg));
 
             } else {
+
+
+                int variableOffset = ((ClassTable)quad.arg2_entry.parent).getVariableOffset((SymbolEntry) quad.arg2_entry);
+
                 // TODO
                 System.err.println(" We have class scope variable we tried to reference!");
             }
@@ -225,6 +246,10 @@ public class QuadEmit {
                 instruction.append(generateOpInst(quad.op, prettyRegister(quad.getResRegister()), arg1Reg,  prettyRegister(quad.getResRegister())));
 
             } else {
+
+
+                int variableOffset = ((ClassTable)quad.arg1_entry.parent).getVariableOffset((SymbolEntry) quad.arg1_entry);
+
                 // TODO
                 System.err.println(" We have class scope variable we tried to reference!");
             }
@@ -293,7 +318,11 @@ public class QuadEmit {
 
             instruction.append("slti").append(' ').append(resRegister).append(COMMA_SPACE).append(arg1Reg).append(COMMA_SPACE).append("1");
 
-        } else {
+        } else if (quad.arg1_entry != null) {
+
+
+            int variableOffset = ((ClassTable)quad.arg1_entry.parent).getVariableOffset((SymbolEntry) quad.arg1_entry);
+
             // TODO
             System.err.println(" We have class scope variable we tried to reference!");
         }
@@ -320,10 +349,9 @@ public class QuadEmit {
         // Steps:
         ClassTable classTable = (ClassTable) quad.arg1_entry;
 
-        ClassDecl classNode = (ClassDecl) classTable.getNode();
 
-        // Using size we can get our allocation count for new
-        int varCount = classNode.vl.size();
+        // get size of the class
+        int varCount = classTable.trueSize();
 
         // Now we have to make the object itself
 
@@ -349,13 +377,22 @@ public class QuadEmit {
         StringBuilder instruction = new StringBuilder();
 
 
-            if (quad.arg1_entry != null) {
+        instruction.append("addi").append(' ').append("$sp").append(COMMA_SPACE).append("$sp").append(COMMA_SPACE).append("-4");
+        // Save $a0 to stack
+        instruction.append("sw").append(' ').append("$a0").append(COMMA_SPACE).append(0);
+        instruction.append("($sp)").append("\n");
+
+        if (quad.arg1_entry != null) {
                 instruction.append("move").append(' ').append("$a0").append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append('\n');
+                // Double the values twice to effectively multiply by 4 in place
+                for (int i = 0; i < 2; i++) {
+                    instruction.append("add").append(' ').append("$a0").append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append('\n');
+                }
 
             } else {
                 int varCount = quad.arg1Int;
                 instruction.append("li").append(' ').append("$a0").append(',').append(varCount * 4).append('\n');
-            }
+        }
 
 
 
@@ -363,19 +400,15 @@ public class QuadEmit {
         this.functParam = true;
 
 
+        // restore $a0
+        instruction.append("lw").append(' ').append("$a0").append(COMMA_SPACE).append(0);
+        instruction.append("($sp)").append("\n");
+        instruction.append("addi").append(' ').append("$sp").append(COMMA_SPACE).append("$sp").append(COMMA_SPACE).append("4");
+
         String resReg = prettyRegister(quad.getResRegister());
 
         instruction.append("move").append(' ').append(resReg).append(COMMA_SPACE).append("$v0");
 
-
-        // This will function in a manner that is similar to the new object instantiation
-
-        // Get the size of the array from the node in the quadruple (may have to augment in the IR visitor)
-
-        // then set up the instructions to call the new array function
-
-        // and then we take the valueu that came fromm $v0 and assign it into whichever register is holding the array
-        // pointer
 
         return instruction.toString();
     }
@@ -383,12 +416,29 @@ public class QuadEmit {
     public String handleIndexedAssignment(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
+        // the problem here is that there are no
+        // defs that occur in this assignment,
+        // this means that we need to get 1 or 2 temporary registers for this to be possible,
+        // we need to add quadruples in the IR that can facilitate this operation so that they may be properly colored
 
+
+        // Deal with the value being used
         if (quad.arg1_entry != null) {
             instruction.append("move").append(' ').append("$a0").append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append('\n');
+            for (int i = 0; i < 2; i++) {
+                instruction.append("add").append(' ').append("$a0").append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append('\n');
+            }
          } else {
-            int varCount = quad.arg1Int;
-            instruction.append("li").append(' ').append("$a0").append(',').append(varCount * 4).append('\n');
+            String assignLit = quad.getArg1();
+            instruction.append("li").append(' ').append("$a0").append(',').append(assignLit).append('\n');
+        }
+
+        // Deal with the offset
+        if (quad.arg2_entry != null) {
+
+
+        } else {
+
         }
 
         // In indexed assignment since we are saving a value to an index of an array what we have to do
@@ -404,9 +454,27 @@ public class QuadEmit {
     public String handleIndexedLookup(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
-        // very simiilar to indexed assignment in how we have to get the pointer ,but then we make a lookup from mmeory
+        //deal with the offfset
+        if (quad.arg2_entry != null) {
+            // in this case the offset is a variable
 
-        // and save it into its destination register
+            instruction.append("move").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(prettyRegister(quad.getArg2Register())).append('\n');
+            for (int i = 0; i < 2; i++) {
+                instruction.append("add").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(prettyRegister(quad.getResRegister())).append('\n');
+            }
+
+            // now add the offset and the actual memory address into the res address and save it to result, since we can not have register offffsets for loads
+            instruction.append("add").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(prettyRegister(quad.getResRegister())).append(prettyRegister(quad.getArg1Register())).append('\n');
+
+            // at this point we use the calculated address the word immediate offset as zero to laod into out target, and we are done
+            instruction.append("lw").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append('0').append('(').append(prettyRegister(quad.getArg1Register())).append(')').append('\n');
+
+        } else {
+
+            /// if we simply have a literal offset and we load it fromm memory
+            instruction.append("lw").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(quad.arg2Int).append('(').append(prettyRegister(quad.getArg1Register())).append(')').append('\n');
+        }
+
 
         return instruction.toString();
 
@@ -417,6 +485,22 @@ public class QuadEmit {
      *   Begin Private Methods
      * ******************************************************************************************
      */
+
+    /**
+     *
+     * @param classOffset sets up instructionf to laod a variable from a class
+     */
+    private void extractVarFromClass(int classOffset, int targetRegister) {
+
+    }
+
+    /**
+     *
+     * @param classOfffset sets up instructions to save a variable into a class
+     */
+    private void putVarIntoClass(int classOfffset, int sourceRegister) {
+
+    }
 
     private String prettyRegister(int uglyRegister) {
         StringBuilder prettyRegister = new StringBuilder();
@@ -603,7 +687,7 @@ public class QuadEmit {
             startPoint++;
         }
 
-        // Shrink the stack by passing a negative offffset
+        // Shrink the stack by passing a negative offset
         instruction.append("addi $sp, $sp, ").append(regCount * 4).append('\n');
 
         return instruction.toString();

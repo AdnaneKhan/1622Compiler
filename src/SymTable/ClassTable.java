@@ -90,6 +90,80 @@ public class ClassTable extends TableEntry {
     }
 
 
+    /**
+     *
+     * @param var variable to look for, this is scope aware search and will search child and parent scopes for the variable
+     * @return return the offset in bytes for the position of hte variable in the class
+     */
+    public int getVariableOffset(SymbolEntry var) {
+        int returnV = -1;
+
+        // First check the current class
+        if (this.hasEntry(var.getSymbolName(),LEAF_ENTRY)) {
+            // Iff we have parents, just add their size
+            returnV = this.parentClass.trueSize();
+            int inClassOffset =0 ;
+
+
+            for (int i=0;i < ((ClassDecl)this.getNode()).vl.size();i++) {
+               if (((ClassDecl)this.getNode()).vl.elementAt(i).i.s.equals(var.getSymbolName())) {
+                    // i is the offset
+                    inClassOffset = i;
+
+                }
+            }
+
+            // We know it is in this list,
+            returnV += inClassOffset;
+        } else if (this.parentClass != null) {
+            // we didn't find it in child, and this class extends so check again
+            returnV = this.parentClass.getVariableOffset(var);
+
+
+        }
+
+        if ( returnV == -1) {
+            System.err.println("We are trying to return -1 fromm object variable offset get");
+        }
+
+
+        return returnV*4;
+    }
+
+
+    /**
+     *
+     * @return size in bytes of the allocation for this class
+     */
+    public int trueSize() {
+        int returnV = -1;
+
+        if (parentClass != null) {
+            int parentSize;
+            int thisSize;
+
+
+            parentSize = this.parentClass.trueSize();
+            thisSize = ((ClassDecl) this.getNode()).vl.size();
+
+
+
+            returnV = parentSize + thisSize;
+        } else {
+            returnV =  ((ClassDecl) this.getNode()).vl.size();
+        }
+
+        if ( returnV == -1) {
+            System.err.println("We are trying to return -1 fromm object truesize get");
+        }
+
+
+
+
+        return returnV*4;
+    }
+
+
     public void put(String key, TableEntry value, int type) {
         KeyWrapper keyWrap = new KeyWrapper(key, type);
 
