@@ -108,14 +108,39 @@ public class Quadruple {
     }
 
 
-    public boolean isResultClass() {
+    public boolean isResultMethodVar() {
+        if (resVar != null && this.resVar.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isArg2MethodVar() {
+        if (arg2_entry != null && this.arg2_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    public boolean isArg1MethodVar() {
+        if (arg1_entry != null && this.arg1_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    public boolean isResultClassVar() {
         if (resVar != null && this.resVar.parent.isEntry(TableEntry.CLASS_ENTRY)) {
             return true;
         }
         return false;
     }
 
-    public boolean isArg2Class() {
+    public boolean isArg2ClassVar() {
         if (arg2_entry != null && this.arg2_entry.parent.isEntry(TableEntry.CLASS_ENTRY)) {
             return true;
         } else {
@@ -124,13 +149,12 @@ public class Quadruple {
 
     }
 
-    public boolean isArg1Class() {
+    public boolean isArg1ClassVar() {
         if (arg1_entry != null && this.arg1_entry.parent.isEntry(TableEntry.CLASS_ENTRY)) {
             return true;
         } else {
             return false;
         }
-
     }
 
     public int getArg2Register() {
