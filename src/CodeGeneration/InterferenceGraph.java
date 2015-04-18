@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Stack;
 
 import SymTable.SymbolEntry;
+import SyntaxTree.Formal;
+import javafx.util.Pair;
 
 /**
  * Created by adnankhan on 4/14/15.
@@ -13,6 +15,8 @@ import SymTable.SymbolEntry;
 public class InterferenceGraph {
     List<InterferenceNode> igraph;
     List<Integer> colors;
+    ArrayList<Pair<InterferenceNode, InterferenceNode>> assocs = new ArrayList<Pair<InterferenceNode, InterferenceNode>>();
+
 
     public InterferenceGraph() {
         igraph = new LinkedList<InterferenceNode>();
@@ -42,12 +46,16 @@ public class InterferenceGraph {
         colors.add(Registers.GP);
     }
 
+
     /**
      * Starts off by simplifying nodes of flesser degre
+     *
      * @return
      */
-    public Stack<InterferenceNode> coalesceGraph() {
+    public Stack<InterferenceNode> coalesceGraph(Stack<InterferenceNode> buildFrom) {
         Stack<InterferenceNode> coalesceStack = new Stack<InterferenceNode>();
+
+        coalesceStack.addAll(buildFrom);
 
         // remove things of lesser degree
         for (int i = 0; i < igraph.size(); i++) {
@@ -56,53 +64,68 @@ public class InterferenceGraph {
             if (!cursor.moveRelated && cursor.getNeighbors().size() < colors.size()) {
                 // if less than signficant degree and not move related
                 // remove from the graph and push onto stack
-                igraph.remove(cursor);
+                removeFromGraph(cursor);
                 coalesceStack.push(cursor);
             }
         }
 
-        Stack<InterferenceNode> toRemove = new Stack<InterferenceNode>();
 
-        /// now check neighbors
-        for (InterferenceNode inode : igraph ){
+            for (int i = 0; i < assocs.size(); i++) {
+                if (assocs.get(i).getKey().getDynamicNeighbors().size() < colors.size() && assocs.get(i).getValue().getDynamicNeighbors().size() < colors.size()) {
+                    if (!assocs.get(i).getKey().getNeighbors().contains(assocs.get(i).getValue())) {
+                        removeFromGraph(assocs.get(i).getValue());
+                        assocs.get(i).getKey().merge(assocs.get(i).getValue());
 
-            // Check if the neighbors lists of all coalesce candidate pairs are less than 2
-            if (inode.moveRelated) {
-                if(inode.moveAssoc.getLinked().getNeighbors().size() < colors.size()
-                        && inode.getNeighbors().size() < colors.size()) {
-                    /// We can link
-                    System.err.println("Ready to link");
-                    toRemove.push(inode.moveAssoc.getLinked());
-                    inode.getVariable().buildBridge(inode.moveAssoc);
+
+                        for (int j = 0; j < assocs.size(); j++) {
+                            if (assocs.get(j).getKey().equals(assocs.get(i).getKey())) {
+
+                                Pair<InterferenceNode, InterferenceNode> toAdd = new Pair<InterferenceNode, InterferenceNode>(assocs.get(i).getKey(), assocs.get(j).getValue());
+
+
+                                assocs.add(j, toAdd);
+                                assocs.remove(assocs.get(j));
+
+                            }
+
+                            if (assocs.get(j).getValue().equals(assocs.get(i).getKey())) {
+                                Pair<InterferenceNode, InterferenceNode> toAdd = new Pair<InterferenceNode, InterferenceNode>(assocs.get(j).getKey(), assocs.get(i).getKey());
+
+                                assocs.add(j, toAdd);
+                                assocs.remove(assocs.get(j));
+                            }
+
+                            if (assocs.get(j).getKey().equals(assocs.get(i).getValue())) {
+                                Pair<InterferenceNode, InterferenceNode> toAdd = new Pair<InterferenceNode, InterferenceNode>(assocs.get(i).getKey(), assocs.get(j).getValue());
+
+                                assocs.add(j, toAdd);
+                                assocs.remove(assocs.get(j));
+
+                            }
+
+                            if (assocs.get(j).getValue().equals(assocs.get(i).getValue())) {
+                                Pair<InterferenceNode, InterferenceNode> toAdd = new Pair<InterferenceNode, InterferenceNode>(assocs.get(j).getKey(), assocs.get(i).getKey());
+
+                                assocs.add(j, toAdd);
+                                assocs.remove(assocs.get(j));
+                            }
+
+                        }
                 } else {
-                    // We need to clear the link
-                    inode.moveRelated = false;
-                    inode.moveAssoc.getLinked().moveRelated = false;
+                        assocs.get(i).getKey().moveRelated = false;
+                        assocs.get(i).getValue().moveRelated = false;
+
+                   }
                 }
+
+            }
+
+
+        for (Pair<InterferenceNode,InterferenceNode> curr : assocs) {
+            if (curr.getKey().equals(curr.getValue())) {
+                assocs.remove(curr);
             }
         }
-
-        // this is a little hack to allow us to store nodes that get linked, and then
-        // wait until we have all the coalesce candidates to remove them so we only remove
-        // one side
-        while (toRemove.size() > 0) {
-            InterferenceNode value = toRemove.pop();
-            igraph.remove(value);
-            toRemove.remove(value.moveAssoc.getLinked());
-
-            // clear the bridge on the value that is not the delegate, for all purposes it has
-            // been erased from existence
-            value.moveAssoc.clearBridge();
-            InterferenceNode master = value.moveAssoc.getLinked();
-            master.merge(value);
-            value.dominated = true;
-        }
-
-
-
-        // At this point the nodes are coalesced, the stack and the remaining graph can then be simmplified as normal
-
-
 
 
         return coalesceStack;
@@ -111,6 +134,7 @@ public class InterferenceGraph {
 
     /**
      * removes node from igraph
+     *
      * @param toStack
      */
     public void removeFromGraph(InterferenceNode toStack) {
@@ -125,6 +149,7 @@ public class InterferenceGraph {
 
     /**
      * simplifies the graph
+     *
      * @param oldStack if there is a stack that has old variables in it, this stack can transfer them in
      *                 other wise it is acceptabble to pass in an empty stack.
      * @return
@@ -134,6 +159,7 @@ public class InterferenceGraph {
         // Add all the elements from the old stack (in cases where we had nodes
         // of less than significant degree popped off in coalesce simplify stage
         istack.addAll(oldStack);
+
 
         // While the graph still contains nodes
         while (igraph.size() > 0) {
@@ -167,22 +193,37 @@ public class InterferenceGraph {
         return istack;
     }
 
+    private void addPair(InterferenceNode first, InterferenceNode second) {
+        Pair<InterferenceNode, InterferenceNode> toAdd = new Pair<InterferenceNode, InterferenceNode>(first, second);
+        assocs.add(toAdd);
+
+    }
+
     /**
      * Builds the interference graph from the uses and defs
+     *
      * @param useDefs
      */
-    public void buildGraph(ArrayList<Row> useDefs) {
+    public void buildGraph(ArrayList<Row> useDefs, ArrayList<Row> inOut) {
         // instantiate igraph
         for (int i = 0; i < useDefs.size(); i++) {
             InterferenceNode newNode;
 
             for (SymbolEntry var : useDefs.get(i).defs) {
+
                 boolean exists = false;
                 for (InterferenceNode existingNode : igraph) {
                     if (existingNode.getVariable().equals(var)) {
                         if (useDefs.get(i).moveRelated) {
                             // If we find it in the duplicate check
-                            existingNode.setMoveAssoc( useDefs.get(i));
+                            InterferenceNode otherNode = null;
+                            for (SymbolEntry se : useDefs.get(i).uses) {
+                                otherNode = se.getLinked();
+                                otherNode.moveRelated = true;
+                                break;
+                            }
+                            addPair(existingNode, otherNode);
+
                         }
                         exists = true;
                         break;
@@ -193,9 +234,58 @@ public class InterferenceGraph {
                 if (!exists) {
                     newNode = new InterferenceNode(var);
                     if (useDefs.get(i).moveRelated) {
-                            newNode.setMoveAssoc(useDefs.get(i));
+                        InterferenceNode otherNode = null;
+                        for (SymbolEntry se : useDefs.get(i).uses) {
+                            otherNode = se.getLinked();
+                            otherNode.moveRelated = true;
+                            break;
+                        }
+                        addPair(newNode, otherNode);
                     }
                     igraph.add(newNode);
+                }
+            }
+        }
+
+        for (int i = 0; i < igraph.size(); i++) {
+            InterferenceNode currentNode = igraph.get(i);
+            for (int j = 0; j < inOut.size(); j++) {
+                if (inOut.get(j).defs.contains(currentNode.getVariable())) {
+                    for (SymbolEntry s : inOut.get(j).defs) {
+                        if (!(s.getNode() instanceof Formal) && !s.equals(currentNode.getVariable())) {
+                            InterferenceNode n = s.getLinked();
+                            if (!currentNode.getNeighbors().contains(n)) {
+                                currentNode.getNeighbors().add(n);
+                                if (!n.getNeighbors().contains(currentNode)) n.getNeighbors().add(currentNode);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < igraph.size(); i++) {
+            InterferenceNode currentNode = igraph.get(i);
+            ArrayList<Integer> indexes = new ArrayList<Integer>();
+            ArrayList<SymbolEntry> rhs = new ArrayList<SymbolEntry>();
+            for (int j = 0; j < useDefs.size(); j++) {
+                if (useDefs.get(j).defs.contains(currentNode.getVariable()) && useDefs.get(j).uses.size() == 1) {
+                    indexes.add(j);
+                    for (SymbolEntry s : useDefs.get(j).uses) {
+                        rhs.add(s);
+                        break;
+                    }
+                }
+            }
+            for (int j = 0; j < indexes.size(); j++) {
+                for (SymbolEntry s : inOut.get(indexes.get(j)).defs) {
+                    if (!s.equals(rhs.get(j)) && !(s.getNode() instanceof Formal) && !s.equals(currentNode.getVariable())) {
+                        InterferenceNode n = s.getLinked();
+                        if (!currentNode.getNeighbors().contains(n)) {
+                            currentNode.getNeighbors().add(n);
+                            if (!n.getNeighbors().contains(currentNode)) n.getNeighbors().add(currentNode);
+                        }
+                    }
                 }
             }
         }
@@ -219,7 +309,6 @@ public class InterferenceGraph {
                     // Set color found to false if neighbor has color already
                     if (n.getColor() == colors.get(i)) {
                         colorFound = false;
-                        break;
                     }
                 }
                 // If color found is still true, set the color and break, else continue

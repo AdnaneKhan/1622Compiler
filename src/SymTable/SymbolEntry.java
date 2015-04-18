@@ -14,7 +14,7 @@ public class SymbolEntry extends TableEntry {
     public static final int DEAD_REG = -5;
     Type symType;
 
-    private SymbolEntry coalesceBridge = null;
+    public SymbolEntry coalesceBridge = null;
     private InterferenceNode nodeLink;
 
     private int register = DEAD_REG;

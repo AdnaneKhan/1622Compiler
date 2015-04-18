@@ -242,7 +242,8 @@ public class QuadEmit {
 
             // Check the symbol entries if they are both move related, at this point any pairs of entries thaat are move related are
             // properly set
-            if ( (((SymbolEntry) quad.arg1_entry).getLinked().moveRelated && ((SymbolEntry)quad.getNode()).getLinked().moveRelated)) {
+            if ( (((SymbolEntry) quad.arg1_entry).getLinked().dominated && (quad.getNode()).equals(((SymbolEntry) quad.arg1_entry).coalesceBridge)) ||
+                    (((SymbolEntry) quad.getNode()).getLinked().dominated && (((SymbolEntry)quad.arg1_entry)).equals(((SymbolEntry) quad.getNode()).coalesceBridge)   )) {
                 instruction.append("#");
             }
 

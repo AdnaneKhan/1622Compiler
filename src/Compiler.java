@@ -67,21 +67,25 @@ public class Compiler {
 
                 ArrayList<Row> defsAndUse = codeGen.generateDefUse();
 
-                ArrayList<Row> liveness = codeGen.generateLiveness();
+                ArrayList<Row> liveness = codeGen.generateLiveness(defsAndUse);
 
                 InterferenceGraph ifGraph = new InterferenceGraph();
 
-                ifGraph.buildGraph(defsAndUse);
+                ifGraph.buildGraph(defsAndUse,liveness);
 
+                Stack<InterferenceNode> temp = new Stack<InterferenceNode>();
                 //
-                Stack<InterferenceNode> tempStack =ifGraph.coalesceGraph();
+                Stack<InterferenceNode> tempStack = ifGraph.coalesceGraph(temp);
 
                 // Simplify the graph
 
                 Stack<InterferenceNode> simpleStack = ifGraph.simplifyGraph(tempStack);
 
-                ifGraph.colorGraph(simpleStack);
+             ///   simpleStack = ifGraph.coalesceGraph(simpleStack);
 
+              ///  simpleStack = ifGraph.simplifyGraph(simpleStack);
+
+                ifGraph.colorGraph(simpleStack);
 
 
                 String output = codeGen.output();

@@ -14,19 +14,6 @@ public class InterferenceNode {
 
     public boolean moveRelated = false;
     public boolean dominated = false;
-    public SymbolEntry moveAssoc;
-
-    public void  setMoveAssoc(Row toSet) {
-
-        for (SymbolEntry use : toSet.uses) {
-            moveAssoc = use;
-            break;
-        }
-        moveAssoc.getLinked().moveRelated = true;
-        moveAssoc.getLinked().moveAssoc = variable;
-        toSet.moveRelated = true;
-        moveRelated = true;
-    }
 
 
     private List<InterferenceNode> neighbors;
@@ -41,37 +28,41 @@ public class InterferenceNode {
         color = -5;
     }
 
-    public void merge(InterferenceNode toMerge) {
-        // combine the list of neighbors, remove duplicates
-        for (int i = 0; i < toMerge.neighbors.size(); i++) {
-            if (!this.neighbors.contains(toMerge.neighbors.get(i))) {
-                this.neighbors.add(toMerge.neighbors.get(i));
-            }
-        }
-
-        // do the same thing for the dynamic neighbors
-        for (int i = 0; i < toMerge.dynamicNeighbors.size(); i++) {
-            if (!this.neighbors.contains(toMerge.dynamicNeighbors.get(i))) {
-                this.dynamicNeighbors.add(toMerge.dynamicNeighbors.get(i));
-            }
-        }
-
-
-        // The node given is can now be removed from the graph and marked as a bridge
-    }
 
     public List<InterferenceNode> getNeighbors() {
         if (dominated) {
-            return moveAssoc.getLinked().getNeighbors();
+            return variable.coalesceBridge.getLinked().getNeighbors();
         }
         return neighbors;
     }
 
     public List<InterferenceNode> getDynamicNeighbors() {
         if (dominated) {
-            return moveAssoc.getLinked().getDynamicNeighbors();
+            return variable.coalesceBridge.getLinked().getDynamicNeighbors();
         }
         return dynamicNeighbors;
+    }
+
+    public void merge(InterferenceNode toMerge) {
+
+
+        // combine the list of neighbors, remove duplicates
+        for (int i = 0; i < toMerge.getNeighbors().size(); i++) {
+            if (!this.getNeighbors().contains(toMerge.getNeighbors().get(i))) {
+                this.getNeighbors().add(toMerge.getNeighbors().get(i));
+            }
+        }
+
+        // do the same thing for the dynamic neighbors
+        for (int i = 0; i < toMerge.getDynamicNeighbors().size(); i++) {
+            if (!this.getDynamicNeighbors().contains(toMerge.getDynamicNeighbors().get(i))) {
+                this.getDynamicNeighbors().add(toMerge.getDynamicNeighbors().get(i));
+            }
+        }
+
+        toMerge.dominated = true;
+
+        toMerge.getVariable().buildBridge(this.getVariable());
     }
 
     public void copyNeighbors() {

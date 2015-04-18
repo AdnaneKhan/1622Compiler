@@ -25,13 +25,118 @@ public class CodeGenerator {
     QuadEmit instPrinter;
     Quadruple mainLast;
 
+    public ArrayList<Row> generateLiveness(ArrayList<Row> useDefs) {
+        int iteration = 0;
+        boolean unchanged = false;
+        ArrayList<ArrayList<Row>> inOut = new ArrayList<ArrayList<Row>>();
+        ArrayList<Row> lastCycle;
 
-    public ArrayList<Row> generateLiveness() {
+        while (!unchanged) {
+            unchanged = true;
+            ArrayList<Row> cycle = new ArrayList<Row>();
+
+            // Pre instantiate rows
+            for (int i = 0; i < baseNodes.size(); i++) {
+                Row temp = new Row();
+                cycle.add(temp);
+            }
+
+            // Uses - in, Defs - out
+            for (int i = baseNodes.size()-1; i >= 0; i--) {
+
+                // Initial population of inOut
+                if (iteration == 0) {
+
+                    // Populate the ins
+                    for (SymbolEntry se : useDefs.get(i).uses) {
+                        cycle.get(i).uses.add(se);
+                    }
+
+                    // Populate the outs
+                    if (baseNodes.get(i).sucessors.size() > 0) {
+                        for (int j = 0; j < baseNodes.get(i).sucessors.size(); j++) {
+                            for (SymbolEntry se : cycle.get(baseNodes.get(i).sucessors.get(j).index).uses) {
+                                cycle.get(i).defs.add(se);
+                            }
+                        }
+                    }
+
+                }
+
+                // If we are beyond initial population
+                else {
+
+                    // Populate the ins
+                    for (SymbolEntry se : inOut.get(iteration - 1).get(i).defs) {
+                        if (!useDefs.get(i).defs.contains(se)) {
+                            cycle.get(i).uses.add(se);
+                        }
+                    }
+                    for (SymbolEntry se : useDefs.get(i).uses) {
+                        cycle.get(i).uses.add(se);
+                    }
+
+                    // Populate the outs
+                    if (baseNodes.get(i).sucessors.size() > 0) {
+                        for (int j = 0; j < baseNodes.get(i).sucessors.size(); j++) {
+                            for (SymbolEntry se : cycle.get(baseNodes.get(i).sucessors.get(j).index).uses) {
+                                cycle.get(i).defs.add(se);
+                            }
+                        }
+                    }
+                }
+
+            }
+
+            inOut.add(cycle);
+
+            // Check to see if there was a change
+            if (iteration == 0) {
+                unchanged = false;
+            }
+            else {
+                for (int j = 0; j < cycle.size(); j++) {
+                    Row q = cycle.get(j);
+                    Row p = inOut.get(iteration-1).get(j);
+                    if (q.defs.size() != p.defs.size() || q.uses.size() != p.uses.size()) {
+                        unchanged = false;
+                        break;
+                    }
+                }
+            }
+
+
+            System.out.println("-- iter number: " + iteration);
+            for (Row r : cycle) {
+
+                System.out.print(" INs ");
+                for (SymbolEntry s : r.uses) {
+                    System.out.print(s.getSymbolName() + ",");
+
+                }
+                System.out.print(" OUTS ");
+
+                for (SymbolEntry s2 : r.defs) {
+                    System.out.print(s2.getSymbolName() + ",");
+                }
+
+                System.out.println("\n------------------\n");
+
+            }
+
+            iteration++;
+        }
+
+
+        lastCycle = inOut.get(inOut.size()-1);
+        return lastCycle;
+    }
+
+    public ArrayList<Row> generateLiveness2() {
         int iteration = 0;
         boolean change;
         boolean clear = true;
         ArrayList<ArrayList<Row>> inOut = new ArrayList<ArrayList<Row>>();
-
         do {
 
             ArrayList<Row> cycle = new ArrayList<Row>();
@@ -71,31 +176,50 @@ public class CodeGenerator {
                     }
                 }
 
+                // Union Step in Algo
+                for (ControlFlowNode predecessor : baseNodes.get(i).predecessors) {
+                    int predIndex = predecessor.index;
+
+
+                    for (SymbolEntry inValue : cycle.get(i).uses) {
+                        cycle.get(predIndex).defs.add(inValue);
+                    }
+                }
+
+
                 for (SymbolEntry outEntry : cycle.get(i).defs) {
                     if (!useAndDefs.get(i).defs.contains(outEntry)) {
                         cycle.get(i).uses.add(outEntry);
                     }
                 }
 
-                // Union Step in Algo
-                for (ControlFlowNode predecessor : baseNodes.get(i).predecessors) {
-                    int predIndex = predecessor.index;
 
-
-                    for (SymbolEntry inValue : cycle.get(predIndex).uses) {
-                        cycle.get(i).defs.add(inValue);
-                    }
-                }
-
-
-                if (clear && oldInSize != inOut.get(iteration).get(i).uses.size() ||
-                        oldOutSize != inOut.get(iteration).get(i).defs.size()) {
+                if (clear || (oldInSize != inOut.get(iteration).get(i).uses.size() ||
+                        oldOutSize != inOut.get(iteration).get(i).defs.size())) {
                     change = true;
                     clear = false;
                 }
             }
 
+            System.out.println("-- iter number: " + iteration);
+            for (Row r : cycle) {
+
+                System.out.print(" INs ");
+                for (SymbolEntry s : r.uses) {
+                    System.out.print(s.getSymbolName() + ",");
+
+                }
+                System.out.print(" OUTS ");
+
+                for (SymbolEntry s2: r.defs) {
+                    System.out.print(s2.getSymbolName()+",");
+                }
+
+                System.out.println("\n------------------\n");
+            }
+
             iteration++;
+
         } while (change);
 
 
@@ -154,6 +278,8 @@ public class CodeGenerator {
                 }
                 break;
                 case (Quadruple.RETURN_3AC):
+
+
                     // no-op
                     break;
 
