@@ -6,6 +6,7 @@ import SymTable.MethodTable;
 import SymTable.SymbolEntry;
 import SymTable.TableEntry;
 import SyntaxTree.ClassDecl;
+import SyntaxTree.Formal;
 import SyntaxTree.MethodDecl;
 
 import java.util.HashMap;
@@ -154,10 +155,23 @@ public class QuadEmit {
 
         } else if (!quad.arg2Literal() && !quad.isTempArg1() && !quad.isTempArg2() && !quad.arg1Literal()) {
             if (quad.arg1_entry.parent.isEntry(TableEntry.METHOD_ENTRY) && quad.arg2_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+                String a1Reg = null;
+                String a2Reg = null;
+                if (quad.arg1_entry.getNode() instanceof Formal) {
+                    int arg1Pos = getArgPos(quad.arg1_entry);
+                    a1Reg = "$a" + arg1Pos;
+                } else {
+                    a1Reg = prettyRegister(quad.getArg1Register());
+                }
 
-                int arg1Pos = getArgPos(quad.arg1_entry);
-                int arg2Pos = getArgPos(quad.arg2_entry);
-                instruction.append(generateOpInst(quad.op, prettyRegister(quad.getResRegister()), "$a" + arg1Pos, "$a" + arg2Pos));
+                if (quad.arg2_entry.getNode() instanceof Formal) {
+                    int arg2Pos = getArgPos(quad.arg2_entry);
+                    a2Reg = "$a" + arg2Pos;
+                } else {
+                    a2Reg = prettyRegister(quad.getArg2Register());
+                }
+
+                instruction.append(generateOpInst(quad.op, prettyRegister(quad.getResRegister()), a1Reg, a2Reg));
 
             } else if (quad.arg1_entry.parent.isEntry(TableEntry.CLASS_ENTRY)) {
                 // TODO
@@ -228,10 +242,13 @@ public class QuadEmit {
 
             // Check the symbol entries if they are both move related, at this point any pairs of entries thaat are move related are
             // properly set
-            if (! (((SymbolEntry) quad.arg1_entry).getLinked().moveRelated && ((SymbolEntry)quad.getNode()).getLinked().moveRelated)) {
-                String rhsReg = prettyRegister(quad.getArg1Register());
-                instruction.append("move").append(" ").append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(rhsReg);
+            if ( (((SymbolEntry) quad.arg1_entry).getLinked().moveRelated && ((SymbolEntry)quad.getNode()).getLinked().moveRelated)) {
+                instruction.append("#");
             }
+
+            String rhsReg = prettyRegister(quad.getArg1Register());
+            instruction.append("move").append(" ").append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(rhsReg);
+
         }
 
 

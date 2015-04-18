@@ -43,9 +43,7 @@ public class InterferenceGraph {
     }
 
     /**
-     * Starts off by simplifying nodes of flesser degree
-     * @param inOut
-     * @param useDefs
+     * Starts off by simplifying nodes of flesser degre
      * @return
      */
     public Stack<InterferenceNode> coalesceGraph() {
@@ -55,7 +53,7 @@ public class InterferenceGraph {
         for (int i = 0; i < igraph.size(); i++) {
 
             InterferenceNode cursor = igraph.get(i);
-            if (!cursor.moveRelated && cursor.neighbors.size() < colors.size()) {
+            if (!cursor.moveRelated && cursor.getNeighbors().size() < colors.size()) {
                 // if less than signficant degree and not move related
                 // remove from the graph and push onto stack
                 igraph.remove(cursor);
@@ -70,8 +68,8 @@ public class InterferenceGraph {
 
             // Check if the neighbors lists of all coalesce candidate pairs are less than 2
             if (inode.moveRelated) {
-                if(inode.moveAssoc.getLinked().neighbors.size() < colors.size()
-                        && inode.neighbors.size() < colors.size()) {
+                if(inode.moveAssoc.getLinked().getNeighbors().size() < colors.size()
+                        && inode.getNeighbors().size() < colors.size()) {
                     /// We can link
                     System.err.println("Ready to link");
                     toRemove.push(inode.moveAssoc.getLinked());
@@ -93,10 +91,13 @@ public class InterferenceGraph {
             toRemove.remove(value.moveAssoc.getLinked());
 
             // clear the bridge on the value that is not the delegate, for all purposes it has
-            /// been erased from existence
+            // been erased from existence
             value.moveAssoc.clearBridge();
-
+            InterferenceNode master = value.moveAssoc.getLinked();
+            master.merge(value);
+            value.dominated = true;
         }
+
 
 
         // At this point the nodes are coalesced, the stack and the remaining graph can then be simmplified as normal
@@ -105,6 +106,20 @@ public class InterferenceGraph {
 
 
         return coalesceStack;
+    }
+
+
+    /**
+     * removes node from igraph
+     * @param toStack
+     */
+    public void removeFromGraph(InterferenceNode toStack) {
+        for (InterferenceNode node : toStack.getDynamicNeighbors()) {
+            if (node.getDynamicNeighbors().contains(toStack)) {
+                node.getDynamicNeighbors().remove(toStack);
+            }
+        }
+        igraph.remove(toStack);
     }
 
 
@@ -126,7 +141,7 @@ public class InterferenceGraph {
             // Find a node we can push to the stack
             InterferenceNode toStack = null;
             for (int i = 0; i < igraph.size(); i++) {
-                if (igraph.get(i).neighbors.size() < 23) {
+                if (igraph.get(i).getDynamicNeighbors().size() < 23) {
                     toStack = igraph.get(i);
                 }
             }
@@ -140,7 +155,8 @@ public class InterferenceGraph {
             else {
 
                 // Remove the interference node from the graph and...
-                igraph.remove(toStack);
+                removeFromGraph(toStack);
+
 
                 // Put that node on the stack
                 istack.push(toStack);
@@ -183,6 +199,10 @@ public class InterferenceGraph {
                 }
             }
         }
+
+        for (InterferenceNode node : igraph) {
+            node.copyNeighbors();
+        }
     }
 
     public void colorGraph(Stack<InterferenceNode> simplifyStack) {
@@ -195,7 +215,7 @@ public class InterferenceGraph {
             // Begin color assignment
             for (int i = 0; i < colors.size(); i++) {
                 boolean colorFound = true;
-                for (InterferenceNode n : inode.neighbors) {
+                for (InterferenceNode n : inode.getNeighbors()) {
                     // Set color found to false if neighbor has color already
                     if (n.getColor() == colors.get(i)) {
                         colorFound = false;
