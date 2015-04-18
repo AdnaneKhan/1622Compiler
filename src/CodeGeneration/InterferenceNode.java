@@ -22,6 +22,7 @@ public class InterferenceNode {
     public InterferenceNode(SymbolEntry node) {
 
         neighbors = new LinkedList<InterferenceNode>();
+        dynamicNeighbors = new LinkedList<InterferenceNode>();
         variable = node;
 
         variable.setINode(this);

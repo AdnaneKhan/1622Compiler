@@ -101,7 +101,12 @@ public class ClassTable extends TableEntry {
         // First check the current class
         if (this.hasEntry(var.getSymbolName(),LEAF_ENTRY)) {
             // Iff we have parents, just add their size
-            returnV = this.parentClass.trueSize();
+            if (this.parentClass != null) {
+                returnV = this.parentClass.trueSize();
+            } else {
+                returnV = 0;
+            }
+
             int inClassOffset =0 ;
 
 

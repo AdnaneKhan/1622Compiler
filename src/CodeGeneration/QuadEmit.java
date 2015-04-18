@@ -246,9 +246,13 @@ public class QuadEmit {
                 instruction.append(generateOpInst(quad.op, prettyRegister(quad.getResRegister()), arg1Reg,  prettyRegister(quad.getResRegister())));
 
             } else {
-
-
                 int variableOffset = ((ClassTable)quad.arg1_entry.parent).getVariableOffset((SymbolEntry) quad.arg1_entry);
+
+
+                // Steps for class allocation:
+
+                // First start with saving necessary registers. For an assignment into a class variable this behav
+
 
                 // TODO
                 System.err.println(" We have class scope variable we tried to reference!");
@@ -269,7 +273,7 @@ public class QuadEmit {
             // properly set
             if ( !((SymbolEntry) quad.arg1_entry).isPreColor() && (((SymbolEntry) quad.arg1_entry).getLinked().dominated && (quad.getNode()).equals(((SymbolEntry) quad.arg1_entry).coalesceBridge)) ||
                     (((SymbolEntry) quad.getNode()).getLinked().dominated && (((SymbolEntry)quad.arg1_entry)).equals(((SymbolEntry) quad.getNode()).coalesceBridge)   )) {
-                instruction.append("#");
+                instruction.append("# ELIMINATED VIA COALESCING");
             }
 
             String rhsReg = prettyRegister(quad.getArg1Register());
@@ -490,16 +494,72 @@ public class QuadEmit {
      *
      * @param classOffset sets up instructionf to laod a variable from a class
      */
-    private void extractVarFromClass(int classOffset, int targetRegister) {
+    private String extractVarFromClass(int classOffset, int targetRegister, int classAddress) {
+        StringBuilder toRet = new StringBuilder();
 
+        // Register saving phase
+
+
+        toRet.append("addi $sp, $sp,").append(4).append('\n');
+        // save $s0
+        toRet.append("sw").append(' ').append("$s0").append(COMMA_SPACE).append('0');
+        toRet.append("($sp)").append('\n');
+
+        // now we can use $s0 for our purposes
+
+
+
+        toRet.append("lw").append(' ').append(prettyRegister(targetRegister)).append(COMMA_SPACE).append(Integer.toString(classOffset)).append('(').append(prettyRegister(classAddress)).append(')').append('\n');
+
+
+
+
+        toRet.append("lw").append(' ').append("$s0").append(COMMA_SPACE).append('0');
+        // note here we use the return value straight from the original syscall we did because
+        // nothing changed in it
+        toRet.append("($sp)").append('\n');
+        toRet.append("addi $sp, $sp,").append(4).append('\n');
+
+        // Register loading phase
+
+
+        return toRet.toString();
     }
 
     /**
      *
      * @param classOfffset sets up instructions to save a variable into a class
      */
-    private void putVarIntoClass(int classOfffset, int sourceRegister) {
+    private String putVarIntoClass(int classOffset, int sourceRegister, int classAdress) {
+        StringBuilder toRet = new StringBuilder();
 
+        // Register saving phase
+
+
+        toRet.append("addi $sp, $sp,").append(4).append('\n');
+        // save $s0
+        toRet.append("sw").append(' ').append("$s0").append(COMMA_SPACE).append('0');
+        toRet.append("($sp)").append('\n');
+
+        // now we can use $s0 for our purposes
+
+
+
+        toRet.append("sw").append(' ').append(prettyRegister(sourceRegister)).append(COMMA_SPACE).append(Integer.toString(classOffset)).append('(').append(prettyRegister(classAdress)).append(')').append('\n');
+
+
+
+
+        toRet.append("lw").append(' ').append("$s0").append(COMMA_SPACE).append('0');
+        // note here we use the return value straight from the original syscall we did because
+        // nothing changed in it
+        toRet.append("($sp)").append('\n');
+        toRet.append("addi $sp, $sp,").append(4).append('\n');
+
+        // Register loading phase
+
+
+        return toRet.toString();
     }
 
     private String prettyRegister(int uglyRegister) {

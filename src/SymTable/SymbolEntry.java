@@ -53,6 +53,8 @@ public class SymbolEntry extends TableEntry {
      * @return the interefrence node that is assocated with this variable
      */
     public InterferenceNode getLinked() {
+
+
         return nodeLink;
     }
 

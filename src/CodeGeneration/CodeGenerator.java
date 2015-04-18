@@ -105,24 +105,24 @@ public class CodeGenerator {
                 }
             }
 
-
-            System.out.println("-- iter number: " + iteration);
-            for (Row r : cycle) {
-
-                System.out.print(" INs ");
-                for (SymbolEntry s : r.uses) {
-                    System.out.print(s.getSymbolName() + ",");
-
-                }
-                System.out.print(" OUTS ");
-
-                for (SymbolEntry s2 : r.defs) {
-                    System.out.print(s2.getSymbolName() + ",");
-                }
-
-                System.out.println("\n------------------\n");
-
-            }
+//
+//            System.out.println("-- iter number: " + iteration);
+//            for (Row r : cycle) {
+//
+//                System.out.print(" INs ");
+//                for (SymbolEntry s : r.uses) {
+//                    System.out.print(s.getSymbolName() + ",");
+//
+//                }
+//                System.out.print(" OUTS ");
+//
+//                for (SymbolEntry s2 : r.defs) {
+//                    System.out.print(s2.getSymbolName() + ",");
+//                }
+//
+//                System.out.println("\n------------------\n");
+//
+//            }
 
             iteration++;
         }
