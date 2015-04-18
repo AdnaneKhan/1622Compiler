@@ -17,6 +17,7 @@ public class SymbolEntry extends TableEntry {
     public SymbolEntry coalesceBridge = null;
     private InterferenceNode nodeLink;
 
+    private boolean preColor = false;
     private int register = DEAD_REG;
 
     public int getRegister() {
@@ -28,6 +29,15 @@ public class SymbolEntry extends TableEntry {
         }
 
         return register;
+    }
+
+    public void preColor(int reg) {
+        preColor = true;
+        assignRegister(reg);
+    }
+
+    public boolean isPreColor() {
+        return preColor;
     }
 
     /**
@@ -46,6 +56,8 @@ public class SymbolEntry extends TableEntry {
         return nodeLink;
     }
 
+
+
     /**
      *
      *
@@ -61,7 +73,6 @@ public class SymbolEntry extends TableEntry {
     }
 
     public void assignRegister(int new_regValue) {
-
         // If there is a coalesce bridge present then assign the register to the other value
         if (coalesceBridge != null) {
             coalesceBridge.assignRegister(new_regValue);

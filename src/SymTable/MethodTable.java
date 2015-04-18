@@ -51,7 +51,7 @@ public class MethodTable extends TableEntry {
     public void putVariable(Formal toAdd, int index) {
         SymbolEntry newLeaf = new SymbolEntry(toAdd.i.s, toAdd.t, toAdd);
 
-        newLeaf.assignRegister(index + 4);
+        newLeaf.preColor(index + 4);
         newLeaf.parent = this;
 
         hash.put(new KeyWrapper(toAdd.i.s, LEAF_ENTRY), newLeaf);

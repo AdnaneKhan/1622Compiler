@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Stack;
 
 import SymTable.SymbolEntry;
-import SyntaxTree.Formal;
 import javafx.util.Pair;
 
 /**
@@ -216,7 +215,7 @@ public class InterferenceGraph {
                     if (existingNode.getVariable().equals(var)) {
                         if (useDefs.get(i).moveRelated) {
                             for (SymbolEntry se : useDefs.get(i).uses) {
-                                if (!(se.getNode() instanceof Formal)) {
+                                if (!(se.isPreColor())) {
                                     InterferenceNode otherNode = se.getLinked();
                                     otherNode.moveRelated = true;
                                     addPair(existingNode, otherNode);
@@ -234,7 +233,7 @@ public class InterferenceGraph {
                     newNode = new InterferenceNode(var);
                     if (useDefs.get(i).moveRelated) {
                         for (SymbolEntry se : useDefs.get(i).uses) {
-                            if (!(se.getNode() instanceof Formal)) {
+                            if (!(se.isPreColor())) {
                                 InterferenceNode otherNode = se.getLinked();
                                 otherNode.moveRelated = true;
                                 addPair(newNode, otherNode);
@@ -252,10 +251,12 @@ public class InterferenceGraph {
             for (int j = 0; j < inOut.size(); j++) {
                 if (inOut.get(j).defs.contains(currentNode.getVariable())) {
                     for (SymbolEntry s : inOut.get(j).defs) {
-                        if (!(s.getNode() instanceof Formal) && !s.equals(currentNode.getVariable())) {
+                        if (!(s.isPreColor()) && !s.equals(currentNode.getVariable())) {
                             InterferenceNode n = s.getLinked();
-                            if (!currentNode.getNeighbors().contains(n)) {
+                            if (n != null && !currentNode.getNeighbors().contains(n)) {
                                 currentNode.getNeighbors().add(n);
+
+
                                 if (!n.getNeighbors().contains(currentNode)) n.getNeighbors().add(currentNode);
                             }
                         }
@@ -279,9 +280,9 @@ public class InterferenceGraph {
             }
             for (int j = 0; j < indexes.size(); j++) {
                 for (SymbolEntry s : inOut.get(indexes.get(j)).defs) {
-                    if (!s.equals(rhs.get(j)) && !(s.getNode() instanceof Formal) && !s.equals(currentNode.getVariable())) {
+                    if (!s.equals(rhs.get(j)) && !(s.isPreColor()) && !s.equals(currentNode.getVariable())) {
                         InterferenceNode n = s.getLinked();
-                        if (!currentNode.getNeighbors().contains(n)) {
+                        if (n != null && !currentNode.getNeighbors().contains(n)) {
                             currentNode.getNeighbors().add(n);
                             if (!n.getNeighbors().contains(currentNode)) n.getNeighbors().add(currentNode);
                         }
