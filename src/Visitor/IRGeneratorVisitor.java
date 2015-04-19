@@ -348,7 +348,7 @@ public class IRGeneratorVisitor implements Visitor {
         pushStack(currentQuad);
         n.s1.accept(this);
         tempQuad = popStack();
-        if (tempQuad.type != Quadruple.CONDITIONAL_JUMP) {
+        if (tempQuad.type != Quadruple.CONDITIONAL_JUMP && tempQuad.type != -1) {
             currentMethod.add(tempQuad);
         }
 
@@ -370,7 +370,7 @@ public class IRGeneratorVisitor implements Visitor {
         pushStack(currentQuad);
         n.s2.accept(this);
         tempQuad = popStack();
-        if (tempQuad.type != Quadruple.CONDITIONAL_JUMP) {
+        if (tempQuad.type != Quadruple.CONDITIONAL_JUMP && tempQuad.type != -1) {
             currentMethod.add(tempQuad);
         }
 
