@@ -215,7 +215,7 @@ public class QuadEmit {
              */
         } else if (quad.isArg1MethodVar() && quad.isResultClassVar()) {
             int variableOffset = ((ClassTable) quad.getNode().parent).getVariableOffset((SymbolEntry) quad.getNode());
-            instruction.append(extractVarFromClass(variableOffset,quad.getArg1Register(),quad.getResRegister()));
+            instruction.append(putVarIntoClass(variableOffset, quad.getArg1Register(), quad.getResRegister()));
 
             // Get the variable form the rhs class
             // extractVarFromClass()
@@ -298,6 +298,9 @@ public class QuadEmit {
              * Enumerate the case where the argument is method scope and result is class scope
              */
         } else if (quad.isArg1MethodVar() && quad.isResultClassVar()) {
+            int variableOffset = ((ClassTable) quad.getNode().parent).getVariableOffset((SymbolEntry) quad.getNode());
+            instruction.append(putVarIntoClass(variableOffset, quad.getArg1Register(), quad.getResRegister()));
+            instruction.append("slti").append(' ').append(resRegister).append(COMMA_SPACE).append(resRegister).append(COMMA_SPACE).append("1");
 
         }
 
@@ -335,13 +338,24 @@ public class QuadEmit {
         // get size of the class
         int varCount = classTable.trueSize();
 
+       //instruction.append("addi $sp, $sp,").append(-4).append('\n');
+       // instruction.append("sw").append(' ').append("$v0").append(COMMA_SPACE).append(-4).append("($sp)").append("\n");
+       //instruction.append("sw").append(' ').append("$a0").append(COMMA_SPACE).append(0).append("($sp)").append("\n");
         // Now we have to make the object itself
 
         // Load the size into the argument zero register
         // yes, our max class size is the size of 16 bit immediate, god help us if that is tested...
+      instruction.append(printSaveAll());
+
         instruction.append("li").append(' ').append("$a0").append(',').append(varCount * 4).append('\n');
         // now we call the object maker
         instruction.append("jal").append(" _new_object").append('\n');
+        instruction.append(printRestoreAll()   );
+
+      //  instruction.append("lw").append(' ').append("$a0").append(COMMA_SPACE).append(0).append("($sp)").append("\n");
+       //// instruction.append("lw").append(' ').append("$v0").append(COMMA_SPACE).append(4).append("($sp)").append("\n");
+      // instruction.append("addi $sp, $sp,").append(4).append('\n');
+
         this.functParam = true;
 //
 //        if (quad.isResultClassVar() && !(quad.getNode().parent.getNode() instanceof MainClass)) {
@@ -448,14 +462,17 @@ public class QuadEmit {
 
 
         // Deal with the value being used
-        if (quad.arg1_entry != null) {
+        if (quad.isArg1MethodVar()) {
             instruction.append("move").append(' ').append("$a0").append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append('\n');
             for (int i = 0; i < 2; i++) {
                 instruction.append("add").append(' ').append("$a0").append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append('\n');
             }
-        } else {
+        } else if (quad.arg1Literal()) {
             String assignLit = quad.getArg1();
             instruction.append("li").append(' ').append("$a0").append(',').append(assignLit).append('\n');
+        } else if (quad.isArg1ClassVar()) {
+            int offSet = ( (ClassTable) quad.arg1_entry.parent).getVariableOffset(((SymbolEntry)quad.arg1_entry));
+            instruction.append(extractVarFromClass(offSet ,Registers.GP,quad.getArg1Register() ));
         }
 
         // Deal with the offset
