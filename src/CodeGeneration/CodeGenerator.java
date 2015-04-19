@@ -66,24 +66,33 @@ public class CodeGenerator {
                 // If we are beyond initial population
                 else {
 
+
+
                     // Populate the ins
                     for (SymbolEntry se : inOut.get(iteration - 1).get(i).defs) {
                         if (!useDefs.get(i).defs.contains(se)) {
                             cycle.get(i).uses.add(se);
                         }
                     }
+
+                    // Populate the outs
+                    if (baseNodes.get(i).sucessors.size() > 0) {
+
+                        for (int j = 0; j < baseNodes.get(i).sucessors.size(); j++) {
+
+                            for (SymbolEntry se : cycle.get(baseNodes.get(i).sucessors.get(j).index).uses) {
+                                cycle.get(i).defs.add(se);
+                            }
+
+                        }
+
+
+                    }
                     for (SymbolEntry se : useDefs.get(i).uses) {
                         cycle.get(i).uses.add(se);
                     }
 
-                    // Populate the outs
-                    if (baseNodes.get(i).sucessors.size() > 0) {
-                        for (int j = 0; j < baseNodes.get(i).sucessors.size(); j++) {
-                            for (SymbolEntry se : cycle.get(baseNodes.get(i).sucessors.get(j).index).uses) {
-                                cycle.get(i).defs.add(se);
-                            }
-                        }
-                    }
+
                 }
 
             }
@@ -106,10 +115,11 @@ public class CodeGenerator {
             }
 
 
-/*           System.out.println("-- iter number: " + iteration);
+           System.out.println("-- iter number: " + iteration);
+            int k = 0;
            for (Row r : cycle) {
 
-               System.out.print(" INs ");
+               System.out.print(k++ +" INs ");
                for (SymbolEntry s : r.uses) {
                    System.out.print(s.getSymbolName() + ",");
 
@@ -122,108 +132,16 @@ public class CodeGenerator {
 
                System.out.println("\n------------------\n");
 
-           }*/
+           }
 
             iteration++;
+
+
         }
 
 
         lastCycle = inOut.get(inOut.size()-1);
         return lastCycle;
-    }
-
-    public ArrayList<Row> generateLiveness2() {
-        int iteration = 0;
-        boolean change;
-        boolean clear = true;
-        ArrayList<ArrayList<Row>> inOut = new ArrayList<ArrayList<Row>>();
-        do {
-
-            ArrayList<Row> cycle = new ArrayList<Row>();
-            inOut.add(cycle);
-            change = false;
-
-            // pre instantiate the array of rows to prevent null pointers
-            for (int i = 0; i < baseNodes.size(); i++) {
-                Row temp = new Row();
-                cycle.add(temp);
-            }
-
-            // Uses - in, defs - out
-            for (int i = 0; i < baseNodes.size(); i++) {
-
-                int oldInSize = 0;
-                int oldOutSize = 0;
-
-                if (iteration > 0) {
-                    oldInSize = inOut.get(iteration - 1).get(i).uses.size();
-                    oldOutSize = inOut.get(iteration - 1).get(i).defs.size();
-
-
-                    for (SymbolEntry se : inOut.get(iteration - 1).get(i).uses) {
-                        cycle.get(i).uses.add(se);
-                    }
-
-                    for (SymbolEntry se : inOut.get(iteration - 1).get(i).defs) {
-                        cycle.get(i).defs.add(se);
-                    }
-
-                } else {
-
-                    // Copy uses into in
-                    for (SymbolEntry se : useAndDefs.get(i).uses) {
-                        cycle.get(i).uses.add(se);
-                    }
-                }
-
-                // Union Step in Algo
-                for (ControlFlowNode predecessor : baseNodes.get(i).predecessors) {
-                    int predIndex = predecessor.index;
-
-
-                    for (SymbolEntry inValue : cycle.get(i).uses) {
-                        cycle.get(predIndex).defs.add(inValue);
-                    }
-                }
-
-
-                for (SymbolEntry outEntry : cycle.get(i).defs) {
-                    if (!useAndDefs.get(i).defs.contains(outEntry)) {
-                        cycle.get(i).uses.add(outEntry);
-                    }
-                }
-
-
-                if (clear || (oldInSize != inOut.get(iteration).get(i).uses.size() ||
-                        oldOutSize != inOut.get(iteration).get(i).defs.size())) {
-                    change = true;
-                    clear = false;
-                }
-            }
-
-            System.out.println("-- iter number: " + iteration);
-            for (Row r : cycle) {
-
-                System.out.print(" INs ");
-                for (SymbolEntry s : r.uses) {
-                    System.out.print(s.getSymbolName() + ",");
-
-                }
-                System.out.print(" OUTS ");
-
-                for (SymbolEntry s2: r.defs) {
-                    System.out.print(s2.getSymbolName()+",");
-                }
-
-                System.out.println("\n------------------\n");
-            }
-
-            iteration++;
-
-        } while (change);
-
-
-        return inOut.get(iteration - 1);
     }
 
 
@@ -259,7 +177,24 @@ public class CodeGenerator {
 
             useAndDefs.add(newRow);
         }
+        System.out.println("USES AND DEFS");
+        int k = 0;
+        for (Row r : useAndDefs) {
 
+            System.out.print(k++ + " USEs ");
+            for (SymbolEntry s : r.uses) {
+                System.out.print(s.getSymbolName() + ",");
+
+            }
+            System.out.print(" DEFs ");
+
+            for (SymbolEntry s2 : r.defs) {
+                System.out.print(s2.getSymbolName() + ",");
+            }
+
+            System.out.println("\n------------------\n");
+
+        }
 
         return this.useAndDefs;
     }
@@ -274,7 +209,9 @@ public class CodeGenerator {
                 case (Quadruple.UNCONDITIONAL_JUMP): {
                     ControlFlowNode successor = labelMap.get(cursor.irLine.result);
                     successor.predecessors.add(cursor);
+
                     cursor.sucessors.add(successor);
+
                 }
                 break;
                 case (Quadruple.RETURN_3AC):
@@ -288,6 +225,7 @@ public class CodeGenerator {
                     successor.predecessors.add(cursor);
 
                     cursor.sucessors.add(successor);
+
                 }
                 // This executes in every case EXCEPT unconditional and return
                 default:

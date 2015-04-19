@@ -484,6 +484,7 @@ public class IRGeneratorVisitor implements Visitor {
         quadstack.set(top(), currentQuad);
 
         n.i.accept(this);
+        currentQuad.setResEntry(base.getCurrentScope().getEntryWalk(n.i.s,TableEntry.LEAF_ENTRY));
 
         currentQuad = new Quadruple();
         currentQuad.type = getType(n.e1);

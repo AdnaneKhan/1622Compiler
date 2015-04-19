@@ -10,24 +10,33 @@ class Foo {
 
 class Fac extends Foo {
     public int ComputeFac(int num){
+        int[] i;
         int x;
         int y;
         int z;
+
+        i = new int [60];
+        z = 4;
         x = 1;
         y = 2;
+        i[2] = 1;
         q = x + y;
         if (!((x<y) && (x<q))) {
             z = 1;
         }
         else {
-            z = 0;
+            i[23] = z + 5;
         }
-        if (x<y) {
+        if (y<x) {
             z = 4;
         }
         else {
             z = 5;
         }
-        return z;
+        System.out.println(z);
+        System.out.println(q);
+        System.out.println(i[2]);
+
+        return z + q + i [2];
     }
 }

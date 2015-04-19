@@ -139,7 +139,7 @@ instruction.append(printRestoreAll());
 
                 int offSet = ( (ClassTable) quad.getNode().parent).getVariableOffset(((SymbolEntry)quad.getNode()));
                 instruction.append("li").append(" ").append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(Integer.toString(result));
-                putVarIntoClass(offSet,Registers.GP,quad.getResRegister());
+                putVarIntoClass(offSet,Registers.GP,Registers.ARG0);
             }
 
         } else {
@@ -159,7 +159,7 @@ instruction.append(printRestoreAll());
             if (quad.isResultClassVar()) {
                 int offSet = ( (ClassTable) quad.getNode().parent).getVariableOffset(((SymbolEntry)quad.getNode()));
                 instruction.append(generateOpInst(quad.op, prettyRegister(Registers.GP), arg1Reg, arg2Reg));
-                putVarIntoClass(offSet,Registers.GP,quad.getResRegister());
+                putVarIntoClass(offSet,Registers.GP,Registers.ARG0);
             } else {
                 quad.dRes();
                 String resReg = prettyRegister(quad.getResRegister());
@@ -188,7 +188,7 @@ instruction.append(printRestoreAll());
         } else if (quad.arg1Literal() && quad.isResultClassVar()) {
             int offSet = ( (ClassTable) quad.getNode().parent ).getVariableOffset(((SymbolEntry)quad.getNode()));
             instruction.append("li").append(" ").append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(Integer.toString(quad.arg1Int)).append('\n');
-            instruction.append(putVarIntoClass(offSet, Registers.GP, quad.getResRegister()));
+            instruction.append(putVarIntoClass(offSet, Registers.GP, Registers.ARG0));
 
         } else if (quad.isArg1MethodVar() && quad.isResultMethodVar()) {
             quad.dRes();
@@ -214,7 +214,7 @@ instruction.append(printRestoreAll());
              */
         } else if (quad.isArg1MethodVar() && quad.isResultClassVar()) {
             int variableOffset = ((ClassTable) quad.getNode().parent).getVariableOffset((SymbolEntry) quad.getNode());
-            instruction.append(putVarIntoClass(variableOffset, quad.getArg1Register(), quad.getResRegister()));
+            instruction.append(putVarIntoClass(variableOffset, quad.getArg1Register(), Registers.ARG0));
 
             // Get the variable form the rhs class
             // extractVarFromClass()
@@ -299,7 +299,7 @@ instruction.append(printRestoreAll());
              */
         } else if (quad.isArg1MethodVar() && quad.isResultClassVar()) {
             int variableOffset = ((ClassTable) quad.getNode().parent).getVariableOffset((SymbolEntry) quad.getNode());
-            instruction.append(putVarIntoClass(variableOffset, quad.getArg1Register(), quad.getResRegister()));
+            instruction.append(putVarIntoClass(variableOffset, quad.getArg1Register(), Registers.ARG0));
             instruction.append("slti").append(' ').append(resRegister).append(COMMA_SPACE).append(resRegister).append(COMMA_SPACE).append("1");
 
         }
@@ -379,12 +379,15 @@ instruction.append(printRestoreAll());
     public String handleNewArray(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
+//
+//        instruction.append("addi").append(' ').append("$sp").append(COMMA_SPACE).append("$sp").append(COMMA_SPACE).append("-4").append('\n');
+//        // Save $a0 to stack
+//        instruction.append("sw").append(' ').append("$a0").append(COMMA_SPACE).append(0);
+//        instruction.append("($sp)").append("\n");
+//
 
-        instruction.append("addi").append(' ').append("$sp").append(COMMA_SPACE).append("$sp").append(COMMA_SPACE).append("-4");
-        // Save $a0 to stack
-        instruction.append("sw").append(' ').append("$a0").append(COMMA_SPACE).append(0);
-        instruction.append("($sp)").append("\n");
 
+        instruction.append(printSaveAll());
         if (quad.arg1_entry != null) {
             instruction.append("move").append(' ').append("$a0").append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append('\n');
             // Double the values twice to effectively multiply by 4 in place
@@ -397,13 +400,14 @@ instruction.append(printRestoreAll());
             instruction.append("li").append(' ').append("$a0").append(',').append(varCount * 4).append('\n');
         }
 
-        instruction.append("jal").append("_new_array").append("\n");
+        instruction.append("jal").append(" _new_array").append("\n");
+        instruction.append(printRestoreAll());
         this.functParam = true;
 
-        // restore $a0
-        instruction.append("lw").append(' ').append("$a0").append(COMMA_SPACE).append(0);
-        instruction.append("($sp)").append("\n");
-        instruction.append("addi").append(' ').append("$sp").append(COMMA_SPACE).append("$sp").append(COMMA_SPACE).append("4");
+//        // restore $a0
+//        instruction.append("lw").append(' ').append("$a0").append(COMMA_SPACE).append(0);
+//        instruction.append("($sp)").append("\n");
+//        instruction.append("addi").append(' ').append("$sp").append(COMMA_SPACE).append("$sp").append(COMMA_SPACE).append("4").append('\n');
 
         String resReg = prettyRegister(quad.getResRegister());
         quad.dRes();
@@ -456,7 +460,7 @@ instruction.append(printRestoreAll());
             instruction.append("addi").append(prettyRegister(Registers.K0)).append(COMMA_SPACE).append(4);
             instruction.append(putVarIntoClass(0, Registers.GP, Registers.K0));
         } else if (quad.arg2Literal()) {
-            instruction.append(putVarIntoClass((quad.arg2Int) + 1, Registers.GP, quad.getResRegister()));
+            instruction.append(putVarIntoClass(((quad.arg2Int) + 1) * 4, Registers.GP, quad.getResRegister()));
         }
 
         // In indexed assignment since we are saving a value to an index of an array what we have to do
@@ -490,7 +494,7 @@ instruction.append(printRestoreAll());
         } else {
             quad.dRes();
             /// if we simply have a literal offset and we load it fromm memory
-            instruction.append("lw").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(quad.arg2Int).append('(').append(prettyRegister(quad.getArg1Register())).append(')').append('\n');
+            instruction.append("lw").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append((1+quad.arg2Int)*4).append('(').append(prettyRegister(quad.getArg1Register())).append(')').append('\n');
         }
 
 
@@ -551,7 +555,7 @@ instruction.append(printRestoreAll());
         // now we can use $s0 for our purposes
 
 
-        toRet.append("lw").append(' ').append(prettyRegister(targetRegister)).append(COMMA_SPACE).append(Integer.toString(classOffset+4)).append('(').append(prettyRegister(Registers.ARG0)).append(')').append('\n');
+        toRet.append("lw").append(' ').append(prettyRegister(targetRegister)).append(COMMA_SPACE).append(Integer.toString(classOffset)).append('(').append(prettyRegister(Registers.ARG0)).append(')').append('\n');
 
 //
 //        toRet.append("lw").append(' ').append("$s5").append(COMMA_SPACE).append('0');
@@ -583,7 +587,7 @@ instruction.append(printRestoreAll());
         // now we can use $s0 for our purposes
 
 
-        toRet.append("sw").append(' ').append(prettyRegister(sourceRegister)).append(COMMA_SPACE).append(Integer.toString(classOffset+4)).append('(').append(prettyRegister(Registers.ARG0)).append(')').append('\n');
+        toRet.append("sw").append(' ').append(prettyRegister(sourceRegister)).append(COMMA_SPACE).append(Integer.toString(classOffset)).append('(').append(prettyRegister(classAdress)).append(')').append('\n');
 
 
 //        toRet.append("lw").append(' ').append("$s0").append(COMMA_SPACE).append('0');

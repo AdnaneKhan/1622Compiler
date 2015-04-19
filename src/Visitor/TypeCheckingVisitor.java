@@ -348,9 +348,9 @@ public class TypeCheckingVisitor extends TypeDepthFirstVisitor {
         classOpCheck(ret1, n.e1, "+");
         classOpCheck(ret2, n.e2, "+");
 
+        if (ret1 instanceof IntArrayType || ret1 instanceof IntegerType)
 
         if (!(ret1.getClass().equals(ret2.getClass()) && (ret1 instanceof IntegerType))) {
-            Errors.nonIntegerOperand(n.lineNum(), n.charNum(), '+');
         }
 
         return new IntegerType();
