@@ -110,14 +110,14 @@ public class Quadruple {
 
 
     public boolean isResultMethodVar() {
-        if (resVar != null && this.resVar.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+        if (resVar != null && (this.resVar.parent.isEntry(TableEntry.METHOD_ENTRY) || resVar.parent.getNode() instanceof  MainClass)) {
             return true;
         }
         return false;
     }
 
     public boolean isArg2MethodVar() {
-        if (arg2_entry != null && this.arg2_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+        if (arg2_entry != null &&( this.arg2_entry.parent.isEntry(TableEntry.METHOD_ENTRY)|| arg2_entry.parent.getNode() instanceof  MainClass)) {
             return true;
         } else {
             return false;
@@ -126,7 +126,7 @@ public class Quadruple {
     }
 
     public boolean isArg1MethodVar() {
-        if (arg1_entry != null && this.arg1_entry.parent.isEntry(TableEntry.METHOD_ENTRY)) {
+        if (arg1_entry != null && ( this.arg1_entry.parent.isEntry(TableEntry.METHOD_ENTRY)|| arg1_entry.parent.getNode() instanceof  MainClass)) {
             return true;
         } else {
             return false;
