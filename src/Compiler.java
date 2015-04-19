@@ -83,6 +83,7 @@ public class Compiler {
                     Optimizer optimizer = new Optimizer();
                     ir = optimizer.constantConditions(ir, cfg, defsAndUse);
                     codeGen = new CodeGenerator(ir, compilerTable);
+                    codeGen.generateCfg();
                     cfg = codeGen.cfgRelations();
                     defsAndUse = codeGen.generateDefUse();
                 }
