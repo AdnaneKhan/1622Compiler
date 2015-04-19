@@ -38,8 +38,6 @@ public class QuadEmit {
             functParam = false;
         }
 
-
-
         if (quad.isLiteral()) {
             instruction.append("li ").append(getAReg()).append(", ").append(quad.getResult());
         } else if (quad.isBoolean()) {
@@ -53,9 +51,10 @@ public class QuadEmit {
 
             instruction.append("move ").append(getAReg()).append(COMMA_SPACE).append(prettyRegister(quad.getResRegister()));
         } else if (quad.isResultClassVar()) {
-            instruction.append("move ").append(getAReg()).append(COMMA_SPACE).append(prettyRegister(quad.getResRegister()));
+            int variableOffset = ((ClassTable) quad.getNode().parent).getVariableOffset((SymbolEntry) quad.getNode());
+            instruction.append(extractVarFromClass(variableOffset, Registers.GP));
+            instruction.append("move ").append(getAReg()).append(COMMA_SPACE).append(prettyRegister(Registers.GP));
         }
-
         return instruction.toString();
     }
 
@@ -77,7 +76,15 @@ public class QuadEmit {
         instruction.append("jal").append(' ').append(quad.getArg1()).append("\n");
         functParam = true;
         instruction.append(printRestoreAll());
-        instruction.append("move").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append("$v0");
+
+
+        if (quad.isResultClassVar() && !(quad.getNode().parent.getNode() instanceof MainClass)) {
+            int offSet = ( (ClassTable) quad.getNode().parent).getVariableOffset(((SymbolEntry)quad.getNode()));
+            instruction.append(putVarIntoClass(offSet,Registers.V0));
+        } else {
+            instruction.append("move").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append("$v0");
+        }
+
 
         fRegC = 0;
 
@@ -211,8 +218,9 @@ public class QuadEmit {
              */
         } else if (quad.isArg1ClassVar() && quad.isResultMethodVar()) {
             quad.dRes();
-            String rhsReg = prettyRegister(quad.getArg1Register());
-            instruction.append("move").append(" ").append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(rhsReg);
+            int variableOffset = ((ClassTable) quad.arg1_entry.parent).getVariableOffset((SymbolEntry) quad.getNode());
+            instruction.append(extractVarFromClass(variableOffset,quad.getResRegister()));
+
             /**
              *
              */
@@ -220,11 +228,6 @@ public class QuadEmit {
             int variableOffset = ((ClassTable) quad.getNode().parent).getVariableOffset((SymbolEntry) quad.getNode());
             instruction.append(putVarIntoClass(variableOffset, quad.getArg1Register()));
 
-            // Get the variable form the rhs class
-            // extractVarFromClass()
-
-            // Put the variable into the lhs class
-            //putVarIntoClass()
         }
 
         return instruction.toString();
@@ -247,7 +250,6 @@ public class QuadEmit {
         } else if (quad.isResultClassVar()) {
             int variableOffset = ((ClassTable) quad.getNode().parent).getVariableOffset((SymbolEntry) quad.getNode());
             instruction.append(extractVarFromClass(variableOffset, Registers.V0));
-
 
             /**
              *
@@ -340,44 +342,30 @@ public class QuadEmit {
         // Steps:
         ClassTable classTable = (ClassTable) quad.arg1_entry;
 
-
         // get size of the class
         int varCount = classTable.trueSize();
 
-       //instruction.append("addi $sp, $sp,").append(-4).append('\n');
-       // instruction.append("sw").append(' ').append("$v0").append(COMMA_SPACE).append(-4).append("($sp)").append("\n");
-       //instruction.append("sw").append(' ').append("$a0").append(COMMA_SPACE).append(0).append("($sp)").append("\n");
-        // Now we have to make the object itself
-
         // Load the size into the argument zero register
         // yes, our max class size is the size of 16 bit immediate, god help us if that is tested...
-      instruction.append(saveVandA());
-
+        instruction.append(saveVandA());
         instruction.append("li").append(' ').append("$a0").append(',').append(varCount * 4).append('\n');
         // now we call the object maker
         instruction.append("jal").append(" _new_object").append('\n');
         instruction.append(loadVandA() );
 
-      //  instruction.append("lw").append(' ').append("$a0").append(COMMA_SPACE).append(0).append("($sp)").append("\n");
-       //// instruction.append("lw").append(' ').append("$v0").append(COMMA_SPACE).append(4).append("($sp)").append("\n");
-      // instruction.append("addi $sp, $sp,").append(4).append('\n');
 
         this.functParam = true;
-//
-//        if (quad.isResultClassVar() && !(quad.getNode().parent.getNode() instanceof MainClass)) {
-//            int offSet =  ((ClassTable) (quad.arg1_entry)).getVariableOffset((SymbolEntry) quad.getNode());
-//            instruction.append(putVarIntoClass(offSet,Registers.V0,quad.getResRegister()));
-//        } else {
-        quad.dRes();
-            String tempReg = prettyRegister(quad.getResRegister());
-            // Now we move the address into the temporary, this is our new object address.
-            instruction.append("move").append(' ').append(tempReg).append(", ").append("$v0");
-      ///  }
-
-        // But right now since we aren't doing classes -- curr time Fri, April 10 7PM
-        // we just make a variable and shove zero in it
 
 
+        if (quad.isResultMethodVar()) {
+            quad.dRes();
+
+            instruction.append("move").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append("$v0");
+        } else {
+            quad.dRes();
+            int offSet = ( (ClassTable) quad.getNode().parent).getVariableOffset(((SymbolEntry)quad.getNode()));
+            instruction.append(putVarIntoClass(offSet,Registers.V0));
+        }
 
         return instruction.toString();
     }
@@ -402,7 +390,14 @@ public class QuadEmit {
 
         String resReg = prettyRegister(quad.getResRegister());
         quad.dRes();
-        instruction.append("move").append(' ').append(resReg).append(COMMA_SPACE).append("$v0");
+
+        if (quad.isResultMethodVar()) {
+            instruction.append("move").append(' ').append(resReg).append(COMMA_SPACE).append("$v0");
+        } else {
+            int offSet = ( (ClassTable) quad.getNode().parent).getVariableOffset(((SymbolEntry)quad.getNode()));
+            instruction.append(putVarIntoClass(offSet, Registers.V0));
+        }
+
 
         return instruction.toString();
     }
@@ -442,7 +437,6 @@ public class QuadEmit {
             instruction.append(extractVarFromClass(offSet ,Registers.K1 ));
         }
 
-
         if (!quad.arg2Literal()){
             // mult by 4
             instruction.append("sll").append(' ').append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(2).append('\n');
@@ -454,12 +448,10 @@ public class QuadEmit {
             instruction.append("sw").append(' ').append(prettyRegister(Registers.K1)).append(COMMA_SPACE).
                     append('4').append('(').append(prettyRegister(Registers.K0)).append(')').append('\n');
 
-
         } else {
             instruction.append("sw").append(' ').append(prettyRegister(Registers.K1)).append(COMMA_SPACE).
-                    append((quad.arg2Int * 4) + 4).append('(').append(prettyRegister(Registers.K0)).append(')').append('\n');
+                    append((quad.arg2Int * 4) + 4).append('(').append(prettyRegister(Registers.K0)).append(')');
         }
-
 
         return instruction.toString();
     }
@@ -521,24 +513,23 @@ public class QuadEmit {
     public String handleLength(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
-
         if (quad.isArg1ClassVar()) {
 
             int offSet = ( (ClassTable) quad.arg1_entry.parent).getVariableOffset(((SymbolEntry)quad.arg1_entry));
             instruction.append(extractVarFromArray(offSet, Registers.GP, quad.getArg1Register()));
         } else if (quad.isArg1MethodVar()) {
-            instruction.append("move").append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(quad.getArg1Register()).append('\n');
+            instruction.append("move").append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(prettyRegister(Registers.ARG0)).append('\n');
         }
 
+        instruction.append(extractVarFromArray(0,Registers.K0,Registers.GP)).append('\n');
 
         // Check is the lhs is of the class or the method
         if (quad.isResultClassVar()) {
             int offSet = ( (ClassTable) quad.getNode().parent).getVariableOffset(((SymbolEntry) quad.getNode()));
-           // instruction.append(extractVarFromClass(0, Registers.K0, quad.getResRegister()));
             instruction.append(putVarIntoClass(offSet,Registers.K0));
         } else if (quad.isResultMethodVar()) {
             quad.dRes();
-          //  instruction.append(extractVarFromClass(0,quad.getResRegister(),Registers.GP));
+            instruction.append("move").append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(prettyRegister(Registers.K0)).append('\n');
         }
 
         return instruction.toString();
@@ -591,7 +582,22 @@ public class QuadEmit {
     private String prettyRegister(int uglyRegister) {
         StringBuilder prettyRegister = new StringBuilder();
         // TODO make a method that returns the proper letter given the number
-        prettyRegister.append("$").append(uglyRegister);
+        prettyRegister.append("$");
+
+        if (uglyRegister >= 8 && uglyRegister <= 15) {
+            prettyRegister.append("t").append(uglyRegister - 8);
+        } else if (uglyRegister >= 16 && uglyRegister <= 23) {
+            prettyRegister.append("s").append(uglyRegister - 16);
+        } else if (uglyRegister == 26){
+            prettyRegister.append("k0");
+        } else if (uglyRegister == 27) {
+            prettyRegister.append("k1");
+        } else if (uglyRegister == 28) {
+            prettyRegister.append("gp");
+        } else {
+            prettyRegister.append(uglyRegister);
+        }
+
 
         return prettyRegister.toString();
     }
