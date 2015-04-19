@@ -18,12 +18,16 @@ public class SymbolEntry extends TableEntry {
     private InterferenceNode nodeLink;
 
     private boolean preColor = false;
+    private boolean defed = false;
+    private int preColorReg;
     private int register = DEAD_REG;
 
     public int getRegister() {
 
         if (coalesceBridge != null) {
-          return coalesceBridge.getRegister();
+            return coalesceBridge.getRegister();
+        } else if (preColor && !defed) {
+            return preColorReg;
         } else if (register == DEAD_REG) {
             System.err.println("We are trying to get a dead register for:\n" + this.toString());
         }
@@ -31,13 +35,34 @@ public class SymbolEntry extends TableEntry {
         return register;
     }
 
+    public void defed() {
+        // the param has been defed
+
+        if (coalesceBridge != null) {
+             coalesceBridge.defed();
+        } else if (preColor) {
+            defed = true;
+        }
+    }
+
     public void preColor(int reg) {
-        preColor = true;
-        assignRegister(reg);
+        if (coalesceBridge != null) {
+            coalesceBridge.preColor(reg);
+        } else {
+            preColor = true;
+            preColorReg = reg;
+            assignRegister(reg);
+        }
+
     }
 
     public boolean isPreColor() {
-        return preColor;
+        if (coalesceBridge != null) {
+            return coalesceBridge.isPreColor();
+        } else{
+            return preColor;
+        }
+
     }
 
     /**
@@ -78,8 +103,14 @@ public class SymbolEntry extends TableEntry {
         // If there is a coalesce bridge present then assign the register to the other value
         if (coalesceBridge != null) {
             coalesceBridge.assignRegister(new_regValue);
+            // If we def a parameter (precolored) it loses its coloring
         } if (register != DEAD_REG) {
-            System.err.println("We tried to give a live register a new live value:\n" + this.toString());
+            if (preColor) {
+                register = new_regValue;
+            }  else {
+                System.err.println("We tried to give a live register a new live value:\n" + new_regValue +"  " + this.toString());
+            }
+
         } else {
             register = new_regValue;
         }

@@ -88,6 +88,24 @@ public class Quadruple {
         label = "";
     }
 
+    public void dArg1() {
+        if (arg1_entry != null) {
+            ((SymbolEntry) arg1_entry).defed();
+        }
+    }
+
+    public void dArg2() {
+        if (arg2_entry != null) {
+            ((SymbolEntry) arg2_entry).defed();
+        }
+    }
+    public void dRes() {
+        if (resVar != null) {
+            ((SymbolEntry) resVar).defed();
+        }
+    }
+
+
     public int getResRegister() {
         int reg = 0;
         if (resVar != null && this.resVar.isEntry(TableEntry.LEAF_ENTRY)) {
