@@ -107,7 +107,7 @@ public class ClassTable extends TableEntry {
                 returnV = 0;
             }
 
-            int inClassOffset =0 ;
+            int inClassOffset = 0 ;
 
 
             for (int i=0;i < ((ClassDecl)this.getNode()).vl.size();i++) {

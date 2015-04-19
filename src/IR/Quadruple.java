@@ -1,6 +1,7 @@
 package IR;
 
 import SymTable.*;
+import SyntaxTree.MainClass;
 
 public class Quadruple {
 
