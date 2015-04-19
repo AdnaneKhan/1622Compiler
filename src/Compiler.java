@@ -21,16 +21,21 @@ public class Compiler {
     private static boolean doOpt = false;
 
     public static void main(String[] args) {
+        String fileName = null;
         if (args.length < 1) {
             System.out.println("Please entire a file as the argument!");
             System.exit(0);
-        } else {
-            if (args.length == 2 && (args[0].equals("-O1") || args[0].equals("-o21"))) {
+        } else if (args.length == 2 && (args[0].equals("-O1") || args[0].equals("-o1"))) {
                 doOpt = true;
-            }
+                fileName = args[1];
+        } else if (args.length == 1) {
+            fileName = args[0];
+        } else {
+            fileName = args[0];
         }
 
-        String fileName = args[0];
+
+
         Reader fileRead;
         try {
 
