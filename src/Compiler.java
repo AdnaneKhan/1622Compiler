@@ -25,7 +25,7 @@ public class Compiler {
             System.out.println("Please entire a file as the argument!");
             System.exit(0);
         } else {
-            if (args.length == 2 && (args[0].equals("-O1") || args[0].equals("-o21"))) {
+            if (args.length == 2 && (args[0].equals("-O1") || args[0].equals("-o1"))) {
                 doOpt = true;
             }
         }
@@ -87,6 +87,11 @@ public class Compiler {
                 if (doOpt) {
                     Optimizer optimizer = new Optimizer();
                     ir = optimizer.constantConditions(ir, cfg, defsAndUse);
+                    codeGen = new CodeGenerator(ir, compilerTable);
+                    codeGen.generateCfg();
+                    cfg = codeGen.cfgRelations();
+                    defsAndUse = codeGen.generateDefUse();
+                    ir = optimizer.restoreUses(ir, cfg, defsAndUse);
                     codeGen = new CodeGenerator(ir, compilerTable);
                     codeGen.generateCfg();
                     cfg = codeGen.cfgRelations();

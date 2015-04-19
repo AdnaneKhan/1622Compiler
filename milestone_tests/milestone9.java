@@ -21,7 +21,7 @@ class Fac extends Foo {
         y = 2;
         i[2] = 1;
         q = x + y;
-        if (!((x<y) && (x<q))) {
+        if (!((x<y) && (x<y))) {
             z = 1;
         }
         else {

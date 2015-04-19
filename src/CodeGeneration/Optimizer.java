@@ -80,6 +80,61 @@ public class Optimizer {
 
 	ArrayList<String> linesRemoved = new ArrayList<String>();
 	ArrayList<String> linesToSave = new ArrayList<String>();
+	ArrayList<Pair<String,Integer>> linesToSaveValues = new ArrayList<Pair<String,Integer>>();
+
+	public ArrayList<IRClass> restoreUses(ArrayList<IRClass> ir, ArrayList<ControlFlowNode> cfg, ArrayList<Row> defsUses) {
+
+		ArrayList<Pair<SymbolEntry,Integer>> indexesOfUses = new ArrayList<Pair<SymbolEntry,Integer>>();
+		ArrayList<String> listOfResultsWhereUses = new ArrayList<String>();
+
+		// get the inexes of all uses along with the symbol associated with it
+		for (int i = 0; i < linesToSaveValues.size(); i++) {
+			for (int j = 0; j < defsUses.size(); j++) {
+				for (SymbolEntry e : defsUses.get(j).uses) {
+					if (e.getSymbolName().charAt(0) == '_') {
+						if (e.getSymbolName().equals(linesToSaveValues.get(i).getKey())) {
+							indexesOfUses.add(new Pair<SymbolEntry,Integer>(e,j));
+						}
+					}
+					else {
+						if (e.getHierarchyName().equals(linesToSaveValues.get(i).getKey())) {
+							indexesOfUses.add(new Pair<SymbolEntry,Integer>(e,j));
+						}					
+					}	
+				}
+			}
+		}
+
+		for (int i = 0; i < indexesOfUses.size(); i++) {
+			String result = cfg.get(indexesOfUses.get(i).getValue()).irLine.getResult();
+			listOfResultsWhereUses.add(result);
+		}
+
+		for (int i = 0; i < listOfResultsWhereUses.size(); i++) {
+
+			// Adjust the IR to replace the conditional branch with a goto or just remove the quad
+			for (int j = 0; j < ir.size(); j++) {
+				for (int k = 0; k < ir.get(j).lines.size(); k++) {
+					for (int h = 0; h < ir.get(j).lines.get(k).lines.size(); h++) {
+						if (listOfResultsWhereUses.get(i).equals(ir.get(j).lines.get(k).lines.get(h).getResult())) {
+							for (int l = 0; l < linesToSaveValues.size(); l++) {
+								if (linesToSaveValues.get(l).getKey().equals(ir.get(j).lines.get(k).lines.get(h).getArg1())) {
+									ir.get(j).lines.get(k).lines.get(h).setArg1(linesToSaveValues.get(l).getValue());
+								}
+								if (linesToSaveValues.get(l).getKey().equals(ir.get(j).lines.get(k).lines.get(h).getArg2())) {
+									ir.get(j).lines.get(k).lines.get(h).setArg2(linesToSaveValues.get(l).getValue());
+								}
+							}
+						}
+							
+					}
+				}
+			}
+		}
+
+		return ir;
+
+	}
 
 	// Changes loops with evaluated immediates in preprocessing to goto getting rid of the calculation in code
 	public ArrayList<IRClass> constantConditions(ArrayList<IRClass> ir, ArrayList<ControlFlowNode> cfg, ArrayList<Row> defsUses) {
@@ -116,9 +171,9 @@ public class Optimizer {
 					}
 				}
 
-				for (int j = i+1; j < nextDef+1; j++) {
+				for (int j = i; j < nextDef+1; j++) {
 					if (defsUses.get(j).uses.contains(branchCondition)) {
-						linesToSave.add(cfg.get(toBeRemoved).irLine.getResult());
+						//linesToSave.add(cfg.get(toBeRemoved).irLine.getResult());
 						break;
 					}
 				}
@@ -181,22 +236,7 @@ public class Optimizer {
 						currentValue = arg1 * arg2;
 					}
 					else if (cfg.get(toBeRemoved).irLine.op.equals("<")) {
-						boolean temp1 = false;
-						boolean temp2 = false;
-						if (arg1 == 0) {
-							temp1 = false;
-						}
-						else {
-							temp1 = true;
-						}
-						if (arg2 == 0) {
-							temp2 = false;
-						}
-						else {
-							temp2 = true;
-						}
-						boolean temp3 = temp1 && temp2;
-						if (temp3) {
+						if (arg1<arg2) {
 							currentValue = 1;
 						}
 						else {
@@ -228,12 +268,18 @@ public class Optimizer {
 					}
 				}
 
+				if (linesToSave.contains(cfg.get(toBeRemoved).irLine.getResult())) {
+					Pair<String,Integer> def = new Pair<String,Integer>(cfg.get(toBeRemoved).irLine.getResult(), currentValue);
+					linesToSaveValues.add(def);
+				}
+
 				if (branchCondition.getSymbolName().charAt(0) == '_') {
 					linesRemoved.add(branchCondition.getSymbolName());
 				}
 				else {
 					linesRemoved.add(branchCondition.getHierarchyName());
 				}
+
 				System.out.println(currentValue);
 				
 				// Adjust the IR to replace the conditional branch with a goto or just remove the quad
@@ -264,13 +310,7 @@ public class Optimizer {
 					}
 				}
 
-				for (int j = 0; j < linesRemoved.size(); j++) {
-					System.out.println(linesRemoved.get(j));
-				}
-				System.out.println();
-				for (int j = 0; j < linesToSave.size(); j++) {
-					System.out.println(linesToSave.get(j));
-				}
+				
 
 				// Remove linesToSave from linesRemoved (set subtraction)	
 				for (int j = 0; j < linesToSave.size(); j++) {
@@ -279,21 +319,51 @@ public class Optimizer {
 					}
 				}
 
+				boolean remove = true;
+				while (remove) {
+					remove = false;
+					for (int j = 0; j < linesToSaveValues.size(); j++) {
+						if (linesToSave.contains(linesToSaveValues.get(j).getKey())) {
+							linesToSaveValues.remove(j);
+							remove = true;
+							break;
+						}
+					}
+				}
+
+				System.out.println("LINES TO BE REMOVED");
+				for (int j = 0; j < linesRemoved.size(); j++) {
+					System.out.println(linesRemoved.get(j));
+				}
+				System.out.println("\nLINES TO BE SAVED");
+				for (int j = 0; j < linesToSave.size(); j++) {
+					System.out.println(linesToSave.get(j));
+				}
+				System.out.println();
+
 				System.out.println("Trying to get rid of useless instructions...");
 				// Remove IR instructions now
-				boolean remove = true;
+				remove = true;
 				while (remove) {
 					remove = false;
 
 					for (int j = 0; j < ir.size(); j++) {
 						for (int k = 0; k < ir.get(j).lines.size(); k++) {
 							for (int h = 0; h < ir.get(j).lines.get(k).lines.size(); h++) {
-								System.out.println(ir.get(j).lines.get(k).lines.get(h).getResult());
 								if (linesRemoved.contains(ir.get(j).lines.get(k).lines.get(h).getResult())) {
 									System.out.println(ir.get(j).lines.get(k).lines.get(h).getResult());
 									ir.get(j).lines.get(k).lines.remove(h);
 									remove = true;
 									break;
+								}
+								if (linesToSave.contains(ir.get(j).lines.get(k).lines.get(h).getResult())) {
+									ir.get(j).lines.get(k).lines.get(h).type = Quadruple.COPY;
+									for (Pair p : linesToSaveValues) {
+										if (p.getKey().equals(ir.get(j).lines.get(k).lines.get(h).getResult())) {
+											ir.get(j).lines.get(k).lines.get(h).type = Quadruple.COPY;
+											ir.get(j).lines.get(k).lines.get(h).setArg1((Integer) p.getValue());
+										}
+									}
 								}
 							}
 							if (remove) {
@@ -310,10 +380,15 @@ public class Optimizer {
 
 				// Clear out the array lists for the next iteration
 				linesRemoved.clear();
-				linesToSave.clear();
-						
+				linesToSave.clear();						
 			}
-		}	
+		}
+
+
+		System.out.println("\nVARIABLES THAT NEED RESTORED WHERE USED");
+		for (int i = 0; i < linesToSaveValues.size(); i++) {
+			System.out.print(linesToSaveValues.get(i).getKey() + ": " + linesToSaveValues.get(i).getValue() + "\n");
+		}
 
 		return ir;
 	}
@@ -347,7 +422,7 @@ public class Optimizer {
 
 		for (int j = i+1; j < nextDef+1; j++) {
 			if (defsUses.get(j).uses.contains(varToCheck)) {
-				linesToSave.add(cfg.get(toBeRemoved).irLine.getResult());
+				//linesToSave.add(cfg.get(toBeRemoved).irLine.getResult());
 				break;
 			}
 		}
@@ -386,6 +461,27 @@ public class Optimizer {
 			}
 		}
 
+		// if no uses of var after branch and before next def, remove the node, else escape
+		int nextDef = 0;
+		if (!(defsUses.size()-1 <= toBeRemoved+1)) {
+			for (int j = toBeRemoved+1; j < defsUses.size(); j++) {
+				if (defsUses.get(j).defs.contains(var)) {
+					nextDef = j;
+					break;
+				}
+				else {
+					nextDef = j;
+				}
+			}
+		}
+
+		for (int j = i+1; j < nextDef+1; j++) {
+			if (defsUses.get(j).uses.contains(var)) {
+				linesToSave.add(cfg.get(toBeRemoved).irLine.getResult());
+				break;
+			}
+		}
+
 		// check the same thing for all nodes above it til it hits ints
 		if (cfg.get(toBeRemoved).irLine.arg1_entry != null && cfg.get(toBeRemoved).irLine.arg1_entry.entryType() == 3 && !cfg.get(toBeRemoved).irLine.arg1Literal()) {
 			arg1 = evaluateExpression((SymbolEntry) cfg.get(toBeRemoved).irLine.arg1_entry, cfg, defsUses, i);
@@ -418,22 +514,7 @@ public class Optimizer {
 				currentValue = arg1 * arg2;
 			}
 			else if (cfg.get(toBeRemoved).irLine.op.equals("<")) {
-				boolean temp1 = false;
-				boolean temp2 = false;
-				if (arg1 == 0) {
-					temp1 = false;
-				}
-				else {
-					temp1 = true;
-				}
-				if (arg2 == 0) {
-					temp2 = false;
-				}
-				else {
-					temp2 = true;
-				}
-				boolean temp3 = temp1 && temp2;
-				if (temp3) {
+				if (arg1<arg2) {
 					currentValue = 1;
 				}
 				else {
@@ -463,6 +544,11 @@ public class Optimizer {
 					currentValue = 0;
 				}
 			}
+		}
+
+		if (linesRemoved.contains(cfg.get(toBeRemoved).irLine.getResult())) {
+			Pair<String,Integer> def = new Pair<String,Integer>(cfg.get(toBeRemoved).irLine.getResult(), currentValue);
+			linesToSaveValues.add(def);
 		}
 
 		return currentValue;

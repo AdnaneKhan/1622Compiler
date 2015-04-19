@@ -115,7 +115,7 @@ public class CodeGenerator {
             }
 
 
-           System.out.println("-- iter number: " + iteration);
+           /*System.out.println("-- iter number: " + iteration);
             int k = 0;
            for (Row r : cycle) {
 
@@ -132,7 +132,7 @@ public class CodeGenerator {
 
                System.out.println("\n------------------\n");
 
-           }
+           }*/
 
             iteration++;
 
