@@ -21,18 +21,18 @@ class Fac {
     public int testInt(int num) {
         int a;
         a = 1;
-        System.out.println(1+1); //2
-        System.out.println(a+1); //2
-        System.out.println(1+a); //2
-        System.out.println(a+num); //11
-        System.out.println(1*1); //1
-        System.out.println(a*1); //1
-        System.out.println(1*a); //1
-        System.out.println(a*num); //10
-        System.out.println(1-1); //0
-        System.out.println(a-1); //0
-        System.out.println(1-a); //0
-        System.out.println(num-a); //9
+        System.out.println(1+1); 
+        System.out.println(a+1); 
+        System.out.println(1+a); 
+        System.out.println(a+num); 
+        System.out.println(1*1); 
+        System.out.println(a*1); 
+        System.out.println(1*a); 
+        System.out.println(a*num); 
+        System.out.println(1-1);
+        System.out.println(a-1); 
+        System.out.println(1-a); 
+        System.out.println(num-a); 
         return a;
     }
 
