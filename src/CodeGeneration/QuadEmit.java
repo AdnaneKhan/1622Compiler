@@ -31,11 +31,14 @@ public class QuadEmit {
     public String handleParameter(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
-        if (functParam) {
+        if (quad.printParam) {
+            instruction.append(saveVandA());
+        }else if (functParam ) {
             instruction.append(printSaveAll());
+            functParam = false;
         }
 
-        functParam = false;
+
 
         if (quad.isLiteral()) {
             instruction.append("li ").append(getAReg()).append(", ").append(quad.getResult());
@@ -60,8 +63,8 @@ public class QuadEmit {
         StringBuilder instruction = new StringBuilder();
 
         instruction.append("jal _system_out_println").append('\n');
-instruction.append(printRestoreAll());
-        functParam = true;
+        instruction.append(loadVandA());
+
         fRegC = 0;
 
         return instruction.toString();
@@ -345,12 +348,12 @@ instruction.append(printRestoreAll());
 
         // Load the size into the argument zero register
         // yes, our max class size is the size of 16 bit immediate, god help us if that is tested...
-      instruction.append(printSaveAll());
+      instruction.append(saveVandA());
 
         instruction.append("li").append(' ').append("$a0").append(',').append(varCount * 4).append('\n');
         // now we call the object maker
         instruction.append("jal").append(" _new_object").append('\n');
-        instruction.append(printRestoreAll()   );
+        instruction.append(loadVandA() );
 
       //  instruction.append("lw").append(' ').append("$a0").append(COMMA_SPACE).append(0).append("($sp)").append("\n");
        //// instruction.append("lw").append(' ').append("$v0").append(COMMA_SPACE).append(4).append("($sp)").append("\n");
@@ -387,7 +390,7 @@ instruction.append(printRestoreAll());
 //
 
 
-        instruction.append(printSaveAll());
+        instruction.append(saveVandA());
         if (quad.arg1_entry != null) {
             instruction.append("move").append(' ').append("$a0").append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append('\n');
             // Double the values twice to effectively multiply by 4 in place
@@ -401,7 +404,7 @@ instruction.append(printRestoreAll());
         }
 
         instruction.append("jal").append(" _new_array").append("\n");
-        instruction.append(printRestoreAll());
+        instruction.append(loadVandA());
         this.functParam = true;
 
 //        // restore $a0
@@ -610,6 +613,37 @@ instruction.append(printRestoreAll());
         return prettyRegister.toString();
     }
 
+    private String saveVandA() {
+        StringBuilder i = new StringBuilder();
+
+        i.append("addi").append(' ').append("$sp").append(COMMA_SPACE).append("$sp").append(COMMA_SPACE).append("-16").append('\n');
+
+        i.append("sw").append(' ').append("$a0").append(COMMA_SPACE).append(12).append("($sp)").append('\n');        // save v
+        i.append("sw").append(' ').append("$t1").append(COMMA_SPACE).append(8).append("($sp)").append('\n');
+        i.append("sw").append(' ').append("$t0").append(COMMA_SPACE).append(4).append("($sp)").append('\n');
+        i.append("sw").append(' ').append("$ra").append(COMMA_SPACE).append(0).append("($sp)").append('\n');
+        // save a
+
+
+
+        return i.toString();
+    }
+
+
+    private String loadVandA() {
+        StringBuilder i = new StringBuilder();
+
+
+        i.append("lw").append(' ').append("$ra").append(COMMA_SPACE).append(0).append("($sp)").append('\n');
+        i.append("lw").append(' ').append("$t0").append(COMMA_SPACE).append(4).append("($sp)").append('\n');
+        i.append("lw").append(' ').append("$t1").append(COMMA_SPACE).append(8).append("($sp)").append('\n');
+        i.append("lw").append(' ').append("$a0").append(COMMA_SPACE).append(12).append("($sp)").append('\n');
+        i.append("addi").append(' ').append("$sp").append(COMMA_SPACE).append("$sp").append(COMMA_SPACE).append("16").append('\n');
+
+
+
+        return i.toString();
+    }
     private void setImmediateRegister(int resRegister, String arg, StringBuilder instruction) {
 
         instruction.append("li").append(" ");

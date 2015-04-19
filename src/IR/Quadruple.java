@@ -61,6 +61,7 @@ public class Quadruple {
     private boolean isArg1Literal;
     private boolean isArg2Literal;
 
+    public boolean printParam = false;
 
     private int intResult;
 

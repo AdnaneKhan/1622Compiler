@@ -447,7 +447,7 @@ public class IRGeneratorVisitor implements Visitor {
 
         Quadruple tempCurr = new Quadruple(Quadruple.PARAMETER);
         tempCurr.transferResult(currentQuad);
-
+        tempCurr.printParam = true;
         currentQuad = tempCurr;
         currentMethod.add(currentQuad);
     }
