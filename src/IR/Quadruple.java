@@ -76,7 +76,7 @@ public class Quadruple {
 
     public TableEntry arg1_entry;
     public TableEntry arg2_entry;
-    private TableEntry resVar;
+    public TableEntry resVar;
 
 
     public Quadruple() {
