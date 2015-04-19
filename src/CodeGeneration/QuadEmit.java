@@ -59,8 +59,8 @@ public class QuadEmit {
     public String handlePrint(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
-        instruction.append("jal _system_out_println");
-
+        instruction.append("jal _system_out_println").append('\n');
+instruction.append(printRestoreAll());
         functParam = true;
         fRegC = 0;
 
@@ -622,7 +622,7 @@ public class QuadEmit {
         } else if (op.equals("-")) {
             opCode = "sub";
         } else if (op.equals("&&")) {
-            opCode = "and";
+            opCode = "seq";
         } else if (op.equals("<")) {
             opCode = "slt";
         }

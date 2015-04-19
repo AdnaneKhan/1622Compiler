@@ -24,7 +24,8 @@ clean:
 	rm -f src/Visitor/*.class \
 	rm -f src/IR/*.class \
 	rm -f src/SymTable/*.class \
-	rm -f src/CodeGeneration/*.class
+	rm -f src/CodeGeneration/*.class \
+	rm -f milestone_tests/*.asm
 
 %.class : %.java
 	$(JAVAC) -classpath ${CLASSPATH} $(sources)

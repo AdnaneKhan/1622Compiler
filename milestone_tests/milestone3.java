@@ -4,13 +4,7 @@ class Test {
     }
 }
 class Test2 {
-    int ohNo;
-
     public int Start(int y) {
-        return this.More(y);
-    }
-
-    public int More(int b) {
-        return 5+5;
+        return y;
     }
 }
