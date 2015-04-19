@@ -1,8 +1,10 @@
 
 import CodeGeneration.CodeGenerator;
+import CodeGeneration.ControlFlowNode;
 import CodeGeneration.InterferenceGraph;
 import CodeGeneration.InterferenceNode;
 import CodeGeneration.Row;
+import CodeGeneration.Optimizer;
 import IR.IRClass;
 import SymTable.SymbolTable;
 import Visitor.*;
@@ -15,6 +17,8 @@ import java.util.Stack;
 
 
 public class Compiler {
+    public static final boolean OPTIMIZE = true;
+
     public static void main(String[] args) {
         if (args.length < 1) {
             System.out.println("Please entire a file as the argument!");
@@ -71,9 +75,17 @@ public class Compiler {
                 codeGen.generateCfg();
 
                 // making cfg relations
-                codeGen.cfgRelations();
+                ArrayList<ControlFlowNode> cfg = codeGen.cfgRelations();
 
                 ArrayList<Row> defsAndUse = codeGen.generateDefUse();
+
+                if (OPTIMIZE) {
+                    Optimizer optimizer = new Optimizer();
+                    ir = optimizer.constantConditions(ir, cfg, defsAndUse);
+                    codeGen = new CodeGenerator(ir, compilerTable);
+                    cfg = codeGen.cfgRelations();
+                    defsAndUse = codeGen.generateDefUse();
+                }
 
                 ArrayList<Row> liveness = codeGen.generateLiveness(defsAndUse);
 
