@@ -310,8 +310,6 @@ public class InterferenceGraph {
                     if (!s.equals(rhs.get(j)) && !(s.isPreColor()) && !s.equals(currentNode.getVariable())) {
                         InterferenceNode n = s.getLinked();
 
-
-
                         if (!currentNode.getNeighbors().contains(n)) {
                             currentNode.getNeighbors().add(n);
                             if (!n.getNeighbors().contains(currentNode)) n.getNeighbors().add(currentNode);

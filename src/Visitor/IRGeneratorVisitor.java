@@ -249,7 +249,7 @@ public class IRGeneratorVisitor implements Visitor {
             pushStack(currentQuad);
             n.sl.elementAt(i).accept(this);
             Quadruple tempQuad = popStack();
-            if (tempQuad.type != Quadruple.CONDITIONAL_JUMP) {
+            if (tempQuad.type != Quadruple.CONDITIONAL_JUMP && tempQuad.type != -1) {
                 currentMethod.add(tempQuad);
             }
         }
