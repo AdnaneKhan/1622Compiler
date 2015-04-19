@@ -18,11 +18,16 @@ import java.util.Stack;
 
 public class Compiler {
     public static final boolean OPTIMIZE = true;
+    private static boolean doOpt = false;
 
     public static void main(String[] args) {
         if (args.length < 1) {
             System.out.println("Please entire a file as the argument!");
             System.exit(0);
+        } else {
+            if (args.length == 2 && (args[0].equals("-O1") || args[0].equals("-o21"))) {
+                doOpt = true;
+            }
         }
 
         String fileName = args[0];
@@ -79,7 +84,7 @@ public class Compiler {
 
                 ArrayList<Row> defsAndUse = codeGen.generateDefUse();
 
-                if (OPTIMIZE) {
+                if (doOpt) {
                     Optimizer optimizer = new Optimizer();
                     ir = optimizer.constantConditions(ir, cfg, defsAndUse);
                     codeGen = new CodeGenerator(ir, compilerTable);
