@@ -100,7 +100,7 @@ public class QuadEmit {
         } else if (quad.isArg1ClassVar()) {
 
            int offSet = ( (ClassTable) quad.arg1_entry.parent).getVariableOffset(((SymbolEntry)quad.arg1_entry));
-            instruction.append(extractVarFromClass(offSet, Registers.K1, quad.getArg1Register()));
+            instruction.append(extractVarFromClass(offSet, Registers.K1));
             arg1Reg = prettyRegister(Registers.K1);
         }
 
@@ -109,7 +109,7 @@ public class QuadEmit {
         } else if(quad.isArg2ClassVar()) {
             int offSet = ( (ClassTable) quad.arg2_entry.parent).getVariableOffset(((SymbolEntry)quad.arg2_entry));
 
-            instruction.append(extractVarFromClass(offSet, Registers.K0, quad.getArg2Register()));
+            instruction.append(extractVarFromClass(offSet, Registers.K0));
             arg2Reg =prettyRegister(Registers.K0);
         }
 
@@ -142,7 +142,7 @@ public class QuadEmit {
 
                 int offSet = ( (ClassTable) quad.getNode().parent).getVariableOffset(((SymbolEntry)quad.getNode()));
                 instruction.append("li").append(" ").append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(Integer.toString(result));
-                putVarIntoClass(offSet,Registers.GP,Registers.ARG0);
+                instruction.append(putVarIntoClass(offSet, Registers.GP));
             }
 
         } else {
@@ -162,7 +162,7 @@ public class QuadEmit {
             if (quad.isResultClassVar()) {
                 int offSet = ( (ClassTable) quad.getNode().parent).getVariableOffset(((SymbolEntry)quad.getNode()));
                 instruction.append(generateOpInst(quad.op, prettyRegister(Registers.GP), arg1Reg, arg2Reg));
-                putVarIntoClass(offSet,Registers.GP,Registers.ARG0);
+                instruction.append(putVarIntoClass(offSet, Registers.GP));
             } else {
                 quad.dRes();
                 String resReg = prettyRegister(quad.getResRegister());
@@ -191,7 +191,7 @@ public class QuadEmit {
         } else if (quad.arg1Literal() && quad.isResultClassVar()) {
             int offSet = ( (ClassTable) quad.getNode().parent ).getVariableOffset(((SymbolEntry)quad.getNode()));
             instruction.append("li").append(" ").append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(Integer.toString(quad.arg1Int)).append('\n');
-            instruction.append(putVarIntoClass(offSet, Registers.GP, Registers.ARG0));
+            instruction.append(putVarIntoClass(offSet, Registers.GP));
 
         } else if (quad.isArg1MethodVar() && quad.isResultMethodVar()) {
             quad.dRes();
@@ -203,7 +203,8 @@ public class QuadEmit {
             }
 
             String rhsReg = prettyRegister(quad.getArg1Register());
-            instruction.append("move").append(" ").append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(rhsReg);
+            instruction.append("move").append(" ").append(prettyRegister(quad.getResRegister())).
+                    append(COMMA_SPACE).append(rhsReg);
 
             /**
              *
@@ -217,7 +218,7 @@ public class QuadEmit {
              */
         } else if (quad.isArg1MethodVar() && quad.isResultClassVar()) {
             int variableOffset = ((ClassTable) quad.getNode().parent).getVariableOffset((SymbolEntry) quad.getNode());
-            instruction.append(putVarIntoClass(variableOffset, quad.getArg1Register(), Registers.ARG0));
+            instruction.append(putVarIntoClass(variableOffset, quad.getArg1Register()));
 
             // Get the variable form the rhs class
             // extractVarFromClass()
@@ -245,7 +246,7 @@ public class QuadEmit {
              */
         } else if (quad.isResultClassVar()) {
             int variableOffset = ((ClassTable) quad.getNode().parent).getVariableOffset((SymbolEntry) quad.getNode());
-            instruction.append(extractVarFromClass(variableOffset, Registers.V0, quad.getResRegister()));
+            instruction.append(extractVarFromClass(variableOffset, Registers.V0));
 
 
             /**
@@ -275,14 +276,16 @@ public class QuadEmit {
             }
             quad.dRes();
             instruction.append("li").append(' ').append(resRegister).append(COMMA_SPACE).append(res).append('\n');
-            instruction.append("slti").append(' ').append(resRegister).append(COMMA_SPACE).append(resRegister).append(COMMA_SPACE).append("1");
+            instruction.append("slti").append(' ').append(resRegister).append(COMMA_SPACE).
+                    append(resRegister).append(COMMA_SPACE).append("1");
             /**
              * Enumerate the case whre teh arg is method scopes and the result is also method scope
              */
         } else if (quad.isArg1MethodVar() && quad.isResultMethodVar()) {
             quad.dRes();
 
-            instruction.append("slti").append(' ').append(resRegister).append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append(COMMA_SPACE).append("1");
+            instruction.append("slti").append(' ').append(resRegister).append(COMMA_SPACE).
+                    append(prettyRegister(quad.getArg1Register())).append(COMMA_SPACE).append("1");
 
             /**
              * Enumerate the case were the argument is lcass scope and the result is method scope
@@ -292,7 +295,7 @@ public class QuadEmit {
             quad.dRes();
 
             int variableOffset = ((ClassTable) quad.arg1_entry.parent).getVariableOffset((SymbolEntry) quad.arg1_entry);
-            instruction.append(extractVarFromClass(variableOffset, quad.getResRegister(), quad.getArg1Register()));
+            instruction.append(extractVarFromClass(variableOffset, quad.getResRegister()));
             instruction.append("slti").append(' ').append(resRegister).append(COMMA_SPACE).append(resRegister).append(COMMA_SPACE).append("1");
 
             // TODO
@@ -302,7 +305,7 @@ public class QuadEmit {
              */
         } else if (quad.isArg1MethodVar() && quad.isResultClassVar()) {
             int variableOffset = ((ClassTable) quad.getNode().parent).getVariableOffset((SymbolEntry) quad.getNode());
-            instruction.append(putVarIntoClass(variableOffset, quad.getArg1Register(), Registers.ARG0));
+            instruction.append(putVarIntoClass(variableOffset, quad.getArg1Register()));
             instruction.append("slti").append(' ').append(resRegister).append(COMMA_SPACE).append(resRegister).append(COMMA_SPACE).append("1");
 
         }
@@ -324,7 +327,7 @@ public class QuadEmit {
 
         } else  {
             int offSet =  ((ClassTable) quad.arg1_entry.parent).getVariableOffset((SymbolEntry) quad.arg1_entry);
-            extractVarFromClass(offSet,Registers.GP,quad.getArg1Register());
+            instruction.append(extractVarFromClass(offSet,Registers.GP)).append('\n');
             resRegister = prettyRegister(Registers.GP);
         }
         instruction.append("beq ").append(resRegister).append(COMMA_SPACE).append("$zero").append(COMMA_SPACE).append(quad.getArg2());
@@ -382,21 +385,11 @@ public class QuadEmit {
     public String handleNewArray(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
-//
-//        instruction.append("addi").append(' ').append("$sp").append(COMMA_SPACE).append("$sp").append(COMMA_SPACE).append("-4").append('\n');
-//        // Save $a0 to stack
-//        instruction.append("sw").append(' ').append("$a0").append(COMMA_SPACE).append(0);
-//        instruction.append("($sp)").append("\n");
-//
-
-
         instruction.append(saveVandA());
         if (quad.arg1_entry != null) {
-            instruction.append("move").append(' ').append("$a0").append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append('\n');
-            // Double the values twice to effectively multiply by 4 in place
-            for (int i = 0; i < 2; i++) {
-                instruction.append("add").append(' ').append("$a0").append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append('\n');
-            }
+            instruction.append("move").append(' ').append("$a0").append(COMMA_SPACE).
+                    append(prettyRegister(quad.getArg1Register())).append('\n');
+            instruction.append("sll").append(' ').append("$a0").append(COMMA_SPACE).append("$a0").append(COMMA_SPACE).append(2).append('\n');
 
         } else {
             int varCount = quad.arg1Int;
@@ -406,11 +399,6 @@ public class QuadEmit {
         instruction.append("jal").append(" _new_array").append("\n");
         instruction.append(loadVandA());
         this.functParam = true;
-
-//        // restore $a0
-//        instruction.append("lw").append(' ').append("$a0").append(COMMA_SPACE).append(0);
-//        instruction.append("($sp)").append("\n");
-//        instruction.append("addi").append(' ').append("$sp").append(COMMA_SPACE).append("$sp").append(COMMA_SPACE).append("4").append('\n');
 
         String resReg = prettyRegister(quad.getResRegister());
         quad.dRes();
@@ -422,56 +410,56 @@ public class QuadEmit {
     public String handleIndexedAssignment(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
-        // the problem here is that there are no
-        // defs that occur in this assignment,
-        // this means that we need to get 1 or 2 temporary registers for this to be possible,
-        // we need to add quadruples in the IR that can facilitate this operation so that they may be properly colored
+        // Move the offset into a register
+        if (quad.isArg2MethodVar()) {
+            instruction.append("move").append(' ').append(prettyRegister(Registers.GP)).append(COMMA_SPACE).
+                    append(prettyRegister(quad.getArg2Register())).append('\n');
 
+        } else if( quad.isArg2ClassVar()) {
+            int offSet = ( (ClassTable) quad.arg2_entry.parent).getVariableOffset(((SymbolEntry)quad.arg2_entry));
+            instruction.append(extractVarFromClass(offSet, Registers.GP));
+        }
 
-        // Deal with the value being used
+        // get address of the ARRAY and put it into K0
+        if (quad.isResultClassVar()) {
+            int offSet = ( (ClassTable) quad.getNode().parent).getVariableOffset(((SymbolEntry) quad.getNode()));
+            instruction.append( extractVarFromClass(offSet, Registers.K0));
+        } else if (quad.isResultMethodVar()) {
+            instruction.append("move").append(' ').append(prettyRegister(Registers.K0)).append(COMMA_SPACE).
+                    append(prettyRegister(quad.getResRegister())).append('\n');
+        }
+
+        // Deal with the value being assigned
         if (quad.isArg1MethodVar()) {
-            instruction.append("move").append(' ').append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append('\n');
-            for (int i = 0; i < 2; i++) {
-                instruction.append("add").append(' ').append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append('\n');
-            }
+            instruction.append("move").append(' ').append(prettyRegister(Registers.K1)).append(COMMA_SPACE).
+                    append(prettyRegister(quad.getArg1Register())).append('\n');
+
         } else if (quad.arg1Literal()) {
             String assignLit = quad.getArg1();
-            instruction.append("li").append(' ').append(prettyRegister(Registers.GP)).append(',').append(assignLit).append('\n');
+            instruction.append("li").append(' ').append(prettyRegister(Registers.K1)).append(',').append(assignLit).append('\n');
         } else if (quad.isArg1ClassVar()) {
             int offSet = ( (ClassTable) quad.arg1_entry.parent).getVariableOffset(((SymbolEntry)quad.arg1_entry));
-            instruction.append(extractVarFromClass(offSet ,Registers.GP,quad.getArg1Register() ));
+            instruction.append(extractVarFromClass(offSet ,Registers.K1 ));
         }
 
-        // Deal with the offset
-        if (quad.isArg2ClassVar()) {
 
-            int offSet = ( (ClassTable) quad.arg2_entry.parent).getVariableOffset(((SymbolEntry)quad.arg2_entry));
+        if (!quad.arg2Literal()){
+            // mult by 4
+            instruction.append("sll").append(' ').append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(2).append('\n');
+            /// Add offset adn address
+            instruction.append("add").append(' ').append(prettyRegister(Registers.K0)).append(COMMA_SPACE).append(prettyRegister(Registers.K0)).append(COMMA_SPACE).append(prettyRegister(Registers.GP)).append('\n');
+            /// LOAD THE WORD <FINALLY>
+            quad.dRes();
+            // at this point we use the calculated address the word immediate offset as zero to laod into out target, and we are done
+            instruction.append("sw").append(' ').append(prettyRegister(Registers.K1)).append(COMMA_SPACE).
+                    append('4').append('(').append(prettyRegister(Registers.K0)).append(')').append('\n');
 
-            instruction.append(extractVarFromClass(offSet ,Registers.K0,quad.getArg2Register() ));
-            // We add the value to a registers for offset
 
-            instruction.append("add").append(prettyRegister(Registers.K0)).append(COMMA_SPACE).append(prettyRegister(Registers.K0)).append(COMMA_SPACE).append(prettyRegister(Registers.K0));
-            instruction.append("add").append(prettyRegister(Registers.K0)).append(COMMA_SPACE).append(prettyRegister(Registers.K0)).append(COMMA_SPACE).append(prettyRegister(Registers.K0));
-            instruction.append("addi").append(prettyRegister(Registers.K0)).append(COMMA_SPACE).append(4);
-            instruction.append(putVarIntoClass(0, Registers.GP, Registers.K0));
-
-        } else if (quad.isArg2MethodVar()) {
-            // We add the value to a registers for offset
-            instruction.append("add").append(prettyRegister(Registers.K0)).append(COMMA_SPACE).append(quad.getArg2Register()).append(COMMA_SPACE).append("$zero");
-            instruction.append("add").append(prettyRegister(Registers.K0)).append(COMMA_SPACE).append(prettyRegister(Registers.K0)).append(COMMA_SPACE).append(prettyRegister(Registers.K0));
-            instruction.append("add").append(prettyRegister(Registers.K0)).append(COMMA_SPACE).append(prettyRegister(Registers.K0)).append(COMMA_SPACE).append(prettyRegister(Registers.K0));
-            instruction.append("addi").append(prettyRegister(Registers.K0)).append(COMMA_SPACE).append(4);
-            instruction.append(putVarIntoClass(0, Registers.GP, Registers.K0));
-        } else if (quad.arg2Literal()) {
-            instruction.append(putVarIntoClass(((quad.arg2Int) + 1) * 4, Registers.GP, quad.getResRegister()));
+        } else {
+            instruction.append("sw").append(' ').append(prettyRegister(Registers.K1)).append(COMMA_SPACE).
+                    append((quad.arg2Int * 4) + 4).append('(').append(prettyRegister(Registers.K0)).append(')').append('\n');
         }
 
-        // In indexed assignment since we are saving a value to an index of an array what we have to do
-        // is use the register that is holding the value and pull the pointer out of it
-        /// if the value has been spilled to the stack (we need to use soem sort of spill table to hold variables
-        // that have had their values spilled to the stack ex: the combination of a varaible and the register it was
-        // last in should return either that register or will allow us to do the appropriate memory reference to get that
-        // value
 
         return instruction.toString();
     }
@@ -479,27 +467,52 @@ public class QuadEmit {
     public String handleIndexedLookup(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
-        //deal with the offset
-        if (quad.arg2_entry != null) {
-            // in this case the offset is a variable
+        // Move the offset into a register
+        if (quad.isArg2MethodVar()) {
+            instruction.append("move").append(' ').append(prettyRegister(Registers.GP)).append(COMMA_SPACE).
+                    append(prettyRegister(quad.getArg2Register())).append('\n');
 
-            instruction.append("move").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(prettyRegister(quad.getArg2Register())).append('\n');
-            for (int i = 0; i < 2; i++) {
-                instruction.append("add").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(prettyRegister(quad.getResRegister())).append('\n');
-            }
-
-            // now add the offset and the actual memory address into the res address and save it to result, since we can not have register offffsets for loads
-            instruction.append("add").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append(prettyRegister(quad.getResRegister())).append(prettyRegister(quad.getArg1Register())).append('\n');
-            quad.dRes();
-            // at this point we use the calculated address the word immediate offset as zero to laod into out target, and we are done
-            instruction.append("lw").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append('0').append('(').append(prettyRegister(quad.getArg1Register())).append(')').append('\n');
-
-        } else {
-            quad.dRes();
-            /// if we simply have a literal offset and we load it fromm memory
-            instruction.append("lw").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).append((1+quad.arg2Int)*4).append('(').append(prettyRegister(quad.getArg1Register())).append(')').append('\n');
+        } else if( quad.isArg2ClassVar()) {
+            int offSet = ( (ClassTable) quad.arg2_entry.parent).getVariableOffset(((SymbolEntry)quad.arg2_entry));
+            instruction.append(extractVarFromClass(offSet, Registers.GP));
         }
 
+        // get address and put it into K0
+        if (quad.isArg1ClassVar()) {
+            int offSet = ( (ClassTable) quad.arg1_entry.parent).getVariableOffset(((SymbolEntry) quad.arg1_entry));
+           instruction.append( extractVarFromClass(offSet, Registers.K0));
+        } else if (quad.isArg1MethodVar()) {
+            instruction.append("move").append(' ').append(prettyRegister(Registers.K0)).append(COMMA_SPACE).
+                    append(prettyRegister(quad.getArg1Register())).append('\n');
+        }
+
+        if (!quad.arg2Literal()){
+            // mult by 4
+            instruction.append("sll").append(' ').append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(2).append('\n');
+            /// Add offset adn address
+            instruction.append("add").append(' ').append(prettyRegister(Registers.K0)).append(COMMA_SPACE).append(prettyRegister(Registers.K0)).append(COMMA_SPACE).append(prettyRegister(Registers.GP)).append('\n');
+            /// LOAD THE WORD <FINALLY>
+            quad.dRes();
+            // at this point we use the calculated address the word immediate offset as zero to laod into out target, and we are done
+            instruction.append("lw").append(' ').append(prettyRegister(Registers.GP)).append(COMMA_SPACE).
+                    append('4').append('(').append(prettyRegister(Registers.K0)).append(')').append('\n');
+
+
+        } else {
+            instruction.append("lw").append(' ').append(prettyRegister(Registers.GP)).append(COMMA_SPACE).
+                    append((quad.arg2Int * 4) + 4).append('(').append(prettyRegister(Registers.K0)).append(')').append('\n');
+        }
+
+        /// Move the result to the destination
+        if (quad.isResultMethodVar()) {
+            // GP will hold the result
+            instruction.append("move").append(' ').append(prettyRegister(quad.getResRegister())).append(COMMA_SPACE).
+                    append(prettyRegister(Registers.GP)).append('\n');
+        } else if (quad.isResultClassVar()) {
+            int offSet = ( (ClassTable) quad.getNode().parent).getVariableOffset(((SymbolEntry) quad.getNode()));
+
+            instruction.append(putVarIntoClass(offSet, Registers.GP));
+        }
 
         return instruction.toString();
 
@@ -509,27 +522,24 @@ public class QuadEmit {
         StringBuilder instruction = new StringBuilder();
 
 
-
         if (quad.isArg1ClassVar()) {
 
             int offSet = ( (ClassTable) quad.arg1_entry.parent).getVariableOffset(((SymbolEntry)quad.arg1_entry));
-            instruction.append(extractVarFromClass(offSet, Registers.GP, quad.getArg1Register()));
+            instruction.append(extractVarFromArray(offSet, Registers.GP, quad.getArg1Register()));
         } else if (quad.isArg1MethodVar()) {
-            instruction.append("move").append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(quad.getArg1Register());
+            instruction.append("move").append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(quad.getArg1Register()).append('\n');
         }
 
 
         // Check is the lhs is of the class or the method
         if (quad.isResultClassVar()) {
             int offSet = ( (ClassTable) quad.getNode().parent).getVariableOffset(((SymbolEntry) quad.getNode()));
-            instruction.append(extractVarFromClass(0,Registers.K0,Registers.GP));
-            instruction.append(putVarIntoClass(offSet,Registers.K0,Registers.GP));
+           // instruction.append(extractVarFromClass(0, Registers.K0, quad.getResRegister()));
+            instruction.append(putVarIntoClass(offSet,Registers.K0));
         } else if (quad.isResultMethodVar()) {
             quad.dRes();
-            instruction.append(extractVarFromClass(0,quad.getResRegister(),Registers.GP));
+          //  instruction.append(extractVarFromClass(0,quad.getResRegister(),Registers.GP));
         }
-
-
 
         return instruction.toString();
     }
@@ -544,31 +554,22 @@ public class QuadEmit {
     /**
      * @param classOffset sets up instructionf to laod a variable from a class
      */
-    private String extractVarFromClass(int classOffset, int targetRegister, int classAddress) {
+    private String extractVarFromClass(int classOffset, int targetRegister) {
         StringBuilder toRet = new StringBuilder();
-
-        // Register saving phase
-
-
-//        toRet.append("addi $sp, $sp,").append(4).append('\n');
-//        // save $s0
-//        toRet.append("sw").append(' ').append("$s5").append(COMMA_SPACE).append('0');
-//        toRet.append("($sp)").append('\n');
-
-        // now we can use $s0 for our purposes
-
 
         toRet.append("lw").append(' ').append(prettyRegister(targetRegister)).append(COMMA_SPACE).append(Integer.toString(classOffset)).append('(').append(prettyRegister(Registers.ARG0)).append(')').append('\n');
 
-//
-//        toRet.append("lw").append(' ').append("$s5").append(COMMA_SPACE).append('0');
-//        // note here we use the return value straight from the original syscall we did because
-//        // nothing changed in it
-//        toRet.append("($sp)").append('\n');
-//        toRet.append("addi $sp, $sp,").append(-4).append('\n');
+        return toRet.toString();
+    }
 
-        // Register loading phase
 
+    /**
+     * @param classOffset sets up instructionf to laod a variable from a class
+     */
+    private String extractVarFromArray(int classOffset, int targetRegister,int arrayAddrReg) {
+        StringBuilder toRet = new StringBuilder();
+
+        toRet.append("lw").append(' ').append(prettyRegister(targetRegister)).append(COMMA_SPACE).append(Integer.toString(classOffset)).append('(').append(prettyRegister(arrayAddrReg)).append(')').append('\n');
 
         return toRet.toString();
     }
@@ -576,30 +577,12 @@ public class QuadEmit {
     /**
      * @param classAdress sets up instructions to save a variable into a class
      */
-    private String putVarIntoClass(int classOffset, int sourceRegister, int classAdress) {
+    private String putVarIntoClass(int classOffset, int sourceRegister) {
         StringBuilder toRet = new StringBuilder();
 
-        // Register saving phase
 
-
-//        toRet.append("addi $sp, $sp,").append(4).append('\n');
-//        // save $s0
-//        toRet.append("sw").append(' ').append("$s0").append(COMMA_SPACE).append('0');
-//        toRet.append("($sp)").append('\n');
-
-        // now we can use $s0 for our purposes
-
-
-        toRet.append("sw").append(' ').append(prettyRegister(sourceRegister)).append(COMMA_SPACE).append(Integer.toString(classOffset)).append('(').append(prettyRegister(classAdress)).append(')').append('\n');
-
-
-//        toRet.append("lw").append(' ').append("$s0").append(COMMA_SPACE).append('0');
-//        // note here we use the return value straight from the original syscall we did because
-//        // nothing changed in it
-//        toRet.append("($sp)").append('\n');
-//        toRet.append("addi $sp, $sp,").append(-4).append('\n');
-
-        // Register loading phase
+        toRet.append("sw").append(' ').append(prettyRegister(sourceRegister)).append(COMMA_SPACE).
+                append(Integer.toString(classOffset)).append('(').append(prettyRegister(Registers.ARG0)).append(')').append('\n');
 
 
         return toRet.toString();
