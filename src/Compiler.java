@@ -27,117 +27,116 @@ public class Compiler {
             System.exit(0);
         } else {
             if (args.length == 2 && (args[0].equals("-O1") || args[0].equals("-o1"))) {
-        } else if (args.length == 2 && (args[0].equals("-O1") || args[0].equals("-o1"))) {
+            } else if (args.length == 2 && (args[0].equals("-O1") || args[0].equals("-o1"))) {
                 doOpt = true;
                 fileName = args[1];
-        } else if (args.length == 1) {
-            fileName = args[0];
-        } else {
-            fileName = args[0];
-        }
-
-
-
-        Reader fileRead;
-        try {
-
-            fileRead = new BufferedReader(new FileReader(fileName));
-
-            // Initialize Lexer
-            MiniJavaLexer miniLex = new MiniJavaLexer(fileRead);
-
-            Program minJProgram = null;
-            // Initialize Parserz
-            parser p = new parser(miniLex);
-            try {
-                Symbol parse_tree = p.parse();
-                // Since we defined the root non terminal as the executable
-                // that is what the parser will report
-                minJProgram = (Program) parse_tree.value;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.exit(1);
+            } else if (args.length == 1) {
+                fileName = args[0];
+            } else {
+                fileName = args[0];
             }
 
 
+            Reader fileRead;
+            try {
 
-            // Symbol table constructed, but its empty
-            SymbolTable compilerTable = new SymbolTable(minJProgram);
+                fileRead = new BufferedReader(new FileReader(fileName));
 
-            // Start the name analyser visitor
-            NameAnalysisVisitor visitor = new NameAnalysisVisitor(compilerTable);
-            visitor.visit(minJProgram);
+                // Initialize Lexer
+                MiniJavaLexer miniLex = new MiniJavaLexer(fileRead);
 
-            // Now we can use the same symbol table for type checking
-            TypeCheckingVisitor typeVisir = new TypeCheckingVisitor(compilerTable);
-            typeVisir.visit(minJProgram);
+                Program minJProgram = null;
+                // Initialize Parserz
+                parser p = new parser(miniLex);
+                try {
+                    Symbol parse_tree = p.parse();
+                    // Since we defined the root non terminal as the executable
+                    // that is what the parser will report
+                    minJProgram = (Program) parse_tree.value;
 
-
-            // Only move forward with IR generation if fthere are NO ERRORS
-            if (Errors.clear) {
-                IRGeneratorVisitor irGen = new IRGeneratorVisitor(compilerTable);
-                irGen.visit(minJProgram);
-
-                ArrayList<IRClass> ir = irGen.getClasses();
-
-                CodeGenerator codeGen = new CodeGenerator(ir, compilerTable);
-
-                // generate cfg nodes
-                codeGen.generateCfg();
-
-                // making cfg relations
-                ArrayList<ControlFlowNode> cfg = codeGen.cfgRelations();
-
-                ArrayList<Row> defsAndUse = codeGen.generateDefUse();
-
-                if (doOpt) {
-                    Optimizer optimizer = new Optimizer();
-                    ir = optimizer.constantConditions(ir, cfg, defsAndUse);
-                    codeGen = new CodeGenerator(ir, compilerTable);
-                    codeGen.generateCfg();
-                    cfg = codeGen.cfgRelations();
-                    defsAndUse = codeGen.generateDefUse();
-                    ir = optimizer.restoreUses(ir, cfg, defsAndUse);
-                    codeGen = new CodeGenerator(ir, compilerTable);
-                    codeGen.generateCfg();
-                    cfg = codeGen.cfgRelations();
-                    defsAndUse = codeGen.generateDefUse();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.exit(1);
                 }
 
-                ArrayList<Row> liveness = codeGen.generateLiveness(defsAndUse);
 
-                InterferenceGraph ifGraph = new InterferenceGraph();
+                // Symbol table constructed, but its empty
+                SymbolTable compilerTable = new SymbolTable(minJProgram);
 
-                ifGraph.buildGraph(defsAndUse,liveness);
+                // Start the name analyser visitor
+                NameAnalysisVisitor visitor = new NameAnalysisVisitor(compilerTable);
+                visitor.visit(minJProgram);
 
-                Stack<InterferenceNode> temp = new Stack<InterferenceNode>();
-                //
-                Stack<InterferenceNode> tempStack = ifGraph.coalesceGraph(temp);
-
-                // Simplify the graph
-
-                Stack<InterferenceNode> simpleStack = ifGraph.simplifyGraph(tempStack);
-
-             ///   simpleStack = ifGraph.coalesceGraph(simpleStack);
-
-              ///  simpleStack = ifGraph.simplifyGraph(simpleStack);
-
-                ifGraph.colorGraph(simpleStack);
+                // Now we can use the same symbol table for type checking
+                TypeCheckingVisitor typeVisir = new TypeCheckingVisitor(compilerTable);
+                typeVisir.visit(minJProgram);
 
 
-                String output = codeGen.output();
-                System.out.println(output);
-                FileWriter fileOut = new FileWriter(fileName + ".asm");
-                fileOut.write(output);
-                fileOut.flush();
+                // Only move forward with IR generation if fthere are NO ERRORS
+                if (Errors.clear) {
+                    IRGeneratorVisitor irGen = new IRGeneratorVisitor(compilerTable);
+                    irGen.visit(minJProgram);
+
+                    ArrayList<IRClass> ir = irGen.getClasses();
+
+                    CodeGenerator codeGen = new CodeGenerator(ir, compilerTable);
+
+                    // generate cfg nodes
+                    codeGen.generateCfg();
+
+                    // making cfg relations
+                    ArrayList<ControlFlowNode> cfg = codeGen.cfgRelations();
+
+                    ArrayList<Row> defsAndUse = codeGen.generateDefUse();
+
+                    if (doOpt) {
+                        Optimizer optimizer = new Optimizer();
+                        ir = optimizer.constantConditions(ir, cfg, defsAndUse);
+                        codeGen = new CodeGenerator(ir, compilerTable);
+                        codeGen.generateCfg();
+                        cfg = codeGen.cfgRelations();
+                        defsAndUse = codeGen.generateDefUse();
+                        ir = optimizer.restoreUses(ir, cfg, defsAndUse);
+                        codeGen = new CodeGenerator(ir, compilerTable);
+                        codeGen.generateCfg();
+                        cfg = codeGen.cfgRelations();
+                        defsAndUse = codeGen.generateDefUse();
+                    }
+
+                    ArrayList<Row> liveness = codeGen.generateLiveness(defsAndUse);
+
+                    InterferenceGraph ifGraph = new InterferenceGraph();
+
+                    ifGraph.buildGraph(defsAndUse, liveness);
+
+                    Stack<InterferenceNode> temp = new Stack<InterferenceNode>();
+                    //
+                    Stack<InterferenceNode> tempStack = ifGraph.coalesceGraph(temp);
+
+                    // Simplify the graph
+
+                    Stack<InterferenceNode> simpleStack = ifGraph.simplifyGraph(tempStack);
+
+                    ///   simpleStack = ifGraph.coalesceGraph(simpleStack);
+
+                    ///  simpleStack = ifGraph.simplifyGraph(simpleStack);
+
+                    ifGraph.colorGraph(simpleStack);
 
 
+                    String output = codeGen.output();
+                    System.out.println(output);
+                    FileWriter fileOut = new FileWriter(fileName + ".asm");
+                    fileOut.write(output);
+                    fileOut.flush();
+
+
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         // Exit
     }
