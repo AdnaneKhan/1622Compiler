@@ -39,6 +39,12 @@ class Fac extends Foo {
         System.out.println(q);
         System.out.println(i[2]);
 
+        y = 0;
+        while (y < 60) {
+            i[y] = y;
+            System.out.println(i[y]);
+            y = y + 1;
+        }
 
         ac = new ArrayCopy();
 
