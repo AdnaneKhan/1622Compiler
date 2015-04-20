@@ -516,9 +516,9 @@ public class QuadEmit {
         if (quad.isArg1ClassVar()) {
 
             int offSet = ( (ClassTable) quad.arg1_entry.parent).getVariableOffset(((SymbolEntry)quad.arg1_entry));
-            instruction.append(extractVarFromArray(offSet, Registers.GP, quad.getArg1Register()));
+            instruction.append(extractVarFromArray(offSet, Registers.GP, Registers.ARG0));
         } else if (quad.isArg1MethodVar()) {
-            instruction.append("move").append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(prettyRegister(Registers.ARG0)).append('\n');
+            instruction.append("move").append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(prettyRegister(quad.getArg1Register())).append('\n');
         }
 
         instruction.append(extractVarFromArray(0,Registers.K0,Registers.GP)).append('\n');
