@@ -51,9 +51,10 @@ public class QuadEmit {
 
             instruction.append("move ").append(getAReg()).append(COMMA_SPACE).append(prettyRegister(quad.getResRegister()));
         } else if (quad.isResultClassVar()) {
-            instruction.append("move ").append(getAReg()).append(COMMA_SPACE).append(prettyRegister(quad.getResRegister()));
+            int variableOffset = ((ClassTable) quad.getNode().parent).getVariableOffset((SymbolEntry) quad.getNode());
+            instruction.append(extractVarFromClass(variableOffset, Registers.GP));
+            instruction.append("move ").append(getAReg()).append(COMMA_SPACE).append(prettyRegister(Registers.GP));
         }
-
         return instruction.toString();
     }
 
@@ -436,7 +437,6 @@ public class QuadEmit {
             instruction.append(extractVarFromClass(offSet ,Registers.K1 ));
         }
 
-
         if (!quad.arg2Literal()){
             // mult by 4
             instruction.append("sll").append(' ').append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(2).append('\n');
@@ -448,12 +448,10 @@ public class QuadEmit {
             instruction.append("sw").append(' ').append(prettyRegister(Registers.K1)).append(COMMA_SPACE).
                     append('4').append('(').append(prettyRegister(Registers.K0)).append(')').append('\n');
 
-
         } else {
             instruction.append("sw").append(' ').append(prettyRegister(Registers.K1)).append(COMMA_SPACE).
-                    append((quad.arg2Int * 4) + 4).append('(').append(prettyRegister(Registers.K0)).append(')').append('\n');
+                    append((quad.arg2Int * 4) + 4).append('(').append(prettyRegister(Registers.K0)).append(')');
         }
-
 
         return instruction.toString();
     }
@@ -515,24 +513,23 @@ public class QuadEmit {
     public String handleLength(Quadruple quad) {
         StringBuilder instruction = new StringBuilder();
 
-
         if (quad.isArg1ClassVar()) {
 
             int offSet = ( (ClassTable) quad.arg1_entry.parent).getVariableOffset(((SymbolEntry)quad.arg1_entry));
             instruction.append(extractVarFromArray(offSet, Registers.GP, quad.getArg1Register()));
         } else if (quad.isArg1MethodVar()) {
-            instruction.append("move").append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(quad.getArg1Register()).append('\n');
+            instruction.append("move").append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(prettyRegister(Registers.ARG0)).append('\n');
         }
 
+        instruction.append(extractVarFromArray(0,Registers.K0,Registers.GP)).append('\n');
 
         // Check is the lhs is of the class or the method
         if (quad.isResultClassVar()) {
             int offSet = ( (ClassTable) quad.getNode().parent).getVariableOffset(((SymbolEntry) quad.getNode()));
-           // instruction.append(extractVarFromClass(0, Registers.K0, quad.getResRegister()));
             instruction.append(putVarIntoClass(offSet,Registers.K0));
         } else if (quad.isResultMethodVar()) {
             quad.dRes();
-          //  instruction.append(extractVarFromClass(0,quad.getResRegister(),Registers.GP));
+            instruction.append("move").append(prettyRegister(Registers.GP)).append(COMMA_SPACE).append(prettyRegister(Registers.K0)).append('\n');
         }
 
         return instruction.toString();
@@ -588,15 +585,17 @@ public class QuadEmit {
         prettyRegister.append("$");
 
         if (uglyRegister >= 8 && uglyRegister <= 15) {
-            prettyRegister.append("$t").append(uglyRegister - 8);
+            prettyRegister.append("t").append(uglyRegister - 8);
         } else if (uglyRegister >= 16 && uglyRegister <= 23) {
-            prettyRegister.append("$s").append(uglyRegister - 16);
+            prettyRegister.append("s").append(uglyRegister - 16);
         } else if (uglyRegister == 26){
-            prettyRegister.append("$k0");
+            prettyRegister.append("k0");
         } else if (uglyRegister == 27) {
-            prettyRegister.append("$k1");
+            prettyRegister.append("k1");
         } else if (uglyRegister == 28) {
-            prettyRegister.append("$gp");
+            prettyRegister.append("gp");
+        } else {
+            prettyRegister.append(uglyRegister);
         }
 
 
