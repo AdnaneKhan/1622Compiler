@@ -23,8 +23,8 @@ Implementation Details:
  In addition to this nodes that represent parse errors have been added. This allows name analysis and type checking to continue
  in cases where pare errors were recovered from.
  
- IR generation is unable to handle scopes with extended classes.
 
+ 
 Considerations:
 -----------------
 
@@ -37,25 +37,17 @@ Project Progress:
 Parser Errors [ x ]
 Name Analysis [ x ]
 Type Checking [ x ]
-
-    Symbol Table Generation:
-
-    Errors:
-    1.  Invalid L                       Status:
-    2.  Invalid R                       Status:
-    3.  Invalid Op                      Status:
-    4.  Non Method                      Status:
-    5.  Arg Count                       Status:
-    6.  Arg Type                        Status:
-    7.  Non Integer Op                  Status:
-    8.  Boolean on non bool             Status:
-    9.  Bad Length call                 Status:
-    10. Non Boolean in Condition        Status:
-    11. Type Mismatch During Assignment Status:
-    12. Illegal use of This             Status:
-    
-
 IR Generation [ X ]
+Milestone1 [ x ]
+Milestone2 [ x ]
+Milestone3 [ x ]
+Milestone4 [ x ]
+Milestone5 [ x ]
+Register Allocation [ X ]
+Coalescing [ X ]
+Objects and Arrays [ X ]
+Optimization [ X ]
+Spils [ NO ]
 
 Building:
 ----------
@@ -93,10 +85,9 @@ Running:
 To run the front end do the following:
 
 ~~~~
-java -cp java-cup-11a.jar:. FrontEnd FILENAME
+java -cp java-cup-11a.jar:. Compiler FILENAME
 ~~~~
 
-where filename is the name of the file to be lexed, parsed, and error checked.
+where filename is the name of the file to be lexed, parsed, and error checked, and compiled to mips assembly
 
-If no errors are encountered then the file will be printed out to an intermediate representation in the console.
-In addition the file will be printed to the "output" directory as FILENAME.IRs
+The file will be placed in the same folder it was but with .asm appended to its name.
